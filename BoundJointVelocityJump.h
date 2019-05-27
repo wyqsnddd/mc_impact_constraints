@@ -14,6 +14,9 @@ namespace mc_impact
  */
 struct BoundJointVelocityJump : public mc_solver::GenInequalityConstraint
 {
+  /** Use the robot module provided velocity bounds */
+  BoundJointVelocityJump(mi_impactPredictor & predictor, double dt);
+
   BoundJointVelocityJump(mi_impactPredictor & predictor, double dt, const Eigen::VectorXd & LBound, const Eigen::VectorXd & UBound);
 
   int maxGenInEq() const override;

@@ -6,6 +6,14 @@ namespace mc_impact
 {
 
 BoundJointTorqueJump::BoundJointTorqueJump(mi_impactPredictor & predictor,
+                                           double dt, double impact_dt, double mult)
+: BoundJointTorqueJump(predictor, dt, impact_dt,
+                       mult * rbd::dofToVector(predictor.getRobot().mb(), predictor.getRobot().tl()),
+                       mult * rbd::dofToVector(predictor.getRobot().mb(), predictor.getRobot().tu()))
+{
+}
+
+BoundJointTorqueJump::BoundJointTorqueJump(mi_impactPredictor & predictor,
                                            double dt, double impact_dt,
                                            const Eigen::VectorXd & LBound,
                                            const Eigen::VectorXd & UBound)

@@ -6,6 +6,14 @@ namespace mc_impact
 {
 
 BoundJointVelocityJump::BoundJointVelocityJump(mi_impactPredictor & predictor,
+                                               double dt)
+: BoundJointVelocityJump(predictor, dt,
+                         rbd::dofToVector(predictor.getRobot().mb(), predictor.getRobot().vl()),
+                         rbd::dofToVector(predictor.getRobot().mb(), predictor.getRobot().vu()))
+{
+}
+
+BoundJointVelocityJump::BoundJointVelocityJump(mi_impactPredictor & predictor,
                                                double dt,
                                                const Eigen::VectorXd & LBound,
                                                const Eigen::VectorXd & UBound)

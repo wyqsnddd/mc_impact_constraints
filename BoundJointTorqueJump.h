@@ -16,6 +16,9 @@ namespace mc_impact
  */
 struct BoundJointTorqueJump : public mc_solver::GenInequalityConstraint
 {
+  /** Multiply the regular torque bounds limits by the provided multiplier */
+  BoundJointTorqueJump(mi_impactPredictor & predictor, double dt, double impact_dt, double mult);
+
   BoundJointTorqueJump(mi_impactPredictor & predictor, double dt, double impact_dt, const Eigen::VectorXd & LBound, const Eigen::VectorXd & UBound);
 
   int maxGenInEq() const override;
