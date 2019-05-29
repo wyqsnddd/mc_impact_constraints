@@ -26,9 +26,10 @@ BoundJointTorqueJump::BoundJointTorqueJump(mi_impactPredictor & predictor,
   {
     startIndex_ = 6;
   }
-  alpha_ = alpha_.tail(alpha_.size() - startIndex_);
-  tau_L_ = tau_L_.tail(alpha_.size());
-  tau_U_ = tau_U_.tail(alpha_.size());
+  int nDof = predictor_.getRobot().mb().nrDof();
+  tau_L_ = tau_L_.tail(nDof - startIndex_);
+  tau_U_ = tau_U_.tail(nDof - startIndex_);
+  A_.resize(nDof - startIndex_, nDof);
 }
 
 int BoundJointTorqueJump::maxGenInEq() const
@@ -42,7 +43,6 @@ void BoundJointTorqueJump::computeALU()
   const auto & J_deltatau = predictor_.getJacobianDeltaTau();
   A_ = (dt_ / impact_dt_) * J_deltatau.block(startIndex_, 0, J_deltatau.rows() - startIndex_, J_deltatau.cols());
   rbd::paramToVector(robot.mbc().alpha, alpha_);
-  alpha_ = alpha_.tail(tau_L_.size());
   L_ = tau_L_ - J_deltatau.block(startIndex_, 0, J_deltatau.rows() - startIndex_, J_deltatau.cols()) * alpha_ / impact_dt_;
   U_ = L_ - tau_L_ + tau_U_;
 }
