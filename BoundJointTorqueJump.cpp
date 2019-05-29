@@ -30,11 +30,13 @@ BoundJointTorqueJump::BoundJointTorqueJump(mi_impactPredictor & predictor,
   tau_L_ = tau_L_.tail(nDof - startIndex_);
   tau_U_ = tau_U_.tail(nDof - startIndex_);
   A_.resize(nDof - startIndex_, nDof);
+  L_.resize(nDof - startIndex_);
+  U_.resize(nDof - startIndex_);
 }
 
 int BoundJointTorqueJump::maxGenInEq() const
 {
-  return alpha_.size();
+  return tau_L_.size();
 }
 
 void BoundJointTorqueJump::computeALU()
