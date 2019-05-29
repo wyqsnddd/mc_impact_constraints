@@ -43,7 +43,7 @@ void BoundJointVelocityJump::computeALU()
   A_ = J_delta.block(startIndex_, 0, J_delta.rows() - startIndex_, J_delta.cols()) / dt_;
   rbd::paramToVector(robot.mbc().alpha, alpha_);
   alpha_ = alpha_.tail(alpha_L_.size());
-  L_ = alpha_L_ - alpha_ - J_delta * alpha_;
+  L_ = alpha_L_ - alpha_ - J_delta.block(startIndex_, 0, J_delta.rows() - startIndex_, J_delta.cols()) * alpha_;
   U_ = L_ - alpha_L_ + alpha_U_;
 }
 
