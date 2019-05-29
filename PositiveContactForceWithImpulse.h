@@ -26,11 +26,11 @@ struct PositiveContactForceWithImpulse : public mc_solver::InequalityConstraint
 
   inline std::string nameInEq() const override { return "PositiveContactForceWithImpulse"; }
 
-  const Eigen::MatrixXd & A() const override { return A_; }
+  inline const Eigen::MatrixXd & A() const override { return A_; }
 
   const Eigen::VectorXd & bInEq() const override;
 
-  void computeAb() override {}
+  inline void computeAb() override {}
 private:
   mi_impactPredictor & predictor_;
   Eigen::MatrixXd A_;
