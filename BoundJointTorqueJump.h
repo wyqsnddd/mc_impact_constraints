@@ -43,6 +43,8 @@ private:
   Eigen::VectorXd tau_U_;
   // Alpha vector
   Eigen::VectorXd alpha_;
+  // 0 for fixed-based, 6 otherwise
+  int startIndex_ = 0;
 
   // dt * J_deltatau / impact_duration
   Eigen::MatrixXd A_;

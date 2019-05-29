@@ -39,6 +39,8 @@ private:
   Eigen::VectorXd alpha_U_;
   // Alpha vector
   Eigen::VectorXd alpha_;
+  // 0 for fixed-based, 6 otherwise
+  int startIndex_ = 0;
 
   // J_deltaq / dt
   Eigen::MatrixXd A_;
