@@ -27,8 +27,8 @@ BoundJointTorqueJump::BoundJointTorqueJump(mi_impactPredictor & predictor,
     startIndex_ = 6;
   }
   int nDof = predictor_.getRobot().mb().nrDof();
-  tau_L_ = tau_L_.tail(nDof - startIndex_);
-  tau_U_ = tau_U_.tail(nDof - startIndex_);
+  tau_L_ = tau_L_.tail(nDof - startIndex_).eval();
+  tau_U_ = tau_U_.tail(nDof - startIndex_).eval();
   A_.resize(nDof - startIndex_, nDof);
   L_.resize(nDof - startIndex_);
   U_.resize(nDof - startIndex_);
