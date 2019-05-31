@@ -43,7 +43,7 @@ void BoundJointVelocityJump::computeALU()
 {
   const auto & robot = predictor_.getRobot();
   const auto & J_delta = predictor_.getJacobianDeltaAlpha();
-  A_ = J_delta.block(startIndex_, 0, J_delta.rows() - startIndex_, J_delta.cols()) / dt_;
+  A_ = J_delta.block(startIndex_, 0, J_delta.rows() - startIndex_, J_delta.cols()) * dt_;
   rbd::paramToVector(robot.mbc().alpha, alpha_);
   L_ = alpha_L_ - alpha_.tail(alpha_L_.size()) - J_delta.block(startIndex_, 0, J_delta.rows() - startIndex_, J_delta.cols()) * alpha_;
   U_ = L_ - alpha_L_ + alpha_U_;
