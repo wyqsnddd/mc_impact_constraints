@@ -11,30 +11,41 @@ class mi_impactPredictor;
 namespace mc_impact
 {
 
-/** This constraint enforces that the sum of the QP force and the impulse remains positive
+/** This constraint enforces that the CoP within the contact area of an established contact,
+ * i.e. it enforces \f$ A_{cop} (F_{QP} + F_{impact}) \leqslant 0 \f$ or \f$ A_{cop}F_{QP} \leqslant - A_{cop}F_{impact} \f$. 
  *
- * i.e. it enforces \f$ f_{QP} + f_{impact} \geqslant 0 \f$ or \f$ -f_{QP} \leqslant f_{impact}
- *
+ * Note that \f$ F_{impact}\f$ denotes the sum of the impulsive reaction force and the equivalent wrenchs from the other end-effectors.
  */
-struct PositiveContactForceWithImpulse : public mc_solver::InequalityConstraint
+struct COPInsideContactAreaWithImpulse : public mc_solver::InequalityConstraint
 {
-  PositiveContactForceWithImpulse(const mc_solver::QPSolver & solver,
+  COPInsideContactAreaWithImpulse(const mc_solver::QPSolver & solver,
                                   const mc_rbdyn::Contact & contact,
                                   mi_impactPredictor & predictor);
 
-  inline int maxInEq() const override { return 3; }
+  inline int maxInEq() const override
+  {
+    return 3;
+  }
 
-  inline std::string nameInEq() const override { return "PositiveContactForceWithImpulse"; }
+  inline std::string nameInEq() const override
+  {
+    return "COPInsideContactAreaWithImpulse";
+  }
 
-  inline const Eigen::MatrixXd & A() const override { return A_; }
+  inline const Eigen::MatrixXd & A() const override
+  {
+    return A_;
+  }
 
   const Eigen::VectorXd & bInEq() const override;
 
   inline void computeAb() override {}
+
 private:
   mi_impactPredictor & predictor_;
   Eigen::MatrixXd A_;
+  Eigen::MatrixXd A_cop;
   std::string sName_;
 };
 
-}
+} // namespace mc_impact
