@@ -1,21 +1,22 @@
-#include "COPInsideContactAreaWithImpulse.h"
+#include "ZeroSlippageWithImpulse.h"
 
 #include <mc_prediction/mi_impactPredictor.h>
 
 namespace mc_impact
 {
 
-COPInsideContactAreaWithImpulse::COPInsideContactAreaWithImpulse(const mc_solver::QPSolver & solver,
+ZeroSlippageWithImpulse::ZeroSlippageWithImpulse(const mc_solver::QPSolver & solver,
                                                                  const mc_rbdyn::Contact & contact,
                                                                  mi_impactPredictor & predictor,
                                                                  double mu)
-: InequalityConstraint(contact.contactId(solver.robots())),
-  predictor_(predictor)
+: InequalityConstraint(contact.contactId(solver.robots())), predictor_(predictor)
 {
   auto cid = contact.contactId(solver.robots());
   ContactWrenchMatrixToLambdaMatrix transformer(solver, cid);
   Eigen::Vector3d normal = contact.X_0_r2s(solver.robots().robot(contact.r2Index())).rotation().row(2).transpose();
-  multiplier_ = (Eigen::MatrixXd::Identity(3,3) - (1 + mu)*normal.transpose()*normal);
+
+  // Should we use normal*normal.transpose()?
+  multiplier_ = (Eigen::MatrixXd::Identity(3, 3) - (1 + mu) * normal.transpose() * normal);
   Eigen::MatrixXd selector = Eigen::MatrixXd::Zero(3, 6);
   selector(0, 3) = 1;
   selector(1, 4) = 1;
@@ -25,10 +26,9 @@ COPInsideContactAreaWithImpulse::COPInsideContactAreaWithImpulse(const mc_solver
   sName_ = contact.r1Surface()->name();
 }
 
-void COPInsideContactAreaWithImpulse::computeAb()
+void ZeroSlippageWithImpulse::computeAb()
 {
-  b_ = -multiplier_*predictor_.getImpulsiveForce(sName_);
+  b_ = -multiplier_ * predictor_.getImpulsiveForce(sName_);
 }
 
-
-}
+} // namespace mc_impact

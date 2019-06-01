@@ -2,7 +2,7 @@ set(constraints
   BoundJointVelocityJump
   BoundJointTorqueJump
   ContactWrenchMatrixToLambdaMatrix
-  COPInsideContactAreaWithImpulse
+  ZeroSlippageWithImpulse
   PositiveContactForceWithImpulse
   #ZMPInsideSupportPolygonWithImpulse
 )

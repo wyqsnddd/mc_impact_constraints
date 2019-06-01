@@ -20,22 +20,35 @@ namespace mc_impact
  * \f]
  *
  */
-struct COPInsideContactAreaWithImpulse : public mc_solver::InequalityConstraint
+struct ZeroSlippageWithImpulse : public mc_solver::InequalityConstraint
 {
-  COPInsideContactAreaWithImpulse(const mc_solver::QPSolver & solver,
+  ZeroSlippageWithImpulse(const mc_solver::QPSolver & solver,
                                   const mc_rbdyn::Contact & contact,
                                   mi_impactPredictor & predictor,
                                   double mu = mc_rbdyn::Contact::defaultFriction);
 
-  inline int maxInEq() const override { return 3; }
+  inline int maxInEq() const override
+  {
+    return 3;
+  }
 
-  inline std::string nameInEq() const override { return "COPInsideContactAreaWithImpulse"; }
+  inline std::string nameInEq() const override
+  {
+    return "ZeroSlippageWithImpulse";
+  }
 
-  inline const Eigen::MatrixXd & A() const override { return A_; }
+  inline const Eigen::MatrixXd & A() const override
+  {
+    return A_;
+  }
 
-  inline const Eigen::VectorXd & bInEq() const override {return b_; }
+  inline const Eigen::VectorXd & bInEq() const override
+  {
+    return b_;
+  }
 
   void computeAb() override;
+
 private:
   mi_impactPredictor & predictor_;
   Eigen::MatrixXd multiplier_; // (I - (1 + mu)nnT)
@@ -44,4 +57,4 @@ private:
   std::string sName_;
 };
 
-}
+} // namespace mc_impact
