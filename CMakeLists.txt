@@ -4,7 +4,7 @@ set(constraints
   ContactWrenchMatrixToLambdaMatrix
   COPInsideContactAreaWithImpulse
   PositiveContactForceWithImpulse
-  ZMPInsideSupportPolygonWithImpulse
+  #ZMPInsideSupportPolygonWithImpulse
 )
 
 set(constraints_SRC)
