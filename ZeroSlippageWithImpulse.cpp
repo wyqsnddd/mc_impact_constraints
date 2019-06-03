@@ -13,10 +13,10 @@ ZeroSlippageWithImpulse::ZeroSlippageWithImpulse(const mc_solver::QPSolver & sol
 {
   auto cid = contact.contactId(solver.robots());
   ContactWrenchMatrixToLambdaMatrix transformer(solver, cid);
-  Eigen::Vector3d normal = contact.X_0_r2s(solver.robots().robot(contact.r2Index())).rotation().row(2).transpose();
+  Eigen::Vector3d normal = contact.X_0_r2s(solver.robots()).rotation().row(2).transpose();
 
   // Should we use normal*normal.transpose()?
-  multiplier_ = (Eigen::MatrixXd::Identity(3, 3) - (1 + mu) * normal.transpose() * normal);
+  multiplier_ = (Eigen::MatrixXd::Identity(3, 3) - (1 + mu) * normal * normal.transpose());
   Eigen::MatrixXd selector = Eigen::MatrixXd::Zero(3, 6);
   selector(0, 3) = 1;
   selector(1, 4) = 1;
@@ -28,7 +28,16 @@ ZeroSlippageWithImpulse::ZeroSlippageWithImpulse(const mc_solver::QPSolver & sol
 
 void ZeroSlippageWithImpulse::computeAb()
 {
-  b_ = -multiplier_ * predictor_.getImpulsiveForce(sName_);
+  const auto & force = predictor_.getImpulsiveForce(sName_);
+  std::cout << "force " << force.rows() << "x" << force.cols() << "\n";
+  if(force.rows() == 3 && force.cols() == 1)
+  {
+    b_ = -multiplier_ * predictor_.getImpulsiveForce(sName_);
+  }
+  else
+  {
+    b_.setZero(3);
+  }
 }
 
 } // namespace mc_impact
