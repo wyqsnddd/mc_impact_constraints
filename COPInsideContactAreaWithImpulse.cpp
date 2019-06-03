@@ -7,38 +7,40 @@ namespace mc_impact
 
 COPInsideContactAreaWithImpulse::COPInsideContactAreaWithImpulse(const mc_solver::QPSolver & solver,
                                                                  const mc_rbdyn::Contact & contact,
-                                                                 mi_impactPredictor & predictor)
+                                                                 const CoPArea & area,
+                                                                 mi_impactPredictor & predictor,
+                                                                 const std::string & sName)
 : InequalityConstraint(contact.contactId(solver.robots())), predictor_(predictor)
 {
   auto cid = contact.contactId(solver.robots());
   ContactWrenchMatrixToLambdaMatrix transformer(solver, cid);
-  /** \f$ selector * F = -f \f$ */
-  Eigen::MatrixXd selector = Eigen::MatrixXd::Zero(3, 6);
-  selector(0, 3) = -1;
-  selector(1, 4) = -1;
-  selector(2, 5) = -1;
-  A_ = transformer.transform(selector);
-  sName_ = contact.r1Surface()->name();
+  sName_ = sName;
 
-  /// Suppose the contact area is x \f$ x \in [-0.12, 0.12], y \in [-0.06, 0.06]\f$
+  A_cop_ = Eigen::MatrixXd::Zero(4, 6);
 
-  A_cop.resize(4, 6);
-  A_cop.setZero();
+  // - cy - max_x * fz
+  A_cop_(0, 1) = -1;
+  A_cop_(0, 5) = -area.max_x;
 
-  A_cop(0, 5) = -0.12;
-  A_cop(0, 1) = -1;
-  A_cop(1, 5) = -0.12;
-  A_cop(1, 1) = 1;
-  A_cop(2, 5) = -0.06;
-  A_cop(2, 0) = 1;
-  A_cop(3, 5) = -0.06;
-  A_cop(3, 0) = -1;
+  // cy + min_x * fz
+  A_cop_(1, 1) = 1;
+  A_cop_(1, 5) = area.min_x;
 
+  // cx - max_y * fz
+  A_cop_(2, 0) = 1;
+  A_cop_(2, 5) = -area.max_y;
+
+  // - cx + min_y * fz
+  A_cop_(3, 0) = -1;
+  A_cop_(3, 5) = area.min_y;
+
+  A_ = transformer.transform(A_cop_);
 }
 
-const Eigen::VectorXd & COPInsideContactAreaWithImpulse::bInEq() const
+void COPInsideContactAreaWithImpulse::computeAb()
 {
-  return A_cop* predictor_.getImpulsiveForceCOP(sName_).vector();
+  Eigen::VectorXd f = predictor_.getImpulsiveForceCOP(sName_).vector();
+  b_.noalias() = - A_cop_ * f;
 }
 
 } // namespace mc_impact
