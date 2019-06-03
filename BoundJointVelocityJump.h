@@ -17,15 +17,31 @@ struct BoundJointVelocityJump : public mc_solver::GenInequalityConstraint
   /** Use the robot module provided velocity bounds */
   BoundJointVelocityJump(mi_impactPredictor & predictor, double dt);
 
-  BoundJointVelocityJump(mi_impactPredictor & predictor, double dt, const Eigen::VectorXd & LBound, const Eigen::VectorXd & UBound);
+  BoundJointVelocityJump(mi_impactPredictor & predictor,
+                         double dt,
+                         const Eigen::VectorXd & LBound,
+                         const Eigen::VectorXd & UBound);
 
   int maxGenInEq() const override;
 
-  inline std::string nameGenInEq() const override { return "BoundJointVelocityJump"; }
+  inline std::string nameGenInEq() const override
+  {
+    return "BoundJointVelocityJump";
+  }
 
-  inline const Eigen::VectorXd & LowerGenInEq() const override { return L_; }
-  inline const Eigen::VectorXd & UpperGenInEq() const override { return U_; }
-  inline const Eigen::MatrixXd & A() const override { return A_; }
+  inline const Eigen::VectorXd & LowerGenInEq() const override
+  {
+    return L_;
+  }
+  inline const Eigen::VectorXd & UpperGenInEq() const override
+  {
+    return U_;
+  }
+  inline const Eigen::MatrixXd & A() const override
+  {
+    return A_;
+  }
+
 private:
   void computeALU() override;
 
@@ -50,4 +66,4 @@ private:
   Eigen::VectorXd U_;
 };
 
-}
+} // namespace mc_impact

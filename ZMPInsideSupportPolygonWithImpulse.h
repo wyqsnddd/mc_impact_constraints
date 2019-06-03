@@ -25,7 +25,9 @@ struct ZMPInsideSupportPolygonWithImpulse : public mc_solver::InequalityConstrai
 {
   ZMPInsideSupportPolygonWithImpulse(const mc_solver::QPSolver & solver,
                                      const mc_rbdyn::Contact & leftSoleContact,
+                                     const std::string & clName,
                                      const mc_rbdyn::Contact & rightSoleContact,
+                                     const std::string & crName,
                                      mi_impactPredictor & predictor);
 
   inline int maxInEq() const override
@@ -54,7 +56,8 @@ private:
   Eigen::MatrixXd multiplier_;
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;
-  std::string sName_;
+  std::string slName_;
+  std::string srName_;
 
 }; // end of struct
 } // namespace mc_impact

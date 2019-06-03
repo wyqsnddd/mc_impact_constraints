@@ -19,15 +19,32 @@ struct BoundJointTorqueJump : public mc_solver::GenInequalityConstraint
   /** Multiply the regular torque bounds limits by the provided multiplier */
   BoundJointTorqueJump(mi_impactPredictor & predictor, double dt, double impact_dt, double mult);
 
-  BoundJointTorqueJump(mi_impactPredictor & predictor, double dt, double impact_dt, const Eigen::VectorXd & LBound, const Eigen::VectorXd & UBound);
+  BoundJointTorqueJump(mi_impactPredictor & predictor,
+                       double dt,
+                       double impact_dt,
+                       const Eigen::VectorXd & LBound,
+                       const Eigen::VectorXd & UBound);
 
   int maxGenInEq() const override;
 
-  inline std::string nameGenInEq() const override { return "BoundJointTorqueJump"; }
+  inline std::string nameGenInEq() const override
+  {
+    return "BoundJointTorqueJump";
+  }
 
-  inline const Eigen::VectorXd & LowerGenInEq() const override { return L_; }
-  inline const Eigen::VectorXd & UpperGenInEq() const override { return U_; }
-  inline const Eigen::MatrixXd & A() const override { return A_; }
+  inline const Eigen::VectorXd & LowerGenInEq() const override
+  {
+    return L_;
+  }
+  inline const Eigen::VectorXd & UpperGenInEq() const override
+  {
+    return U_;
+  }
+  inline const Eigen::MatrixXd & A() const override
+  {
+    return A_;
+  }
+
 private:
   void computeALU() override;
 
@@ -54,4 +71,4 @@ private:
   Eigen::VectorXd U_;
 };
 
-}
+} // namespace mc_impact

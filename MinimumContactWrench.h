@@ -6,7 +6,6 @@
 
 #include "ContactWrenchMatrixToLambdaMatrix.h"
 
-
 namespace mc_impact
 {
 
@@ -33,7 +32,9 @@ struct MinimumContactWrench : public mc_solver::InequalityConstraint
     if(gui_)
     {
       gui_->addElement({"Constraints", "MinimumContactWrench", sName_},
-                       mc_rtc::gui::ArrayInput("Minimum wrench", {"cx", "cy", "cz", "fx", "fy", "fz"}, [this]() -> Eigen::VectorXd { return -fUser_; }, [this](const Eigen::VectorXd & v) { fUser_ = -v; }));
+                       mc_rtc::gui::ArrayInput("Minimum wrench", {"cx", "cy", "cz", "fx", "fy", "fz"},
+                                               [this]() -> Eigen::VectorXd { return -fUser_; },
+                                               [this](const Eigen::VectorXd & v) { fUser_ = -v; }));
     }
   }
 
@@ -45,17 +46,28 @@ struct MinimumContactWrench : public mc_solver::InequalityConstraint
     }
   }
 
-  int maxInEq() const override { return 6; }
-
-  std::string nameInEq() const override { return "MinimumContactWrench"; }
-
-  const Eigen::VectorXd & bInEq() const override { return fUser_; }
-
-  const Eigen::MatrixXd & A() const override { return A_; }
-
-  void computeAb() override
+  int maxInEq() const override
   {
+    return 6;
   }
+
+  std::string nameInEq() const override
+  {
+    return "MinimumContactWrench";
+  }
+
+  const Eigen::VectorXd & bInEq() const override
+  {
+    return fUser_;
+  }
+
+  const Eigen::MatrixXd & A() const override
+  {
+    return A_;
+  }
+
+  void computeAb() override {}
+
 private:
   Eigen::VectorXd fUser_;
   Eigen::MatrixXd A_;
@@ -63,4 +75,4 @@ private:
   std::string sName_;
 };
 
-}
+} // namespace mc_impact

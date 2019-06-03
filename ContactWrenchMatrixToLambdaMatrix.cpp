@@ -11,7 +11,8 @@ ContactWrenchMatrixToLambdaMatrix::ContactWrenchMatrixToLambdaMatrix(const mc_so
   auto qp_c = solver.contactById(id);
   if(qp_c.first == -1)
   {
-    LOG_ERROR_AND_THROW(std::runtime_error, "[ContactWrenchMatrixToLambdaMatrix] Provided contact has not been added to the solver yet")
+    LOG_ERROR_AND_THROW(std::runtime_error,
+                        "[ContactWrenchMatrixToLambdaMatrix] Provided contact has not been added to the solver yet")
   }
   const auto & contact = qp_c.second;
   const auto & cones = contact.r1Cones;
@@ -28,7 +29,7 @@ ContactWrenchMatrixToLambdaMatrix::ContactWrenchMatrixToLambdaMatrix(const mc_so
   int col = 0;
   for(size_t i = 0; i < points.size(); ++i)
   {
-    sva::PTransformd X_b_pi { contact.r1Points[i] };
+    sva::PTransformd X_b_pi{contact.r1Points[i]};
     sva::PTransformd X_cf_pi = X_b_pi * contact.X_b1_cf.inv();
     X_cf_pi_T.block(0, 0, 3, 3) = sva::vector3ToCrossMatrix(X_cf_pi.translation()) * X_cf_pi.rotation().transpose();
     X_cf_pi_T.block(3, 0, 3, 3) = X_cf_pi.rotation().transpose();
@@ -36,10 +37,9 @@ ContactWrenchMatrixToLambdaMatrix::ContactWrenchMatrixToLambdaMatrix(const mc_so
     {
       Gi.col(j) = cones[i].generators[j];
     }
-    transform_.block(0, col, 6, cones[i].generators.size()) =
-      X_cf_pi_T * Gi.block(0, 0, 3, cones[i].generators.size());
+    transform_.block(0, col, 6, cones[i].generators.size()) = X_cf_pi_T * Gi.block(0, 0, 3, cones[i].generators.size());
     col += cones[i].generators.size();
   }
 }
 
-}
+} // namespace mc_impact

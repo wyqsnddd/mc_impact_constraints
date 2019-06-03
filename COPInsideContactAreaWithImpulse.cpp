@@ -40,7 +40,7 @@ COPInsideContactAreaWithImpulse::COPInsideContactAreaWithImpulse(const mc_solver
 void COPInsideContactAreaWithImpulse::computeAb()
 {
   Eigen::VectorXd f = predictor_.getImpulsiveForceCOP(sName_).vector();
-  b_.noalias() = - A_cop_ * f;
+  b_.noalias() = -A_cop_ * f;
 }
 
 } // namespace mc_impact

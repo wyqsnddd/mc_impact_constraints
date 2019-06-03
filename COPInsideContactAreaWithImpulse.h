@@ -20,9 +20,11 @@ struct CoPArea
 };
 
 /** This constraint enforces that the CoP within the contact area of an established contact,
- * i.e. it enforces \f$ A_{cop} (F_{QP} + F_{impact}) \leqslant 0 \f$ or \f$ A_{cop}F_{QP} \leqslant - A_{cop}F_{impact} \f$. 
+ * i.e. it enforces \f$ A_{cop} (F_{QP} + F_{impact}) \leqslant 0 \f$ or \f$ A_{cop}F_{QP} \leqslant - A_{cop}F_{impact}
+ * \f$.
  *
- * Note that \f$ F_{impact}\f$ denotes the sum of the impulsive reaction force and the equivalent wrenchs from the other end-effectors.
+ * Note that \f$ F_{impact}\f$ denotes the sum of the impulsive reaction force and the equivalent wrenchs from the other
+ * end-effectors.
  */
 struct COPInsideContactAreaWithImpulse : public mc_solver::InequalityConstraint
 {
@@ -53,6 +55,7 @@ struct COPInsideContactAreaWithImpulse : public mc_solver::InequalityConstraint
   }
 
   void computeAb() override;
+
 private:
   mi_impactPredictor & predictor_;
   Eigen::MatrixXd A_;

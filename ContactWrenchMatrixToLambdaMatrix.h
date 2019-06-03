@@ -16,7 +16,8 @@ namespace mc_impact
  *
  * \f[f_p = \sum^{N^{Gen}_{p}}_{i=1} G^{p}_{i} \lambda^{p}_{i}\f]
  *
- * Where \f$G^{p}_{i} \in \mathbb{R}^{3,1}\f$ are the generatrix of the friction cone. In the remainder of these equations we write \f$N = N^{Gen}_{p}\f$ for sparcity
+ * Where \f$G^{p}_{i} \in \mathbb{R}^{3,1}\f$ are the generatrix of the friction cone. In the remainder of these
+ * equations we write \f$N = N^{Gen}_{p}\f$ for sparcity
  *
  * In matrix form:
  *
@@ -114,8 +115,9 @@ struct ContactWrenchMatrixToLambdaMatrix
   {
     return transform_;
   }
+
 private:
   Eigen::MatrixXd transform_;
 };
 
-}
+} // namespace mc_impact
