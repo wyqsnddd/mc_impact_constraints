@@ -25,6 +25,7 @@ struct ZeroSlippageWithImpulse : public mc_solver::InequalityConstraint
   ZeroSlippageWithImpulse(const mc_solver::QPSolver & solver,
                                   const mc_rbdyn::Contact & contact,
                                   mi_impactPredictor & predictor,
+                                  const std::string & cBody,
                                   double mu = mc_rbdyn::Contact::defaultFriction);
 
   inline int maxInEq() const override

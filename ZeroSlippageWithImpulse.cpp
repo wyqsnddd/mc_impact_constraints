@@ -8,6 +8,7 @@ namespace mc_impact
 ZeroSlippageWithImpulse::ZeroSlippageWithImpulse(const mc_solver::QPSolver & solver,
                                                                  const mc_rbdyn::Contact & contact,
                                                                  mi_impactPredictor & predictor,
+                                                                 const std::string & cBody,
                                                                  double mu)
 : InequalityConstraint(contact.contactId(solver.robots())), predictor_(predictor)
 {
@@ -23,13 +24,12 @@ ZeroSlippageWithImpulse::ZeroSlippageWithImpulse(const mc_solver::QPSolver & sol
   selector(2, 5) = 1;
   // selector * F = f => multiplier_ * selector * F = multiplier_ * f
   A_ = transformer.transform(multiplier_ * selector);
-  sName_ = contact.r1Surface()->name();
+  sName_ = cBody;
 }
 
 void ZeroSlippageWithImpulse::computeAb()
 {
   const auto & force = predictor_.getImpulsiveForce(sName_);
-  std::cout << "force " << force.rows() << "x" << force.cols() << "\n";
   if(force.rows() == 3 && force.cols() == 1)
   {
     b_ = -multiplier_ * predictor_.getImpulsiveForce(sName_);
