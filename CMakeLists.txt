@@ -4,6 +4,8 @@ set(constraints
   ContactWrenchMatrixToLambdaMatrix
   ZeroSlippageWithImpulse
   COPInsideContactAreaWithImpulse
+  frictionWithImpulse
+  copWithImpulse
   #ZMPInsideSupportPolygonWithImpulse
 )
 
