@@ -40,7 +40,7 @@ void ZMPInsideSupportPolygonWithImpulse::computeAb()
 
   A_ = A_s * (F_QP_left_sole_COM + F_QP_right_sole_COM);
 
-  b_ = A_s
+  b_ = -A_s
        * (predictor_.getImpulsiveForceCOM("l_sole").vector() + predictor_.getImpulsiveForceCOM("r_sole").vector()
           + predictor_.getImpulsiveForceCOM().vector());
 
