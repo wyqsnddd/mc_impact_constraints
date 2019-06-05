@@ -52,6 +52,19 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
 
   void computeAb() override;
 
+  void getComItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench);
+  inline const Eigen::MatrixXd & getA()
+  {
+    return A_; 
+  }
+  inline const Eigen::VectorXd & getb()
+  {
+    return b_; 
+  }
+  inline const Eigen::MatrixXd & getZMP()
+  {
+    return A_zmp_; 
+  }
 private:
   // Predictor
   mi_impactPredictor & predictor_;
@@ -68,7 +81,6 @@ private:
   // std::string sName_;
   // dt * J_deltatau / impact_duration
 
-  void getComItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench);
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;
   Eigen::MatrixXd A_zmp_;
