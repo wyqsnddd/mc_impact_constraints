@@ -5,14 +5,13 @@
 namespace mc_impact
 {
 
-copWithImpulse::copWithImpulse(
-		                           mi_impactPredictor & predictor,
-		                           const std::string & bodyName,
-		                           const std::string & sensorName,
-					   double dt,
-                                           double impact_dt,
-					   //const mc_rbdyn::Contact & contact,
-					   const newCoPArea & area)
+copWithImpulse::copWithImpulse(mi_impactPredictor & predictor,
+                               const std::string & bodyName,
+                               const std::string & sensorName,
+                               double dt,
+                               double impact_dt,
+                               // const mc_rbdyn::Contact & contact,
+                               const newCoPArea & area)
 : InequalityConstraint(predictor.getRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt)
 {
 
@@ -40,9 +39,8 @@ copWithImpulse::copWithImpulse(
   int nDof = predictor_.getRobot().mb().nrDof();
 
   alpha_.resize(nDof);
-  A_.resize(4, nDof );
+  A_.resize(4, nDof);
   b_.resize(4);
-
 }
 
 void copWithImpulse::computeAb()
@@ -50,18 +48,18 @@ void copWithImpulse::computeAb()
 
   const auto & robot = predictor_.getRobot();
   const auto & J_deltaF = predictor_.getJacobianDeltaF(bName_);
-  //std::cout<<"size of J_deltaF: "<<J_deltaF.rows()<<", "<<J_deltaF.cols()<<std::endl;
-  //std::cout<<"size of reduced J_deltaF: "<<J_deltaF.rows()<<", "<<J_deltaF.cols()<<std::endl;
+  // std::cout<<"size of J_deltaF: "<<J_deltaF.rows()<<", "<<J_deltaF.cols()<<std::endl;
+  // std::cout<<"size of reduced J_deltaF: "<<J_deltaF.rows()<<", "<<J_deltaF.cols()<<std::endl;
 
-  //A_ = (dt_ / impact_dt_) * A_cop_.block(0, 3, 4, 3)*J_deltaF.block(0, startIndex_, J_deltaF.rows(), J_deltaF.cols() - startIndex_);
-  A_ = (dt_ / impact_dt_) * A_cop_.block(0, 3, 4, 3)*J_deltaF;
-  //std::cout<<"size of A_: "<<A_.rows()<<", "<<A_.cols()<<std::endl;
+  // A_ = (dt_ / impact_dt_) * A_cop_.block(0, 3, 4, 3)*J_deltaF.block(0, startIndex_, J_deltaF.rows(), J_deltaF.cols()
+  // - startIndex_);
+  A_ = (dt_ / impact_dt_) * A_cop_.block(0, 3, 4, 3) * J_deltaF;
+  // std::cout<<"size of A_: "<<A_.rows()<<", "<<A_.cols()<<std::endl;
   rbd::paramToVector(robot.mbc().alpha, alpha_);
-  
-  //std::cout<<"size of alpha_"<<alpha_.rows()<<std::endl;
-  b_ = - (A_cop_*predictor_.getRobot().forceSensor(sName_).wrench().vector()
-        + A_cop_.block(0, 3, 4, 3)*J_deltaF*alpha_/impact_dt_);
 
+  // std::cout<<"size of alpha_"<<alpha_.rows()<<std::endl;
+  b_ = -(A_cop_ * predictor_.getRobot().forceSensor(sName_).wrench().vector()
+         + A_cop_.block(0, 3, 4, 3) * J_deltaF * alpha_ / impact_dt_);
 }
 
 } // namespace mc_impact

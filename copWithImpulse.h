@@ -3,15 +3,13 @@
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
 
-
-
 /** Forward declaration */
 class mi_impactPredictor;
 
 namespace mc_impact
 {
 
-	struct newCoPArea
+struct newCoPArea
 {
   double min_x;
   double max_x;
@@ -19,22 +17,19 @@ namespace mc_impact
   double max_y;
 };
 
-
 struct copWithImpulse : public mc_solver::InequalityConstraint
 {
-  copWithImpulse(
-		       mi_impactPredictor & predictor,
-		       const std::string & bodyName,
-		       const std::string & sensorName,
-		       double dt,
-                       double impact_dt,
-	       //const mc_rbdyn::Contact & contact,
-		       const newCoPArea & area
-		       );
+  copWithImpulse(mi_impactPredictor & predictor,
+                 const std::string & bodyName,
+                 const std::string & sensorName,
+                 double dt,
+                 double impact_dt,
+                 // const mc_rbdyn::Contact & contact,
+                 const newCoPArea & area);
 
   inline int maxInEq() const override
   {
-    return 4; 
+    return 4;
   }
 
   inline std::string nameInEq() const override
@@ -42,7 +37,7 @@ struct copWithImpulse : public mc_solver::InequalityConstraint
     return "copWithImpulse";
   }
 
-   inline const Eigen::MatrixXd & A() const override
+  inline const Eigen::MatrixXd & A() const override
   {
     return A_;
   }
@@ -54,7 +49,6 @@ struct copWithImpulse : public mc_solver::InequalityConstraint
   void computeAb() override;
 
 private:
-
   // Predictor
   mi_impactPredictor & predictor_;
   // Timestep
@@ -63,9 +57,9 @@ private:
   double impact_dt_;
   // Alpha vector
   Eigen::VectorXd alpha_;
-  // Name of the body of interest. 
+  // Name of the body of interest.
   std::string bName_;
-   // Name of the force sensor 
+  // Name of the force sensor
   std::string sName_;
   // dt * J_deltatau / impact_duration
   Eigen::MatrixXd A_;
