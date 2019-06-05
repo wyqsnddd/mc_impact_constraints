@@ -39,10 +39,10 @@ COPInsideContactAreaWithImpulse::COPInsideContactAreaWithImpulse(const mc_solver
 
 void COPInsideContactAreaWithImpulse::computeAb()
 {
-  //Eigen::VectorXd f = predictor_.getImpulsiveForceCOP(sName_).vector();
+  // Eigen::VectorXd f = predictor_.getImpulsiveForceCOP(sName_).vector();
   Eigen::Vector6d f;
   f.setZero();
-  f.segment(3,3) = predictor_.getImpulsiveForce(sName_);
+  f.segment(3, 3) = predictor_.getImpulsiveForce(sName_);
 
   b_.noalias() = -A_cop_ * f;
 }
