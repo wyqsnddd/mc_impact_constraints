@@ -6,6 +6,7 @@ set(constraints
   COPInsideContactAreaWithImpulse
   frictionWithImpulse
   copWithImpulse
+  zmpWithImpulse
   #ZMPInsideSupportPolygonWithImpulse
 )
 
