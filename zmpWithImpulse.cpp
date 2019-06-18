@@ -90,7 +90,7 @@ void zmpWithImpulse::calcZMP_(const Eigen::MatrixXd & sumJac, const Eigen::Vecto
  zmpPerturbation_.x() = - (impulseForceSum(1))/denominator;
  zmpPerturbation_.y() = (impulseForceSum(0))/denominator;
  
- zmpPrediction_ = zmpSensor_ - zmpPerturbation_;
+ zmpPrediction_ = zmpSensor_ + zmpPerturbation_;
 
 }
 void zmpWithImpulse::computeAb()
