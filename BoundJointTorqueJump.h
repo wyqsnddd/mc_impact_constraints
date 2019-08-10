@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mc_solver/GenInequalityConstraint.h>
-
+# include <mc_prediction/mi_qpEstimator.h>
 /** Forward declaration */
 class mi_impactPredictor;
 
@@ -17,9 +17,9 @@ namespace mc_impact
 struct BoundJointTorqueJump : public mc_solver::GenInequalityConstraint
 {
   /** Multiply the regular torque bounds limits by the provided multiplier */
-  BoundJointTorqueJump(mi_impactPredictor & predictor, double dt, double impact_dt, double mult);
+  BoundJointTorqueJump(mi_qpEstimator& predictor, double dt, double impact_dt, double mult);
 
-  BoundJointTorqueJump(mi_impactPredictor & predictor,
+  BoundJointTorqueJump(mi_qpEstimator& predictor,
                        double dt,
                        double impact_dt,
                        const Eigen::VectorXd & LBound,
@@ -49,7 +49,7 @@ private:
   void computeALU() override;
 
   // Predictor
-  mi_impactPredictor & predictor_;
+  mi_qpEstimator& predictor_;
   // Timestep
   double dt_;
   // Impact duration

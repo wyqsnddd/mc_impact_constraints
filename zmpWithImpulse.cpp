@@ -1,18 +1,16 @@
 #include "zmpWithImpulse.h"
 
-#include <mc_prediction/mi_impactPredictor.h>
-
 namespace mc_impact
 {
 
-zmpWithImpulse::zmpWithImpulse(mi_impactPredictor & predictor,
+zmpWithImpulse::zmpWithImpulse(mi_qpEstimator& predictor,
                                const std::vector<mc_impact::supportContact> & supports,
                                double dt,
                                double impact_dt,
                                const ZMPArea & area,
 			       bool debug 
 			       )
-: InequalityConstraint(predictor.getRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt), supports_(supports), debug_(debug)
+: InequalityConstraint(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt), supports_(supports), debug_(debug)
 {
 
   // bName_ = bodyName;
@@ -43,7 +41,7 @@ zmpWithImpulse::zmpWithImpulse(mi_impactPredictor & predictor,
   A_zmp_f_(2, 0) = -1;
   A_zmp_f_(3, 0) = 1;
 
-  int nDof = predictor_.getRobot().mb().nrDof();
+  int nDof = predictor_.getSimRobot().mb().nrDof();
 
   alpha_.resize(nDof);
   // This needs double check
@@ -54,7 +52,7 @@ zmpWithImpulse::zmpWithImpulse(mi_impactPredictor & predictor,
 void zmpWithImpulse::getComItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench)
 {
   exWrench.setZero();
-  int dof = predictor_.getRobot().mb().nrDof();
+  int dof = predictor_.getSimRobot().mb().nrDof();
   sumJac.resize(6, dof);
   sumJac.setZero();
   //sva::PTransformd X_0_CoM = sva::PTransformd(predictor_.getRobot().com());
@@ -62,26 +60,26 @@ void zmpWithImpulse::getComItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exW
   
   for(auto idx = supports_.begin(); idx != supports_.end(); ++idx)
   {
-    sva::PTransformd X_ee_0 = predictor_.getRobot().bodyPosW(idx->bodyName).inv();
-    exWrench += X_ee_0.dualMatrix()*predictor_.getRobot().forceSensor(idx->sensorName).wrench().vector();
+    sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(idx->bodyName).inv();
+    exWrench += X_ee_0.dualMatrix()*predictor_.getSimRobot().forceSensor(idx->sensorName).wrench().vector();
    sumJac.block(0, 0, 3, dof) += X_ee_0.dualMatrix().block(0, 3, 3, 3)*predictor_.getJacobianDeltaF(idx->bodyName);
     sumJac.block(3, 0, 3, dof) += X_ee_0.dualMatrix().block(3, 3, 3, 3)*predictor_.getJacobianDeltaF(idx->bodyName);
   }// end of for
 
   // Add the impact body force
-  sva::PTransformd X_ee_0 = predictor_.getRobot().bodyPosW(predictor_.getImpactBody()).inv();
-  sumJac.block(0, 0, 3, dof) += X_ee_0.dualMatrix().block(0, 3, 3, 3)*predictor_.getJacobianDeltaF(predictor_.getImpactBody());
-  sumJac.block(3, 0, 3, dof) += X_ee_0.dualMatrix().block(3, 3, 3, 3)*predictor_.getJacobianDeltaF(predictor_.getImpactBody());
+  sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(predictor_.getImpactModel()->getImpactBody()).inv();
+  sumJac.block(0, 0, 3, dof) += X_ee_0.dualMatrix().block(0, 3, 3, 3)*predictor_.getJacobianDeltaF(predictor_.getImpactModel()->getImpactBody());
+  sumJac.block(3, 0, 3, dof) += X_ee_0.dualMatrix().block(3, 3, 3, 3)*predictor_.getJacobianDeltaF(predictor_.getImpactModel()->getImpactBody());
 
 }
 
 void zmpWithImpulse::calcZMP_(const Eigen::MatrixXd & sumJac, const Eigen::Vector6d & exWrench)
 {
  Eigen::VectorXd temp =
-        (rbd::dofToVector(predictor_.getRobot().mb(), predictor_.getRobot().mbc().alpha)
-         + rbd::dofToVector(predictor_.getRobot().mb(), predictor_.getRobot().mbc().alphaD) * predictor_.getImpactDuration_());
+        (rbd::dofToVector(predictor_.getSimRobot().mb(), predictor_.getSimRobot().mbc().alpha)
+         + rbd::dofToVector(predictor_.getSimRobot().mb(), predictor_.getSimRobot().mbc().alphaD) * predictor_.getImpactModel()->getTimeStep());
 
- Eigen::Vector6d impulseForceSum = (1/predictor_.getImpactDuration_())*sumJac*temp;
+ Eigen::Vector6d impulseForceSum = (1/predictor_.getImpactModel()->getImpactDuration())*sumJac*temp;
  double denominator = exWrench(5)  + impulseForceSum(5);
 
  zmpSensor_.x() = - (exWrench(1))/denominator;
@@ -95,7 +93,7 @@ void zmpWithImpulse::calcZMP_(const Eigen::MatrixXd & sumJac, const Eigen::Vecto
 }
 void zmpWithImpulse::computeAb()
 {
-  const auto & robot = predictor_.getRobot();
+  const auto & robot = predictor_.getSimRobot();
   Eigen::MatrixXd sumJac;
   Eigen::Vector6d sumWrench;
   getComItems(sumJac, sumWrench);
@@ -108,7 +106,7 @@ void zmpWithImpulse::computeAb()
   if(debug_)
   {
     calcZMP_(sumJac, sumWrench);
-    difference_ = A_* rbd::dofToVector(predictor_.getRobot().mb(), predictor_.getRobot().mbc().alphaD) - b_;
+    difference_ = A_* rbd::dofToVector(predictor_.getSimRobot().mb(), predictor_.getSimRobot().mbc().alphaD) - b_;
   }
 }
 

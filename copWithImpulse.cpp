@@ -1,18 +1,17 @@
 #include "copWithImpulse.h"
 
-#include <mc_prediction/mi_impactPredictor.h>
 
 namespace mc_impact
 {
 
-copWithImpulse::copWithImpulse(mi_impactPredictor & predictor,
+copWithImpulse::copWithImpulse(mi_qpEstimator & predictor,
                                const std::string & bodyName,
                                const std::string & sensorName,
                                double dt,
                                double impact_dt,
                                // const mc_rbdyn::Contact & contact,
                                const newCoPArea & area)
-: InequalityConstraint(predictor.getRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt)
+: InequalityConstraint(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt)
 {
 
   bName_ = bodyName;
@@ -36,7 +35,7 @@ copWithImpulse::copWithImpulse(mi_impactPredictor & predictor,
   A_cop_(3, 0) = -1;
   A_cop_(3, 5) = area.min_y;
 
-  int nDof = predictor_.getRobot().mb().nrDof();
+  int nDof = predictor_.getSimRobot().mb().nrDof();
 
   alpha_.resize(nDof);
   A_.resize(4, nDof);
@@ -46,7 +45,7 @@ copWithImpulse::copWithImpulse(mi_impactPredictor & predictor,
 void copWithImpulse::computeAb()
 {
 
-  const auto & robot = predictor_.getRobot();
+  const auto & robot = predictor_.getSimRobot();
   const auto & J_deltaF = predictor_.getJacobianDeltaF(bName_);
   // std::cout<<"size of J_deltaF: "<<J_deltaF.rows()<<", "<<J_deltaF.cols()<<std::endl;
   // std::cout<<"size of reduced J_deltaF: "<<J_deltaF.rows()<<", "<<J_deltaF.cols()<<std::endl;
@@ -58,7 +57,7 @@ void copWithImpulse::computeAb()
   rbd::paramToVector(robot.mbc().alpha, alpha_);
 
   // std::cout<<"size of alpha_"<<alpha_.rows()<<std::endl;
-  b_ = -(A_cop_ * predictor_.getRobot().forceSensor(sName_).wrench().vector()
+  b_ = -(A_cop_ * predictor_.getSimRobot().forceSensor(sName_).wrench().vector()
          + A_cop_.block(0, 3, 4, 3) * J_deltaF * alpha_ / impact_dt_);
 }
 

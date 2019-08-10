@@ -3,6 +3,8 @@
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
 
+#include <mc_prediction/mi_qpEstimator.h>
+
 /** Forward declaration */
 class mi_impactPredictor;
 
@@ -25,7 +27,7 @@ struct supportContact
 
 struct zmpWithImpulse : public mc_solver::InequalityConstraint
 {
-  zmpWithImpulse(mi_impactPredictor & predictor,
+  zmpWithImpulse(mi_qpEstimator & predictor,
                  const std::vector<supportContact> & supports,
                  double dt,
                  double impact_dt,
@@ -98,7 +100,7 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
 
 private:
   // Predictor
-  mi_impactPredictor & predictor_;
+  mi_qpEstimator& predictor_;
   // Timestep
   double dt_;
   // Impact duration

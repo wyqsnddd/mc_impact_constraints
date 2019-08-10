@@ -2,6 +2,7 @@
 
 #include <mc_solver/GenInequalityConstraint.h>
 
+# include <mc_prediction/mi_qpEstimator.h>
 /** Forward declaration */
 class mi_impactPredictor;
 
@@ -15,9 +16,9 @@ namespace mc_impact
 struct BoundJointVelocityJump : public mc_solver::GenInequalityConstraint
 {
   /** Use the robot module provided velocity bounds */
-  BoundJointVelocityJump(mi_impactPredictor & predictor, double dt);
+  BoundJointVelocityJump(mi_qpEstimator& predictor, double dt);
 
-  BoundJointVelocityJump(mi_impactPredictor & predictor,
+  BoundJointVelocityJump(mi_qpEstimator& predictor,
                          double dt,
                          const Eigen::VectorXd & LBound,
                          const Eigen::VectorXd & UBound);
@@ -46,7 +47,7 @@ private:
   void computeALU() override;
 
   // Predictor
-  mi_impactPredictor & predictor_;
+  mi_qpEstimator& predictor_;
   // Timestep
   double dt_;
   // Lower joint velocity bound

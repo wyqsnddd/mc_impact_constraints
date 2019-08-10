@@ -2,6 +2,7 @@
 
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
+#include <mc_prediction/mi_qpEstimator.h>
 
 /** Forward declaration */
 class mi_impactPredictor;
@@ -19,7 +20,7 @@ struct newCoPArea
 
 struct copWithImpulse : public mc_solver::InequalityConstraint
 {
-  copWithImpulse(mi_impactPredictor & predictor,
+  copWithImpulse(mi_qpEstimator& predictor,
                  const std::string & bodyName,
                  const std::string & sensorName,
                  double dt,
@@ -50,7 +51,7 @@ struct copWithImpulse : public mc_solver::InequalityConstraint
 
 private:
   // Predictor
-  mi_impactPredictor & predictor_;
+  mi_qpEstimator& predictor_;
   // Timestep
   double dt_;
   // Impact duration

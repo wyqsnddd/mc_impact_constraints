@@ -2,6 +2,7 @@
 
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
+# include <mc_prediction/mi_qpEstimator.h>
 
 /** Forward declaration */
 class mi_impactPredictor;
@@ -14,7 +15,7 @@ namespace mc_impact
  */
 struct frictionWithImpulse : public mc_solver::InequalityConstraint
 {
-  frictionWithImpulse(mi_impactPredictor & predictor,
+  frictionWithImpulse(mi_qpEstimator& predictor,
                       const std::string & bodyName,
                       const std::string & sensorName,
                       const mc_rbdyn::Contact & contact,
@@ -45,7 +46,7 @@ struct frictionWithImpulse : public mc_solver::InequalityConstraint
 
 private:
   // Predictor
-  mi_impactPredictor & predictor_;
+  mi_qpEstimator& predictor_;
   // Timestep
   double dt_;
   // Impact duration
