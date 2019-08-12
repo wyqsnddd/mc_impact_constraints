@@ -55,7 +55,7 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
 
   void computeAb() override;
 
-  void getComItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench);
+  void getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench);
   inline const Eigen::MatrixXd & getA()
   {
     return A_; 
