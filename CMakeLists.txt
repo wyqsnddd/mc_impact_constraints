@@ -1,3 +1,30 @@
+cmake_minimum_required(VERSION 2.8)
+
+include(cmake/base.cmake)
+include(cmake/boost.cmake)
+
+set(PROJECT_NAME mc_impact_constraints)
+
+set(PROJECT_DESCRIPTION "The QP impact constraints")
+set(PROJECT_URL  https://gite.lirmm.fr/jrl-collaborators/mc_impact_constraints )
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(CXX_DISABLE_WERROR 1)
+setup_project()
+
+# Enable C++11
+if(NOT WIN32)
+  add_definitions(-std=c++0x)
+endif()
+
+add_definitions(-o2)
+
+
+
+add_required_dependency(mc_rtc)
+
+include_directories(include)
+
 set(constraints
   BoundJointVelocityJump
   BoundJointTorqueJump
@@ -32,3 +59,4 @@ install(
 
 
 
+setup_project_finalize()
