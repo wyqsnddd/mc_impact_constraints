@@ -1,6 +1,5 @@
 #include "copWithImpulse.h"
 
-
 namespace mc_impact
 {
 

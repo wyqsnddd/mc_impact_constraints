@@ -1,7 +1,7 @@
 #pragma once
 
+#include <mc_prediction/mi_qpEstimator.h>
 #include <mc_solver/GenInequalityConstraint.h>
-# include <mc_prediction/mi_qpEstimator.h>
 /** Forward declaration */
 class mi_impactPredictor;
 
@@ -17,13 +17,14 @@ namespace mc_impact
 struct BoundJointTorqueJump : public mc_solver::GenInequalityConstraint
 {
   /** Multiply the regular torque bounds limits by the provided multiplier */
-  BoundJointTorqueJump(mi_qpEstimator& predictor, double dt, double impact_dt, double mult);
+  BoundJointTorqueJump(mi_qpEstimator & predictor, double dt, double impact_dt, double mult, bool debug = false);
 
-  BoundJointTorqueJump(mi_qpEstimator& predictor,
+  BoundJointTorqueJump(mi_qpEstimator & predictor,
                        double dt,
                        double impact_dt,
                        const Eigen::VectorXd & LBound,
-                       const Eigen::VectorXd & UBound);
+                       const Eigen::VectorXd & UBound,
+                       bool debug = false);
 
   int maxGenInEq() const override;
 
@@ -44,12 +45,20 @@ struct BoundJointTorqueJump : public mc_solver::GenInequalityConstraint
   {
     return A_;
   }
+  inline const Eigen::VectorXd & getDiffUpper()
+  {
+    return difference_upper_;
+  }
+  inline const Eigen::VectorXd & getDiffLower()
+  {
+    return difference_lower_;
+  }
 
 private:
   void computeALU() override;
 
   // Predictor
-  mi_qpEstimator& predictor_;
+  mi_qpEstimator & predictor_;
   // Timestep
   double dt_;
   // Impact duration
@@ -62,6 +71,10 @@ private:
   Eigen::VectorXd alpha_;
   // 0 for fixed-based, 6 otherwise
   int startIndex_ = 0;
+
+  bool debug_;
+  Eigen::VectorXd difference_upper_;
+  Eigen::VectorXd difference_lower_;
 
   // dt * J_deltatau / impact_duration
   Eigen::MatrixXd A_;

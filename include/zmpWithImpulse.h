@@ -1,9 +1,8 @@
 #pragma once
 
+#include <mc_prediction/mi_qpEstimator.h>
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
-
-#include <mc_prediction/mi_qpEstimator.h>
 
 /** Forward declaration */
 class mi_impactPredictor;
@@ -32,7 +31,7 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
                  double dt,
                  double impact_dt,
                  const ZMPArea & area,
-		 bool debug=false);
+                 bool debug = false);
 
   inline int maxInEq() const override
   {
@@ -58,49 +57,48 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
   void getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench);
   inline const Eigen::MatrixXd & getA()
   {
-    return A_; 
+    return A_;
   }
   inline const Eigen::VectorXd & getb()
   {
-    return b_; 
+    return b_;
   }
   inline const Eigen::MatrixXd & getZMP()
   {
-    return A_zmp_; 
+    return A_zmp_;
   }
   inline const Eigen::Vector3d & getZMP_sensor()
-  { if(debug_)
-      return zmpSensor_; 
+  {
+    if(debug_)
+      return zmpSensor_;
     else
       throw std::runtime_error("zmp constraint not in debug mode.");
   }
   inline const Eigen::Vector3d & getZMP_perturbation()
   {
     if(debug_)
-      return zmpPerturbation_; 
+      return zmpPerturbation_;
     else
       throw std::runtime_error("zmp constraint not in debug mode.");
   }
   inline const Eigen::Vector3d & getZMP_prediction()
   {
     if(debug_)
-      return zmpPrediction_; 
+      return zmpPrediction_;
     else
       throw std::runtime_error("zmp constraint not in debug mode.");
-
   }
   inline const Eigen::Vector4d & getZMP_constraint_difference()
   {
     if(debug_)
-      return difference_; 
+      return difference_;
     else
       throw std::runtime_error("zmp constraint not in debug mode.");
-
   }
 
 private:
   // Predictor
-  mi_qpEstimator& predictor_;
+  mi_qpEstimator & predictor_;
   // Timestep
   double dt_;
   // Impact duration
