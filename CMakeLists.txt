@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 
 include(cmake/base.cmake)
 include(cmake/boost.cmake)
@@ -10,18 +10,10 @@ set(PROJECT_URL  https://gite.lirmm.fr/jrl-collaborators/mc_impact_constraints )
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CXX_DISABLE_WERROR 1)
+set(CMAKE_CXX_STANDARD 11)
 setup_project()
 
-# Enable C++11
-if(NOT WIN32)
-  add_definitions(-std=c++0x)
-endif()
-
-add_definitions(-o2)
-
-
-
-add_required_dependency(mc_rtc)
+find_package(mc_rtc REQUIRED)
 
 include_directories(include)
 
@@ -43,9 +35,8 @@ endforeach()
 
 add_library(mc_impact_constraints SHARED ${constraints_SRC})
 target_include_directories(mc_impact_constraints PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-pkg_config_use_dependency(mc_impact_constraints mc_rtc )
+target_link_libraries(mc_impact_constraints mc_rtc::mc_control)
 target_link_libraries(mc_impact_constraints mc_impact_predictor)
-
 
 pkg_config_append_libs(mc_impact_constraints)
 
@@ -55,8 +46,5 @@ install(
 	DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
 	DESTINATION include/mc_impact_constraints
 	FILES_MATCHING PATTERN "*.h*")
-
-
-
 
 setup_project_finalize()
