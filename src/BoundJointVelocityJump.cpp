@@ -3,11 +3,11 @@
 namespace mc_impact
 {
 
-BoundJointVelocityJump::BoundJointVelocityJump(mi_qpEstimator & predictor, double dt, bool debug)
+BoundJointVelocityJump::BoundJointVelocityJump(mi_qpEstimator & predictor, double dt, double multi, bool debug)
 : BoundJointVelocityJump(predictor,
                          dt,
-                         rbd::dofToVector(predictor.getSimRobot().mb(), predictor.getSimRobot().vl()),
-                         rbd::dofToVector(predictor.getSimRobot().mb(), predictor.getSimRobot().vu()),
+                         multi*rbd::dofToVector(predictor.getSimRobot().mb(), predictor.getSimRobot().vl()),
+                         multi*rbd::dofToVector(predictor.getSimRobot().mb(), predictor.getSimRobot().vu()),
                          debug)
 {
 }
@@ -26,19 +26,21 @@ BoundJointVelocityJump::BoundJointVelocityJump(mi_qpEstimator & predictor,
     startIndex_ = 6;
   }
   int nDof = predictor_.getSimRobot().mb().nrDof();
-  alpha_L_ = alpha_L_.tail(nDof - startIndex_).eval();
-  alpha_U_ = alpha_U_.tail(nDof - startIndex_).eval();
-  A_.resize(nDof - startIndex_, nDof);
-  L_.resize(nDof - startIndex_);
-  U_.resize(nDof - startIndex_);
+  int realDof = nDof - startIndex_; 
+  alpha_L_ = alpha_L_.tail(realDof).eval();
+  alpha_U_ = alpha_U_.tail(realDof).eval();
+  A_.resize(realDof, nDof);
+  L_.resize(realDof);
+  U_.resize(realDof);
 
-  diff_lower_.resize(nDof - startIndex_);
-  diff_upper_.resize(nDof - startIndex_);
+  diff_lower_.resize(realDof);
+  diff_upper_.resize(realDof);
+  test_delta_vel_.resize(realDof);
 }
 
 int BoundJointVelocityJump::maxGenInEq() const
 {
-  return alpha_L_.size();
+  return static_cast<int>(alpha_L_.size());
 }
 
 void BoundJointVelocityJump::computeALU()
@@ -58,6 +60,8 @@ void BoundJointVelocityJump::computeALU()
 
     diff_upper_ = U_ - A_ * alphaD;
     diff_lower_ = U_ - diff_upper_ - L_;
+
+    test_delta_vel_ =  J_delta*(alphaD*dt_ + alpha_);
   }
 }
 

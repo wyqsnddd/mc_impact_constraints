@@ -34,16 +34,20 @@ BoundJointTorqueJump::BoundJointTorqueJump(mi_qpEstimator & predictor,
     startIndex_ = 6;
   }
   int nDof = predictor_.getSimRobot().mb().nrDof();
-  tau_L_ = tau_L_.tail(nDof - startIndex_).eval();
-  tau_U_ = tau_U_.tail(nDof - startIndex_).eval();
-  A_.resize(nDof - startIndex_, nDof);
-  L_.resize(nDof - startIndex_);
-  U_.resize(nDof - startIndex_);
+  int realDof = nDof - startIndex_;
+  tau_L_ = tau_L_.tail(realDof).eval();
+  tau_U_ = tau_U_.tail(realDof).eval();
+  A_.resize(realDof, nDof);
+  L_.resize(realDof);
+  U_.resize(realDof);
+  test_delta_torque_.resize(realDof);
+  difference_lower_.resize(realDof);
+  difference_upper_.resize(realDof);
 }
 
 int BoundJointTorqueJump::maxGenInEq() const
 {
-  return tau_L_.size();
+  return static_cast<int>(tau_L_.size());
 }
 
 void BoundJointTorqueJump::computeALU()
@@ -63,6 +67,8 @@ void BoundJointTorqueJump::computeALU()
 
     difference_upper_ = U_ - A_ * alphaD;
     difference_lower_ = U_ - difference_upper_ - L_;
+
+    test_delta_torque_ =  (1.0/ impact_dt_)*J_deltatau*(alpha_ + alphaD*dt_);
   }
 }
 

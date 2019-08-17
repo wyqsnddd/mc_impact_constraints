@@ -54,6 +54,10 @@ struct BoundJointTorqueJump : public mc_solver::GenInequalityConstraint
     return difference_lower_;
   }
 
+  inline const Eigen::VectorXd & getDeltaTau()
+  {
+    return test_delta_torque_;
+  }
 private:
   void computeALU() override;
 
@@ -75,6 +79,7 @@ private:
   bool debug_;
   Eigen::VectorXd difference_upper_;
   Eigen::VectorXd difference_lower_;
+  Eigen::VectorXd test_delta_torque_;
 
   // dt * J_deltatau / impact_duration
   Eigen::MatrixXd A_;
