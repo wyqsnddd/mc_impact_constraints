@@ -56,8 +56,12 @@ void copWithImpulse::computeAb()
   rbd::paramToVector(robot.mbc().alpha, alpha_);
 
   // std::cout<<"size of alpha_"<<alpha_.rows()<<std::endl;
+  b_ = -(A_cop_ * predictor_.getSimRobot().bodyWrench(bName_).vector()
+         + A_cop_.block(0, 3, 4, 3) * J_deltaF * alpha_ / impact_dt_);
+  /*
   b_ = -(A_cop_ * predictor_.getSimRobot().forceSensor(sName_).wrench().vector()
          + A_cop_.block(0, 3, 4, 3) * J_deltaF * alpha_ / impact_dt_);
+	 */
 }
 
 } // namespace mc_impact
