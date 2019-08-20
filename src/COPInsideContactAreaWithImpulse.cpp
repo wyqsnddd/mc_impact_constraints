@@ -1,14 +1,12 @@
 #include "COPInsideContactAreaWithImpulse.h"
 
-#include <mc_prediction/mi_impactPredictor.h>
-
 namespace mc_impact
 {
 
 COPInsideContactAreaWithImpulse::COPInsideContactAreaWithImpulse(const mc_solver::QPSolver & solver,
                                                                  const mc_rbdyn::Contact & contact,
                                                                  const CoPArea & area,
-                                                                 mi_impactPredictor & predictor,
+                                                                 mi_qpEstimator & predictor,
                                                                  const std::string & sName)
 : InequalityConstraint(contact.contactId(solver.robots())), predictor_(predictor)
 {
@@ -39,10 +37,9 @@ COPInsideContactAreaWithImpulse::COPInsideContactAreaWithImpulse(const mc_solver
 
 void COPInsideContactAreaWithImpulse::computeAb()
 {
-  // Eigen::VectorXd f = predictor_.getImpulsiveForceCOP(sName_).vector();
   Eigen::Vector6d f;
   f.setZero();
-  f.segment(3, 3) = predictor_.getImpulsiveForce(sName_);
+  f.segment(3, 3) = predictor_.getEndeffector(sName_).estimatedAverageImpulsiveForce;
 
   b_.noalias() = -A_cop_ * f;
 }

@@ -1,12 +1,10 @@
 #pragma once
 
+#include <mc_prediction/mi_qpEstimator.h>
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
 
 #include "ContactWrenchMatrixToLambdaMatrix.h"
-
-/** Forward declaration */
-class mi_impactPredictor;
 
 namespace mc_impact
 {
@@ -31,7 +29,7 @@ struct COPInsideContactAreaWithImpulse : public mc_solver::InequalityConstraint
   COPInsideContactAreaWithImpulse(const mc_solver::QPSolver & solver,
                                   const mc_rbdyn::Contact & contact,
                                   const CoPArea & area,
-                                  mi_impactPredictor & predictor,
+                                  mi_qpEstimator& predictor,
                                   const std::string & sName);
 
   inline int maxInEq() const override
@@ -57,7 +55,7 @@ struct COPInsideContactAreaWithImpulse : public mc_solver::InequalityConstraint
   void computeAb() override;
 
 private:
-  mi_impactPredictor & predictor_;
+  mi_qpEstimator& predictor_;
   Eigen::MatrixXd A_;
   Eigen::MatrixXd A_cop_;
   Eigen::VectorXd b_;

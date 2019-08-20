@@ -2,11 +2,9 @@
 
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
+#include <mc_prediction/mi_qpEstimator.h>
 
 #include "ContactWrenchMatrixToLambdaMatrix.h"
-
-/** Forward declaration */
-class mi_impactPredictor;
 
 namespace mc_impact
 {
@@ -24,7 +22,7 @@ struct ZeroSlippageWithImpulse : public mc_solver::InequalityConstraint
 {
   ZeroSlippageWithImpulse(const mc_solver::QPSolver & solver,
                           const mc_rbdyn::Contact & contact,
-                          mi_impactPredictor & predictor,
+                          mi_qpEstimator& predictor,
                           const std::string & cBody,
                           double mu = mc_rbdyn::Contact::defaultFriction);
 
@@ -51,7 +49,7 @@ struct ZeroSlippageWithImpulse : public mc_solver::InequalityConstraint
   void computeAb() override;
 
 private:
-  mi_impactPredictor & predictor_;
+  mi_qpEstimator& predictor_;
   Eigen::MatrixXd multiplier_; // (I - (1 + mu)nnT)
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;

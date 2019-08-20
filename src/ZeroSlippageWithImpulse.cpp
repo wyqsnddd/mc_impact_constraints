@@ -1,13 +1,12 @@
 #include "ZeroSlippageWithImpulse.h"
 
-#include <mc_prediction/mi_impactPredictor.h>
 
 namespace mc_impact
 {
 
 ZeroSlippageWithImpulse::ZeroSlippageWithImpulse(const mc_solver::QPSolver & solver,
                                                  const mc_rbdyn::Contact & contact,
-                                                 mi_impactPredictor & predictor,
+                                                 mi_qpEstimator& predictor,
                                                  const std::string & cBody,
                                                  double mu)
 : InequalityConstraint(contact.contactId(solver.robots())), predictor_(predictor)
@@ -27,10 +26,10 @@ ZeroSlippageWithImpulse::ZeroSlippageWithImpulse(const mc_solver::QPSolver & sol
 
 void ZeroSlippageWithImpulse::computeAb()
 {
-  const auto & force = predictor_.getImpulsiveForce(sName_);
+  const auto & force = predictor_.getEndeffector(sName_).estimatedAverageImpulsiveForce;
   if(force.rows() == 3 && force.cols() == 1)
   {
-    b_ = -multiplier_ * predictor_.getImpulsiveForce(sName_);
+    b_ = -multiplier_ * predictor_.getEndeffector(sName_).estimatedAverageImpulsiveForce;
   }
   else
   {

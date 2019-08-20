@@ -2,8 +2,6 @@
 
 #include <mc_prediction/mi_qpEstimator.h>
 #include <mc_solver/GenInequalityConstraint.h>
-/** Forward declaration */
-class mi_impactPredictor;
 
 namespace mc_impact
 {
