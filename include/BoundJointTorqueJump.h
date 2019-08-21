@@ -56,6 +56,7 @@ struct BoundJointTorqueJump : public mc_solver::GenInequalityConstraint
   {
     return test_delta_torque_;
   }
+
 private:
   void computeALU() override;
 

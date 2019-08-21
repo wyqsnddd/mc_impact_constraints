@@ -1,12 +1,11 @@
 #include "ZeroSlippageWithImpulse.h"
 
-
 namespace mc_impact
 {
 
 ZeroSlippageWithImpulse::ZeroSlippageWithImpulse(const mc_solver::QPSolver & solver,
                                                  const mc_rbdyn::Contact & contact,
-                                                 mi_qpEstimator& predictor,
+                                                 mi_qpEstimator & predictor,
                                                  const std::string & cBody,
                                                  double mu)
 : InequalityConstraint(contact.contactId(solver.robots())), predictor_(predictor)

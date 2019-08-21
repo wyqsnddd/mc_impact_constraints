@@ -68,7 +68,7 @@ void BoundJointTorqueJump::computeALU()
     difference_upper_ = U_ - A_ * alphaD;
     difference_lower_ = U_ - difference_upper_ - L_;
 
-    test_delta_torque_ =  (1.0/ impact_dt_)*J_deltatau*(alpha_ + alphaD*dt_);
+    test_delta_torque_ = (1.0 / impact_dt_) * J_deltatau * (alpha_ + alphaD * dt_);
   }
 }
 

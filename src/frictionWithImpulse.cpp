@@ -47,7 +47,8 @@ void frictionWithImpulse::computeAb()
   rbd::paramToVector(robot.mbc().alpha, alpha_);
 
   // std::cout<<"size of alpha_"<<alpha_.rows()<<std::endl;
-  //b_ = -multiplier_ * (predictor_.getSimRobot().forceSensor(sName_).wrench().force() + J_deltaF * alpha_ / impact_dt_);
+  // b_ = -multiplier_ * (predictor_.getSimRobot().forceSensor(sName_).wrench().force() + J_deltaF * alpha_ /
+  // impact_dt_);
   b_ = -multiplier_ * (predictor_.getSimRobot().bodyWrench(bName_).force() + J_deltaF * alpha_ / impact_dt_);
 }
 

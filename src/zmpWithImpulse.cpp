@@ -59,7 +59,7 @@ void zmpWithImpulse::getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d 
   for(auto idx = supports_.begin(); idx != supports_.end(); ++idx)
   {
     sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(idx->bodyName).inv();
-    //exWrench += X_ee_0.dualMatrix() * predictor_.getSimRobot().forceSensor(idx->sensorName).wrench().vector();
+    // exWrench += X_ee_0.dualMatrix() * predictor_.getSimRobot().forceSensor(idx->sensorName).wrench().vector();
     exWrench += X_ee_0.dualMatrix() * predictor_.getSimRobot().bodyWrench(idx->bodyName).vector();
 
     sumJac.block(0, 0, 3, dof) += X_ee_0.dualMatrix().block(0, 3, 3, 3) * predictor_.getJacobianDeltaF(idx->bodyName);

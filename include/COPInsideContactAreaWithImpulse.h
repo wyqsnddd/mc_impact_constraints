@@ -29,7 +29,7 @@ struct COPInsideContactAreaWithImpulse : public mc_solver::InequalityConstraint
   COPInsideContactAreaWithImpulse(const mc_solver::QPSolver & solver,
                                   const mc_rbdyn::Contact & contact,
                                   const CoPArea & area,
-                                  mi_qpEstimator& predictor,
+                                  mi_qpEstimator & predictor,
                                   const std::string & sName);
 
   inline int maxInEq() const override
@@ -55,7 +55,7 @@ struct COPInsideContactAreaWithImpulse : public mc_solver::InequalityConstraint
   void computeAb() override;
 
 private:
-  mi_qpEstimator& predictor_;
+  mi_qpEstimator & predictor_;
   Eigen::MatrixXd A_;
   Eigen::MatrixXd A_cop_;
   Eigen::VectorXd b_;

@@ -6,8 +6,8 @@ namespace mc_impact
 BoundJointVelocityJump::BoundJointVelocityJump(mi_qpEstimator & predictor, double dt, double multi, bool debug)
 : BoundJointVelocityJump(predictor,
                          dt,
-                         multi*rbd::dofToVector(predictor.getSimRobot().mb(), predictor.getSimRobot().vl()),
-                         multi*rbd::dofToVector(predictor.getSimRobot().mb(), predictor.getSimRobot().vu()),
+                         multi * rbd::dofToVector(predictor.getSimRobot().mb(), predictor.getSimRobot().vl()),
+                         multi * rbd::dofToVector(predictor.getSimRobot().mb(), predictor.getSimRobot().vu()),
                          debug)
 {
 }
@@ -26,7 +26,7 @@ BoundJointVelocityJump::BoundJointVelocityJump(mi_qpEstimator & predictor,
     startIndex_ = 6;
   }
   int nDof = predictor_.getSimRobot().mb().nrDof();
-  int realDof = nDof - startIndex_; 
+  int realDof = nDof - startIndex_;
   alpha_L_ = alpha_L_.tail(realDof).eval();
   alpha_U_ = alpha_U_.tail(realDof).eval();
   A_.resize(realDof, nDof);
@@ -61,7 +61,7 @@ void BoundJointVelocityJump::computeALU()
     diff_upper_ = U_ - A_ * alphaD;
     diff_lower_ = U_ - diff_upper_ - L_;
 
-    test_delta_vel_ =  J_delta*(alphaD*dt_ + alpha_);
+    test_delta_vel_ = J_delta * (alphaD * dt_ + alpha_);
   }
 }
 

@@ -61,7 +61,7 @@ void copWithImpulse::computeAb()
   /*
   b_ = -(A_cop_ * predictor_.getSimRobot().forceSensor(sName_).wrench().vector()
          + A_cop_.block(0, 3, 4, 3) * J_deltaF * alpha_ / impact_dt_);
-	 */
+   */
 }
 
 } // namespace mc_impact
