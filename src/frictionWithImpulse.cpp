@@ -1,7 +1,5 @@
 #include "frictionWithImpulse.h"
 
-#include <mc_prediction/mi_impactPredictor.h>
-
 namespace mc_impact
 {
 

@@ -1,4 +1,5 @@
 #include "zmpWithImpulse.h"
+
 namespace mc_impact
 {
 

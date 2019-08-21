@@ -4,9 +4,6 @@
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
 
-/** Forward declaration */
-class mi_impactPredictor;
-
 namespace mc_impact
 {
 
