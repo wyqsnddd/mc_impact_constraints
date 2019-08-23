@@ -57,27 +57,28 @@ void copWithImpulse::computeAb()
 
   // std::cout<<"size of alpha_"<<alpha_.rows()<<std::endl;
   sva::ForceVecd bodyWrenchSensor = predictor_.getSimRobot().bodyWrench(bName_);
-  b_ = -(A_cop_ * bodyWrenchSensor.vector()
-         + A_cop_.block(0, 3, 4, 3) * J_deltaF * alpha_ / impact_dt_);
+  b_ = -(A_cop_ * bodyWrenchSensor.vector() + A_cop_.block(0, 3, 4, 3) * J_deltaF * alpha_ / impact_dt_);
   /*
   b_ = -(A_cop_ * predictor_.getSimRobot().forceSensor(sName_).wrench().vector()
          + A_cop_.block(0, 3, 4, 3) * J_deltaF * alpha_ / impact_dt_);
    */
-  cop_.x() = - bodyWrenchSensor.couple().y()/bodyWrenchSensor.force().z();
-  cop_.y() = bodyWrenchSensor.couple().x()/bodyWrenchSensor.force().z();
+  cop_.x() = -bodyWrenchSensor.couple().y() / bodyWrenchSensor.force().z();
+  cop_.y() = bodyWrenchSensor.couple().x() / bodyWrenchSensor.force().z();
 
-  double perturbedNormalForce = bodyWrenchSensor.force().z() + predictor_.getEndeffector(bName_).estimatedAverageImpulsiveForce.z();
+  double perturbedNormalForce =
+      bodyWrenchSensor.force().z() + predictor_.getEndeffector(bName_).estimatedAverageImpulsiveForce.z();
 
-  cop_perturb_.x() = - bodyWrenchSensor.couple().y()/perturbedNormalForce;
-  cop_perturb_.y() = bodyWrenchSensor.couple().x()/perturbedNormalForce;
-/*
-  double perturbedNormalForce_whole = bodyWrenchSensor.force().z() + predictor_.getEndeffector(bName_).perturbedWrench.force().z();
+  cop_perturb_.x() = -bodyWrenchSensor.couple().y() / perturbedNormalForce;
+  cop_perturb_.y() = bodyWrenchSensor.couple().x() / perturbedNormalForce;
+  /*
+    double perturbedNormalForce_whole = bodyWrenchSensor.force().z() +
+    predictor_.getEndeffector(bName_).perturbedWrench.force().z();
 
-  cop_perturb_whole_.x() = - (bodyWrenchSensor.couple().y() + predictor_.getEndeffector(bName_).perturbedWrench.couple().y())/perturbedNormalForce_whole;
-  cop_perturb_whole_.y() = (bodyWrenchSensor.couple().x() + predictor_.getEndeffector(bName_).perturbedWrench.couple().x())/perturbedNormalForce_whole;
-*/
-
-
+    cop_perturb_whole_.x() = - (bodyWrenchSensor.couple().y() +
+    predictor_.getEndeffector(bName_).perturbedWrench.couple().y())/perturbedNormalForce_whole; cop_perturb_whole_.y() =
+    (bodyWrenchSensor.couple().x() +
+    predictor_.getEndeffector(bName_).perturbedWrench.couple().x())/perturbedNormalForce_whole;
+  */
 }
 
 } // namespace mc_impact

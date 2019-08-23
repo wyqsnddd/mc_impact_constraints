@@ -34,20 +34,20 @@ struct copWithImpulse : public mc_solver::InequalityConstraint
   {
     return "copWithImpulse";
   }
-  inline const Eigen::Vector2d & getCop() const 
+  inline const Eigen::Vector2d & getCop() const
   {
     return cop_;
   }
-  inline const Eigen::Vector2d & getCopPerturb() const 
+  inline const Eigen::Vector2d & getCopPerturb() const
   {
     return cop_perturb_;
   }
-/*
-  inline const Eigen::Vector2d & getCopPerturbWhole() const 
-  {
-    return cop_perturb_whole_;
-  }
-  */
+  /*
+    inline const Eigen::Vector2d & getCopPerturbWhole() const
+    {
+      return cop_perturb_whole_;
+    }
+    */
   inline const Eigen::MatrixXd & A() const override
   {
     return A_;
@@ -77,10 +77,10 @@ private:
   Eigen::VectorXd b_;
   Eigen::MatrixXd A_cop_;
 
-  // Cop 
+  // Cop
   Eigen::Vector2d cop_ = Eigen::Vector2d::Zero();
-  Eigen::Vector2d cop_perturb_= Eigen::Vector2d::Zero();
-  //Eigen::Vector2d cop_perturb_whole_ = Eigen::Vector2d::Zero();
+  Eigen::Vector2d cop_perturb_ = Eigen::Vector2d::Zero();
+  // Eigen::Vector2d cop_perturb_whole_ = Eigen::Vector2d::Zero();
 };
 
 } // namespace mc_impact
