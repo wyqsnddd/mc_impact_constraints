@@ -28,6 +28,7 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
                  double dt,
                  double impact_dt,
                  const ZMPArea & area,
+                 bool allforce = true,
                  bool debug = false);
 
   inline int maxInEq() const override
@@ -78,10 +79,17 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
     else
       throw std::runtime_error("zmp constraint not in debug mode.");
   }
-  inline const Eigen::Vector3d & getZMP_prediction()
+  inline const Eigen::Vector3d & getZMP_prediction_feetforce()
   {
     if(debug_)
-      return zmpPrediction_;
+      return zmpPrediction_feetforce_;
+    else
+      throw std::runtime_error("zmp constraint not in debug mode.");
+  }
+  inline const Eigen::Vector3d & getZMP_prediction_allforce()
+  {
+    if(debug_)
+      return zmpPrediction_allforce_;
     else
       throw std::runtime_error("zmp constraint not in debug mode.");
   }
@@ -113,10 +121,15 @@ private:
   Eigen::MatrixXd A_zmp_;
   Eigen::MatrixXd A_zmp_f_;
   bool debug_;
-  void calcZMP_(const Eigen::MatrixXd & sumJac, const Eigen::Vector6d & exWrench);
+  bool allForce_;
+
+  void calcZMP_();
   Eigen::Vector3d zmpSensor_ = Eigen::Vector3d::Zero();
   Eigen::Vector3d zmpPerturbation_ = Eigen::Vector3d::Zero();
-  Eigen::Vector3d zmpPrediction_ = Eigen::Vector3d::Zero();
+
+  Eigen::Vector3d zmpPrediction_allforce_ = Eigen::Vector3d::Zero();
+  Eigen::Vector3d zmpPrediction_feetforce_ = Eigen::Vector3d::Zero();
+
   Eigen::Vector4d difference_ = Eigen::Vector4d::Zero();
 };
 
