@@ -59,6 +59,7 @@ struct copWithImpulse : public mc_solver::InequalityConstraint
 
   void computeAb() override;
 
+  const newCoPArea  area_;
 private:
   // Predictor
   mi_qpEstimator & predictor_;
@@ -76,6 +77,7 @@ private:
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;
   Eigen::MatrixXd A_cop_;
+
 
   // Cop
   Eigen::Vector2d cop_ = Eigen::Vector2d::Zero();

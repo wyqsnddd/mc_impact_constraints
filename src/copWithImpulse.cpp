@@ -10,7 +10,7 @@ copWithImpulse::copWithImpulse(mi_qpEstimator & predictor,
                                double impact_dt,
                                // const mc_rbdyn::Contact & contact,
                                const newCoPArea & area)
-: InequalityConstraint(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt)
+: InequalityConstraint(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt), area_(area)
 {
 
   bName_ = bodyName;
@@ -20,19 +20,19 @@ copWithImpulse::copWithImpulse(mi_qpEstimator & predictor,
 
   // - cy - max_x * fz
   A_cop_(0, 1) = -1;
-  A_cop_(0, 5) = -area.max_x;
+  A_cop_(0, 5) = -area_.max_x;
 
   // cy + min_x * fz
   A_cop_(1, 1) = 1;
-  A_cop_(1, 5) = area.min_x;
+  A_cop_(1, 5) = area_.min_x;
 
   // cx - max_y * fz
   A_cop_(2, 0) = 1;
-  A_cop_(2, 5) = -area.max_y;
+  A_cop_(2, 5) = -area_.max_y;
 
   // - cx + min_y * fz
   A_cop_(3, 0) = -1;
-  A_cop_(3, 5) = area.min_y;
+  A_cop_(3, 5) = area_.min_y;
 
   int nDof = predictor_.getSimRobot().mb().nrDof();
 
