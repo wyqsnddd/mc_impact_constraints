@@ -70,15 +70,19 @@ void copWithImpulse::computeAb()
 
   cop_perturb_.x() = -bodyWrenchSensor.couple().y() / perturbedNormalForce;
   cop_perturb_.y() = bodyWrenchSensor.couple().x() / perturbedNormalForce;
-  /*
-    double perturbedNormalForce_whole = bodyWrenchSensor.force().z() +
+
+  cop_perturb_whole_.setZero();
+  //std::cout<<"copConstraint: The converted wrench of "<<bName_<<" is: "<< predictor_.getEndeffector(bName_).perturbedWrench.vector().transpose()<<std::endl;
+  double perturbedNormalForce_whole = perturbedNormalForce +  
     predictor_.getEndeffector(bName_).perturbedWrench.force().z();
 
-    cop_perturb_whole_.x() = - (bodyWrenchSensor.couple().y() +
-    predictor_.getEndeffector(bName_).perturbedWrench.couple().y())/perturbedNormalForce_whole; cop_perturb_whole_.y() =
+  cop_perturb_whole_.x() = - (bodyWrenchSensor.couple().y() +
+    predictor_.getEndeffector(bName_).perturbedWrench.couple().y())/perturbedNormalForce_whole; 
+
+  cop_perturb_whole_.y() =
     (bodyWrenchSensor.couple().x() +
     predictor_.getEndeffector(bName_).perturbedWrench.couple().x())/perturbedNormalForce_whole;
-  */
+  
 }
 
 } // namespace mc_impact

@@ -100,7 +100,7 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
     else
       throw std::runtime_error("zmp constraint not in debug mode.");
   }
-
+  const ZMPArea area_;
 private:
   // Predictor
   mi_qpEstimator & predictor_;
