@@ -3,8 +3,9 @@
 namespace mc_impact
 {
 
-zmpWithImpulse::zmpWithImpulse(mi_qpEstimator & predictor,
-                               const std::vector<mc_impact::supportContact> & supports,
+template <typename supportContact>
+zmpWithImpulse<supportContact>::zmpWithImpulse(mi_qpEstimator & predictor,
+                               const std::vector<supportContact> & supports,
                                double dt,
                                double impact_dt,
                                const ZMPArea & area,
@@ -48,8 +49,8 @@ zmpWithImpulse::zmpWithImpulse(mi_qpEstimator & predictor,
   A_.resize(4, nDof);
   b_.resize(4);
 }
-
-void zmpWithImpulse::getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench)
+template <typename supportContact>
+void zmpWithImpulse<supportContact>::getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench)
 {
   exWrench.setZero();
   int dof = predictor_.getSimRobot().mb().nrDof();
@@ -100,7 +101,8 @@ void zmpWithImpulse::getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d 
   }
 }
 
-void zmpWithImpulse::calcZMP_()
+template <typename supportContact>
+void zmpWithImpulse<supportContact>::calcZMP_()
 {
 /*
   Eigen::VectorXd temp = (rbd::dofToVector(predictor_.getSimRobot().mb(), predictor_.getSimRobot().mbc().alpha)
@@ -156,7 +158,8 @@ void zmpWithImpulse::calcZMP_()
   zmpPrediction_allforce_ = zmpSensor_ + zmpPerturbation_;
 }
 
-void zmpWithImpulse::computeAb()
+template <typename supportContact>
+void zmpWithImpulse<supportContact>::computeAb()
 {
   const auto & robot = predictor_.getSimRobot();
   Eigen::MatrixXd sumJac;
@@ -181,3 +184,8 @@ void zmpWithImpulse::computeAb()
 }
 
 } // namespace mc_impact
+
+//The explicit instantiation
+template struct mc_impact::zmpWithImpulse<mc_impact::zmpSupportContact>;
+
+

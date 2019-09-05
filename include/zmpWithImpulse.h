@@ -3,31 +3,21 @@
 #include <mc_prediction/mi_qpEstimator.h>
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
+#include <mc_solver/QPSolver.h>
+
+# include "constraintUtils.h"
 
 namespace mc_impact
 {
 
-struct ZMPArea
-{
-  double min_x;
-  double max_x;
-  double min_y;
-  double max_y;
-};
-
-struct supportContact
-{
-  std::string bodyName;
-  std::string sensorName;
-};
-
+template<typename supportContact>
 struct zmpWithImpulse : public mc_solver::InequalityConstraint
 {
   zmpWithImpulse(mi_qpEstimator & predictor,
                  const std::vector<supportContact> & supports,
                  double dt,
                  double impact_dt,
-                 const ZMPArea & area,
+                 const mc_impact::ZMPArea & area,
                  bool allforce = true,
                  bool debug = false);
 
