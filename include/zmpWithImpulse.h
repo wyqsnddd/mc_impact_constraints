@@ -109,7 +109,6 @@ private:
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;
   Eigen::MatrixXd A_zmp_;
-  Eigen::MatrixXd A_zmp_f_;
   bool debug_;
   bool allForce_;
 

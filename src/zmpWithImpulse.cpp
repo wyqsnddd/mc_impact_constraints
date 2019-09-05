@@ -18,7 +18,6 @@ zmpWithImpulse<supportContact>::zmpWithImpulse(mi_qpEstimator & predictor,
   // bName_ = bodyName;
   // sName_ = sensorName;
   A_zmp_ = Eigen::MatrixXd::Zero(4, 6);
-  A_zmp_f_ = Eigen::MatrixXd::Zero(4, 6);
 
   // - cy - max_x * fz
   A_zmp_(0, 1) = -1;
@@ -35,12 +34,6 @@ zmpWithImpulse<supportContact>::zmpWithImpulse(mi_qpEstimator & predictor,
   // - cx + min_y * fz
   A_zmp_(3, 0) = -1;
   A_zmp_(3, 5) = area_.min_y;
-
-  A_zmp_f_ = A_zmp_;
-  A_zmp_f_(0, 1) = 1;
-  A_zmp_f_(1, 1) = -1;
-  A_zmp_f_(2, 0) = -1;
-  A_zmp_f_(3, 0) = 1;
 
   int nDof = predictor_.getSimRobot().mb().nrDof();
 
@@ -166,14 +159,12 @@ void zmpWithImpulse<supportContact>::computeAb()
   Eigen::Vector6d sumWrench;
   getInertialItems(sumJac, sumWrench);
 
-  //A_ = (dt_ / impact_dt_) * A_zmp_f_ * sumJac;
   A_ = (dt_ / impact_dt_) * A_zmp_ * sumJac;
   /*
     alpha_ =
           (rbd::dofToVector(predictor_.getSimRobot().mb(), predictor_.getSimRobot().mbc().alpha));
     */
   rbd::paramToVector(robot.mbc().alpha, alpha_);
-  //b_ = -(A_zmp_ * sumWrench + A_zmp_f_ * sumJac * alpha_ / impact_dt_);
   b_ = -(A_zmp_ * sumWrench + A_zmp_ * sumJac * alpha_ / impact_dt_);
 
   if(debug_)
