@@ -36,7 +36,7 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
 
   inline int maxInEq() const override
   {
-    return A_zmp_.rows();
+    return static_cast<int>(iniVertexSet_.size());
   }
 
   inline std::string nameInEq() const override
