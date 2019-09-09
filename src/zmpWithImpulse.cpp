@@ -3,8 +3,47 @@
 namespace mc_impact
 {
 
-template <typename supportContact>
-zmpWithImpulse<supportContact>::zmpWithImpulse(mi_qpEstimator & predictor,
+template<typename supportContact, typename Point>
+zmpWithImpulse<supportContact, Point>::zmpWithImpulse(mi_qpEstimator & predictor,
+                 const std::vector<supportContact> & supports,
+                 double dt,
+                 double impact_dt,
+                 const std::vector<Point> & vertexSet,
+                 bool allforce,
+                 bool debug):InequalityConstraint(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt), supports_(supports), iniVertexSet_(vertexSet), allForce_(allforce), debug_(debug){
+
+  int numVertex = static_cast<int>(iniVertexSet_.size());
+  A_zmp_ = Eigen::MatrixXd::Zero(numVertex, 6);
+
+  //Eigen::MatrixXd G_zmp;
+  //Eigen::VectorXd h_zmp;
+   
+  pointsToInequalityMatrix<Point>(iniVertexSet_, G_zmp_, h_zmp_, centeroid_, slopeVec_, 0.01, 100);
+  /// Needs to be checked carefully, compare to the 4 dim case
+  // A(:,0) = G_y
+  A_zmp_.block(0, 0, numVertex, 1) = G_zmp_.block(0, 1, numVertex, 1);
+  /// A(:,1) = -G_x
+  A_zmp_.block(0, 1, numVertex, 1) = - G_zmp_.block(0, 0, numVertex, 1);
+  /// A(:,5) = h 
+  A_zmp_.block(0, 5, numVertex, 1) = -h_zmp_; 
+
+
+  int nDof = predictor_.getSimRobot().mb().nrDof();
+
+  alpha_.resize(nDof);
+  A_.resize(numVertex, nDof);
+  b_.resize(numVertex);
+
+  // Place holders
+  area_.max_x = 0;
+  area_.max_y = 0;
+  area_.min_x = 0;
+  area_.min_y = 0;
+}
+
+
+template <typename supportContact, typename Point>
+zmpWithImpulse<supportContact, Point>::zmpWithImpulse(mi_qpEstimator & predictor,
                                const std::vector<supportContact> & supports,
                                double dt,
                                double impact_dt,
@@ -41,9 +80,10 @@ zmpWithImpulse<supportContact>::zmpWithImpulse(mi_qpEstimator & predictor,
   // This needs double check
   A_.resize(4, nDof);
   b_.resize(4);
+
 }
-template <typename supportContact>
-void zmpWithImpulse<supportContact>::getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench)
+template <typename supportContact, typename Point>
+void zmpWithImpulse<supportContact, Point>::getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench)
 {
   exWrench.setZero();
   int dof = predictor_.getSimRobot().mb().nrDof();
@@ -94,8 +134,8 @@ void zmpWithImpulse<supportContact>::getInertialItems(Eigen::MatrixXd & sumJac, 
   }
 }
 
-template <typename supportContact>
-void zmpWithImpulse<supportContact>::calcZMP_()
+template <typename supportContact, typename Point>
+void zmpWithImpulse<supportContact, Point>::calcZMP_()
 {
 /*
   Eigen::VectorXd temp = (rbd::dofToVector(predictor_.getSimRobot().mb(), predictor_.getSimRobot().mbc().alpha)
@@ -151,13 +191,27 @@ void zmpWithImpulse<supportContact>::calcZMP_()
   zmpPrediction_allforce_ = zmpSensor_ + zmpPerturbation_;
 }
 
-template <typename supportContact>
-void zmpWithImpulse<supportContact>::computeAb()
+template <typename supportContact, typename Point>
+bool zmpWithImpulse<supportContact, Point>::pointInsideSupportPolygon(const Point & input){
+
+  Point result = G_zmp_*input - h_zmp_;
+
+  if (result[0] > 0)
+	  return false;
+  if (result[1] > 0)
+	  return false;
+  
+  return true;
+}
+
+template <typename supportContact, typename Point>
+void zmpWithImpulse<supportContact, Point>::computeAb()
 {
   const auto & robot = predictor_.getSimRobot();
   Eigen::MatrixXd sumJac;
   Eigen::Vector6d sumWrench;
   getInertialItems(sumJac, sumWrench);
+
 
   A_ = (dt_ / impact_dt_) * A_zmp_ * sumJac;
   /*
@@ -174,9 +228,11 @@ void zmpWithImpulse<supportContact>::computeAb()
   }
 }
 
-} // namespace mc_impact
 
 //The explicit instantiation
-template struct mc_impact::zmpWithImpulse<mc_impact::zmpSupportContact>;
+template struct mc_impact::zmpWithImpulse<zmpSupportContact, Eigen::Vector3d>;
+template struct mc_impact::zmpWithImpulse<zmpSupportContact, Eigen::Vector2d>;
 
+
+} // namespace mc_impact
 

@@ -9,21 +9,34 @@
 
 namespace mc_impact
 {
-
-template<typename supportContact>
+template<typename supportContact, typename Point>
 struct zmpWithImpulse : public mc_solver::InequalityConstraint
 {
-  zmpWithImpulse(mi_qpEstimator & predictor,
+
+  /// ZMP defined by a rectangle
+  zmpWithImpulse(
+		 mi_qpEstimator & predictor,
                  const std::vector<supportContact> & supports,
                  double dt,
                  double impact_dt,
-                 const mc_impact::ZMPArea & area,
+                 const ZMPArea & area,
+                 bool allforce = true,
+                 bool debug = false);
+
+ 
+  /// ZMP defined with a set of points
+  zmpWithImpulse( 
+		 mi_qpEstimator & predictor,
+                 const std::vector<supportContact> & supports,
+                 double dt,
+                 double impact_dt,
+                 const std::vector<Point> & vertexSet,
                  bool allforce = true,
                  bool debug = false);
 
   inline int maxInEq() const override
   {
-    return 4;
+    return A_zmp_.rows();
   }
 
   inline std::string nameInEq() const override
@@ -90,7 +103,23 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
     else
       throw std::runtime_error("zmp constraint not in debug mode.");
   }
-  const ZMPArea area_;
+
+  inline const ZMPArea & getZMPArea(){
+    return area_; 
+  }
+  inline const std::vector<Point> & getVertices(){
+    return iniVertexSet_; 
+  } 
+// Debugging: 
+  Point centeroid_;
+  Eigen::VectorXd slopeVec_ = Eigen::Vector3d::Zero();
+
+  bool zmpTest_ = false;
+  Eigen::MatrixXd G_zmp_;
+  Eigen::VectorXd h_zmp_;
+
+  Eigen::MatrixXd A_zmp_;
+  bool pointInsideSupportPolygon(const Point & input);
 private:
   // Predictor
   mi_qpEstimator & predictor_;
@@ -108,9 +137,12 @@ private:
   // dt * J_deltatau / impact_duration
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;
-  Eigen::MatrixXd A_zmp_;
-  bool debug_;
+
+  const std::vector<Point> iniVertexSet_;
+
+  ZMPArea area_; 
   bool allForce_;
+  bool debug_;
 
   void calcZMP_();
   Eigen::Vector3d zmpSensor_ = Eigen::Vector3d::Zero();
