@@ -26,14 +26,12 @@ set(constraints
   BoundJointVelocityJump
   BoundJointTorqueJump
   ContactWrenchMatrixToLambdaMatrix
-  ZeroSlippageWithImpulse
-  COPInsideContactAreaWithImpulse
   frictionWithImpulse
   copWithImpulse
   zmpWithImpulse
+  dcmWithImpulse
   supportPolygon
   constraintUtils
-  #ZMPInsideSupportPolygonWithImpulse
 )
 set(constraints_SRC)
 foreach(CSTR ${constraints})
@@ -41,7 +39,7 @@ foreach(CSTR ${constraints})
 endforeach()
 
 # add_definitions(-fPIC)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # set(CMAKE_CXX_FLAGS "-Wall -fPIC -o2")
 
