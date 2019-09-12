@@ -3,6 +3,7 @@
 #include <mc_prediction/mi_qpEstimator.h>
 #include <mc_solver/InequalityConstraint.h>
 #include <RBDyn/CoM.h>
+#include <mc_rbdyn/Robots.h>
 
 #include <math.h> 
 
@@ -14,11 +15,14 @@ template <typename supportContact, typename Point>
 struct dcmWithImpulse : public mc_solver::InequalityConstraint
 {
 
-dcmWithImpulse(mi_qpEstimator & predictor,
+dcmWithImpulse(const mc_rbdyn::Robot & realRobot,
+		mi_qpEstimator & predictor,
                  const std::vector<supportContact> & supports,
                  double dt,
                  double impact_dt,
                  const std::vector<Point> & vertexSet,
+		 double lowerSlope = 0.01, 
+		 double upperSlope = 100,
 		 bool debug = false);
 
 
@@ -64,6 +68,7 @@ inline int maxInEq() const override
 
   Eigen::Vector2d dcm_;
   Eigen::Vector2d predicted_dcm_;
+  Eigen::Vector2d predicted_dcm_jump_;
   Eigen::VectorXd difference_; 
 
   Eigen::MatrixXd A_dcm_;
@@ -76,7 +81,13 @@ inline int maxInEq() const override
   inline const double & getOmega(){
     return omega_; 
   }
+  inline const Eigen::Vector3d & getPredictedComVelJump(){
+    return predictedComVelJump_; 
+  }
+
 private:
+
+  const mc_rbdyn::Robot & realRobot_;
   // Predictor
   mi_qpEstimator & predictor_;
    // Timestep
@@ -96,6 +107,7 @@ private:
   Eigen::VectorXd b_;
 
 
+  Eigen::Vector3d predictedComVelJump_;
   std::shared_ptr<rbd::CoMJacobian> comJacobianPtr_;
   //Eigen::MatrixXd comJacobian_;
 };// end of dcmWithImpuplse

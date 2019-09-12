@@ -4,18 +4,22 @@ namespace mc_impact {
 
 
 template<typename supportContact, typename Point>
-dcmWithImpulse<supportContact, Point>::dcmWithImpulse(mi_qpEstimator & predictor, 
+dcmWithImpulse<supportContact, Point>::dcmWithImpulse(
+		const mc_rbdyn::Robot & realRobot,
+		mi_qpEstimator & predictor, 
                  const std::vector<supportContact> & supports,
                  double dt,
                  double impact_dt,
                  const std::vector<Point> & vertexSet,
+		 double lowerSlope, 
+		 double upperSlope,
 		 bool debug
-                 ):InequalityConstraint(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt), supports_(supports), iniVertexSet_(vertexSet), debug_(debug) {
+                 ):InequalityConstraint(predictor.getSimRobot().robotIndex()), realRobot_(realRobot), predictor_(predictor), dt_(dt), impact_dt_(impact_dt), supports_(supports), iniVertexSet_(vertexSet), debug_(debug) {
 
   int numVertex = static_cast<int>(iniVertexSet_.size());
   A_dcm_ = Eigen::MatrixXd::Zero(numVertex, 6);
 
-  pointsToInequalityMatrix<Point>(iniVertexSet_, G_dcm_, h_dcm_, centeroid_, slopeVec_, 0.01, 100);
+  pointsToInequalityMatrix<Point>(iniVertexSet_, G_dcm_, h_dcm_, centeroid_, slopeVec_, lowerSlope, upperSlope);
  
   A_dcm_.block(0, 0, numVertex, 1) = G_dcm_.block(0, 1, numVertex, 1);
   /// A(:,1) = -G_x
@@ -55,7 +59,8 @@ bool dcmWithImpulse<supportContact, Point>::pointInsideSupportPolygon(const Poin
 template <typename supportContact, typename Point>
 void dcmWithImpulse<supportContact, Point>::computeAb()
 {
-  const auto & robot = predictor_.getSimRobot();
+  //const auto & robot = predictor_.getSimRobot();
+  const auto & robot = realRobot_; 
   int dof = predictor_.getSimRobot().mb().nrDof();
   Eigen::MatrixXd comJacobian = comJacobianPtr_->jacobian(robot.mb(), robot.mbc());
   //std::cout<<"comJacobian size is: "<<comJacobian.rows() << ", "<<comJacobian.cols()<<std::endl;
@@ -71,7 +76,9 @@ void dcmWithImpulse<supportContact, Point>::computeAb()
 
   dcm_ =  Com.segment(0, 2) + ComVel.segment(0,2)/getOmega();
 
-  predicted_dcm_ = dcm_ + comJacobian.block(0, 0, 2, dof)*predictor_.getJointVelJump() /getOmega(); 
+  predicted_dcm_jump_ =  comJacobian.block(0, 0, 2, dof)*predictor_.getJointVelJump() /getOmega(); 
+
+  predicted_dcm_ = dcm_ + predicted_dcm_jump_; 
 
   b_ = getOmega()*h_dcm_ 
 	  - G_dcm_*( dcm_*getOmega() + jacDcm*alpha_);
@@ -83,6 +90,8 @@ void dcmWithImpulse<supportContact, Point>::computeAb()
                                 * predictor_.getImpactModels().begin()->second->getTimeStep());
 
     difference_ = A_ * rbd::dofToVector(predictor_.getSimRobot().mb(), predictor_.getSimRobot().mbc().alphaD) - b_;
+
+    predictedComVelJump_ = comJacobian*predictor_.getJointVelJump(); 
     std::cout<<"The dcm constraint difference is: "<<difference_<<std::endl;
     std::cout<<"The dcm dq difference is: "<< G_dcm_*(dcm_ + 
 		    comJacobian.block(0, 0, 2, dof)*predictor_.getJointVelJump() /getOmega()) - h_dcm_<<std::endl;
