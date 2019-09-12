@@ -10,6 +10,8 @@ zmpWithImpulse<supportContact, Point>::zmpWithImpulse(mi_qpEstimator & predictor
                  double impact_dt,
                  const std::vector<Point> & vertexSet,
                  bool allforce,
+		 double lowerSlope, 
+		 double upperSlope,
                  bool debug):InequalityConstraint(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt), supports_(supports), iniVertexSet_(vertexSet), allForce_(allforce), debug_(debug){
 
   int numVertex = static_cast<int>(iniVertexSet_.size());
@@ -18,7 +20,7 @@ zmpWithImpulse<supportContact, Point>::zmpWithImpulse(mi_qpEstimator & predictor
   //Eigen::MatrixXd G_zmp;
   //Eigen::VectorXd h_zmp;
    
-  pointsToInequalityMatrix<Point>(iniVertexSet_, G_zmp_, h_zmp_, centeroid_, slopeVec_, 0.01, 100);
+  pointsToInequalityMatrix<Point>(iniVertexSet_, G_zmp_, h_zmp_, centeroid_, slopeVec_, lowerSlope, upperSlope);
   /// Needs to be checked carefully, compare to the 4 dim case
   // A(:,0) = G_y
   A_zmp_.block(0, 0, numVertex, 1) = G_zmp_.block(0, 1, numVertex, 1);

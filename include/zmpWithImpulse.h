@@ -20,7 +20,7 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
                  double dt,
                  double impact_dt,
                  const ZMPArea & area,
-                 bool allforce = true,
+		 bool allforce = true,
                  bool debug = false);
 
  
@@ -32,6 +32,8 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
                  double impact_dt,
                  const std::vector<Point> & vertexSet,
                  bool allforce = true,
+		 double lowerSlope = 0.01, 
+		 double upperSlope = 100.0,
                  bool debug = false);
 
   inline int maxInEq() const override
