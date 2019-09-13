@@ -3,9 +3,8 @@
 #include <mc_prediction/mi_qpEstimator.h>
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
-#include <mc_solver/QPSolver.h>
 
-# include "constraintUtils.h"
+#include "constraintUtils.h"
 
 namespace mc_impact
 {
@@ -16,25 +15,24 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
   /// ZMP defined by a rectangle
   /*
   zmpWithImpulse(
-		 mi_qpEstimator & predictor,
+     mi_qpEstimator & predictor,
                  const std::vector<supportContact> & supports,
                  double dt,
                  double impact_dt,
                  const ZMPArea & area,
-		 bool allforce = true,
+     bool allforce = true,
                  bool debug = false);
 */
- 
+
   /// ZMP defined with a set of points
-  zmpWithImpulse( 
-		 mi_qpEstimator & predictor,
+  zmpWithImpulse(mi_qpEstimator & predictor,
                  const std::vector<supportContact> & supports,
                  double dt,
                  double impact_dt,
                  const std::vector<Point> & vertexSet,
                  bool allforce = true,
-		 double lowerSlope = 0.01, 
-		 double upperSlope = 100.0,
+                 double lowerSlope = 0.01,
+                 double upperSlope = 100.0,
                  bool debug = false);
 
   inline int maxInEq() const override
@@ -106,15 +104,16 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
     else
       throw std::runtime_error("zmp constraint not in debug mode.");
   }
-/*
-  inline const ZMPArea & getZMPArea(){
-    return area_; 
+  /*
+    inline const ZMPArea & getZMPArea(){
+      return area_;
+    }
+    */
+  inline const std::vector<Point> & getVertices()
+  {
+    return iniVertexSet_;
   }
-  */
-  inline const std::vector<Point> & getVertices(){
-    return iniVertexSet_; 
-  } 
-// Debugging: 
+  // Debugging:
   Point centeroid_;
   Eigen::VectorXd slopeVec_ = Eigen::Vector3d::Zero();
 
@@ -124,6 +123,7 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
 
   Eigen::MatrixXd A_zmp_;
   bool pointInsideSupportPolygon(const Point & input);
+
 private:
   // Predictor
   mi_qpEstimator & predictor_;
@@ -144,7 +144,7 @@ private:
 
   const std::vector<Point> iniVertexSet_;
 
-  //ZMPArea area_; 
+  // ZMPArea area_;
   bool allForce_;
   bool debug_;
 

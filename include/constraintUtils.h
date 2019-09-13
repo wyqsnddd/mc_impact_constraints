@@ -1,4 +1,4 @@
-# pragma once
+#pragma once
 
 #include <Eigen/Dense>
 #include <iostream>
@@ -19,13 +19,20 @@ struct zmpSupportContact
   std::string sensorName;
 };
 
+template<typename Point>
+void pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
+                              Eigen::MatrixXd & G,
+                              Eigen::VectorXd & h,
+                              Point & centeroid,
+                              Eigen::VectorXd & slopeVec,
+                              double miniSlope = 0.01,
+                              double maxSlope = 100);
 
+template<typename Point>
+void pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
+                              Eigen::MatrixXd & G,
+                              Eigen::VectorXd & h,
+                              double miniSlope = 0.01,
+                              double maxSlope = 100);
 
-template <typename Point>
-void pointsToInequalityMatrix(const std::vector<Point> & inputPoints, Eigen::MatrixXd & G, Eigen::VectorXd & h, Point & centeroid, Eigen::VectorXd & slopeVec, double miniSlope = 0.01, double maxSlope = 100);
-
-template <typename Point>
-void pointsToInequalityMatrix(const std::vector<Point> & inputPoints, Eigen::MatrixXd & G, Eigen::VectorXd & h, double miniSlope = 0.01, double maxSlope = 100);
-
-
-}// end of namespace 
+} // namespace mc_impact

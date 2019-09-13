@@ -42,12 +42,12 @@ struct copWithImpulse : public mc_solver::InequalityConstraint
   {
     return cop_perturb_;
   }
-  
-    inline const Eigen::Vector2d & getCopPerturbWhole() const
-    {
-      return cop_perturb_whole_;
-    }
-    
+
+  inline const Eigen::Vector2d & getCopPerturbWhole() const
+  {
+    return cop_perturb_whole_;
+  }
+
   inline const Eigen::MatrixXd & A() const override
   {
     return A_;
@@ -59,7 +59,8 @@ struct copWithImpulse : public mc_solver::InequalityConstraint
 
   void computeAb() override;
 
-  const newCoPArea  area_;
+  const newCoPArea area_;
+
 private:
   // Predictor
   mi_qpEstimator & predictor_;
@@ -77,7 +78,6 @@ private:
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;
   Eigen::MatrixXd A_cop_;
-
 
   // Cop
   Eigen::Vector2d cop_ = Eigen::Vector2d::Zero();
