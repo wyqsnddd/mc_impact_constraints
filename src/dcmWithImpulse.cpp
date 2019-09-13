@@ -106,10 +106,8 @@ void dcmWithImpulse<supportContact, Point>::computeAb()
     std::cout<<"The difference is : " <<std::endl<<(predictor_.getJointVelJump() - predictor_.getJacobianDeltaAlpha()*temp).transpose()<<std::endl;
 */
 
-
+/*
     std::cout<<"The dcm constraint difference is: "<<difference_<<std::endl;
-    //std::cout<<"A_ size: "<<A_.rows()<<", "<<A_.cols()<<std::endl;
-    //std::cout<<"b_ size: "<<b_.rows()<<", "<<b_.cols()<<std::endl;
     std::cout<<"The dcm dq difference is: "<< G_dcm_*(dcm_ + 
 		    comJacobian.block(0, 0, 2, dof)*predictor_.getJointVelJump() /getOmega()) - h_dcm_<<std::endl;
 
@@ -122,7 +120,7 @@ void dcmWithImpulse<supportContact, Point>::computeAb()
 	    G_dcm_*(dcm_ + predicted_dcm_jump_)  - h_dcm_<<std::endl;
     std::cout<<"The dcm prediction test is: "<<
 	    G_dcm_*(predicted_dcm_)  - h_dcm_<<std::endl;
-
+*/
 
 
   }
