@@ -1,12 +1,18 @@
 # include "constraintUtils.h"
 
 
+template <typename T> T sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
 void clampSlope(double & slope, const double& mini, const double & max)
 {
-    if(slope <= mini){
-       slope = mini;
-    }else if(slope >=max){
-       slope = max; 
+    double sign = sgn<double>(slope);
+
+    if(fabs(slope) <= mini){
+       slope = sign*mini;
+    }else if(fabs(slope) >=max){
+       slope = sign*max; 
     }
 }
 
@@ -31,6 +37,7 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
   }
   center[0] = center[0]/(double)vertexNumber;
   center[1] = center[1]/(double)vertexNumber;
+  std::cout<<"The initial center is: "<<center.transpose()<<std::endl;
 
   int vNumber = 0;
   slopeVec = Eigen::VectorXd::Zero(vertexNumber);
