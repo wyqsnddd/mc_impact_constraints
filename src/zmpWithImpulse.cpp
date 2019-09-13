@@ -37,13 +37,15 @@ zmpWithImpulse<supportContact, Point>::zmpWithImpulse(mi_qpEstimator & predictor
   b_.resize(numVertex);
 
   // Place holders
+  /*
   area_.max_x = 0;
   area_.max_y = 0;
   area_.min_x = 0;
   area_.min_y = 0;
+  */
 }
 
-
+/*
 template <typename supportContact, typename Point>
 zmpWithImpulse<supportContact, Point>::zmpWithImpulse(mi_qpEstimator & predictor,
                                const std::vector<supportContact> & supports,
@@ -84,6 +86,7 @@ zmpWithImpulse<supportContact, Point>::zmpWithImpulse(mi_qpEstimator & predictor
   b_.resize(4);
 
 }
+*/
 template <typename supportContact, typename Point>
 void zmpWithImpulse<supportContact, Point>::getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench)
 {

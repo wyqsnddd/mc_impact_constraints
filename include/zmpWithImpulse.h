@@ -14,6 +14,7 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
 {
 
   /// ZMP defined by a rectangle
+  /*
   zmpWithImpulse(
 		 mi_qpEstimator & predictor,
                  const std::vector<supportContact> & supports,
@@ -22,7 +23,7 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
                  const ZMPArea & area,
 		 bool allforce = true,
                  bool debug = false);
-
+*/
  
   /// ZMP defined with a set of points
   zmpWithImpulse( 
@@ -105,10 +106,11 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
     else
       throw std::runtime_error("zmp constraint not in debug mode.");
   }
-
+/*
   inline const ZMPArea & getZMPArea(){
     return area_; 
   }
+  */
   inline const std::vector<Point> & getVertices(){
     return iniVertexSet_; 
   } 
@@ -142,7 +144,7 @@ private:
 
   const std::vector<Point> iniVertexSet_;
 
-  ZMPArea area_; 
+  //ZMPArea area_; 
   bool allForce_;
   bool debug_;
 
