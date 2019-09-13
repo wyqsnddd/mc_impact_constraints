@@ -70,7 +70,7 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
     }
 
     Point difference = point_two - point_one;
-    difference.normalize();
+    //difference.normalize();
     double slope = difference[1] / difference[0];
 
     clampSlope(slope, miniSlope, maxSlope);
