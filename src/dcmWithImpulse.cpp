@@ -47,12 +47,13 @@ dcmWithImpulse<supportContact, Point>::dcmWithImpulse(
 template <typename supportContact, typename Point>
 bool dcmWithImpulse<supportContact, Point>::pointInsideSupportPolygon(const Point & input){
 
-  Point result = G_dcm_*input - h_dcm_;
+  Eigen::VectorXd result = G_dcm_*input - h_dcm_;
 
-  if (result[0] > 0)
-	  return false;
-  if (result[1] > 0)
-	  return false;
+  for (int ii = 0; ii <= static_cast<int>(iniVertexSet_.size()); ii++){
+    if (result(ii) >0)
+	    return false;
+  }
+
   return true;
 }
 
@@ -66,7 +67,7 @@ void dcmWithImpulse<supportContact, Point>::computeAb()
   //std::cout<<"comJacobian size is: "<<comJacobian.rows() << ", "<<comJacobian.cols()<<std::endl;
   Eigen::MatrixXd jacDcm =   (comJacobian * predictor_.getJacobianDeltaAlpha()).block(0, 0, 2, dof);
 
-  A_ = dt_  * G_dcm_ * jacDcm; 
+  A_ = dt_/getOmega()  * G_dcm_ * jacDcm; 
   
 
   rbd::paramToVector(robot.mbc().alpha, alpha_);
@@ -80,9 +81,12 @@ void dcmWithImpulse<supportContact, Point>::computeAb()
 
   predicted_dcm_ = dcm_ + predicted_dcm_jump_; 
 
-  b_ = getOmega()*h_dcm_ 
+  b_ = (h_dcm_ - G_dcm_*dcm_)  - G_dcm_*jacDcm*alpha_/getOmega();
+	 /* 
+	  getOmega()*h_dcm_ 
 	  - G_dcm_*( dcm_*getOmega() + jacDcm*alpha_);
 
+	  */
   if(debug_)
   {
     Eigen::VectorXd temp = (rbd::dofToVector(predictor_.getSimRobot().mb(), predictor_.getSimRobot().mbc().alpha)
@@ -92,12 +96,35 @@ void dcmWithImpulse<supportContact, Point>::computeAb()
     difference_ = A_ * rbd::dofToVector(predictor_.getSimRobot().mb(), predictor_.getSimRobot().mbc().alphaD) - b_;
 
     predictedComVelJump_ = comJacobian*predictor_.getJointVelJump(); 
+
+   // The delta dq comparison: 
+   /*
+    std::cout<<"The predictor delta dq: " <<std::endl<<predictor_.getJointVelJump().transpose()<<std::endl;
+
+    std::cout<<"The calculated delta dq: " <<std::endl<<(predictor_.getJacobianDeltaAlpha()*temp).transpose()<<std::endl;
+
+    std::cout<<"The difference is : " <<std::endl<<(predictor_.getJointVelJump() - predictor_.getJacobianDeltaAlpha()*temp).transpose()<<std::endl;
+*/
+
+
     std::cout<<"The dcm constraint difference is: "<<difference_<<std::endl;
+    //std::cout<<"A_ size: "<<A_.rows()<<", "<<A_.cols()<<std::endl;
+    //std::cout<<"b_ size: "<<b_.rows()<<", "<<b_.cols()<<std::endl;
     std::cout<<"The dcm dq difference is: "<< G_dcm_*(dcm_ + 
 		    comJacobian.block(0, 0, 2, dof)*predictor_.getJointVelJump() /getOmega()) - h_dcm_<<std::endl;
 
-    std::cout<<"The dcm acc difference is: "<<G_dcm_*(dcm_ + jacDcm*temp ) - h_dcm_*getOmega()<<std::endl;
+    std::cout<<"The dcm acc difference is: "<<G_dcm_*(dcm_  + jacDcm*temp/getOmega() ) - h_dcm_<<std::endl;
     
+
+    std::cout<<"The dcm test is: "<<
+	    G_dcm_*dcm_  - h_dcm_<<std::endl;
+    std::cout<<"The dcm jump test is: "<<
+	    G_dcm_*(dcm_ + predicted_dcm_jump_)  - h_dcm_<<std::endl;
+    std::cout<<"The dcm prediction test is: "<<
+	    G_dcm_*(predicted_dcm_)  - h_dcm_<<std::endl;
+
+
+
   }
 
 }
