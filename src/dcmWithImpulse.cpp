@@ -70,9 +70,10 @@ void dcmWithImpulse<supportContact, Point>::computeAb()
   rbd::paramToVector(robot.mbc().alpha, alpha_);
 
   Eigen::Vector3d Com = robot.com();
-  Eigen::Vector3d ComVel = robot.comVelocity();
+  //Eigen::Vector3d 
+  ComVel_ = robot.comVelocity();
 
-  dcm_ = Com.segment(0, 2) + ComVel.segment(0, 2) / getOmega();
+  dcm_ = Com.segment(0, 2) + ComVel_.segment(0, 2) / getOmega();
 
   predicted_dcm_jump_ = comJacobian.block(0, 0, 2, dof) * predictor_.getJointVelJump() / getOmega();
 

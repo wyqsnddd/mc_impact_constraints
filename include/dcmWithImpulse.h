@@ -69,6 +69,8 @@ struct dcmWithImpulse : public mc_solver::InequalityConstraint
   Eigen::Vector2d predicted_dcm_jump_;
   Eigen::VectorXd difference_;
 
+  Eigen::Vector3d ComVel_;
+
   bool pointInsideSupportPolygon(const Point & input);
 
   inline void calcOmega(const double & c_z)
