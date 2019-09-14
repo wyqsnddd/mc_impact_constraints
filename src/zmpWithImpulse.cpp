@@ -203,7 +203,7 @@ bool zmpWithImpulse<supportContact, Point>::pointInsideSupportPolygon(const Poin
 
   Eigen::VectorXd result = G_zmp_ * input - h_zmp_;
 
-  for(int ii = 0; ii <= static_cast<int>(iniVertexSet_.size()); ii++)
+  for(int ii = 0; ii < static_cast<int>(iniVertexSet_.size()); ii++)
   {
     if(result(ii) > 0) return false;
   }
