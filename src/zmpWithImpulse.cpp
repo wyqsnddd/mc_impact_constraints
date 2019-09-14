@@ -201,12 +201,15 @@ template<typename supportContact, typename Point>
 bool zmpWithImpulse<supportContact, Point>::pointInsideSupportPolygon(const Point & input)
 {
 
-  Point result = G_zmp_ * input - h_zmp_;
+  Eigen::VectorXd result = G_zmp_ * input - h_zmp_;
 
-  if(result[0] > 0) return false;
-  if(result[1] > 0) return false;
+  for(int ii = 0; ii <= static_cast<int>(iniVertexSet_.size()); ii++)
+  {
+    if(result(ii) > 0) return false;
+  }
 
   return true;
+
 }
 
 template<typename supportContact, typename Point>
