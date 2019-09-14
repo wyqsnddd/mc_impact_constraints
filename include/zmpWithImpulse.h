@@ -97,7 +97,7 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
     else
       throw std::runtime_error("zmp constraint not in debug mode.");
   }
-  inline const Eigen::Vector4d & getZMP_constraint_difference()
+  inline const Eigen::VectorXd & getZMP_constraint_difference()
   {
     if(debug_)
       return difference_;
