@@ -155,7 +155,7 @@ private:
   Eigen::Vector3d zmpPrediction_allforce_ = Eigen::Vector3d::Zero();
   Eigen::Vector3d zmpPrediction_feetforce_ = Eigen::Vector3d::Zero();
 
-  Eigen::Vector4d difference_ = Eigen::Vector4d::Zero();
+  Eigen::VectorXd difference_; 
 };
 
 } // namespace mc_impact
