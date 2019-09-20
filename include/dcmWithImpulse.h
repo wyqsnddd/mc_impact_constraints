@@ -86,7 +86,10 @@ struct dcmWithImpulse : public mc_solver::InequalityConstraint
   {
     return predictedComVelJump_;
   }
-
+  inline const std::vector<Point> & getVertices()
+  {
+    return iniVertexSet_;
+  }
 private:
   const mc_rbdyn::Robot & realRobot_;
   // Predictor
