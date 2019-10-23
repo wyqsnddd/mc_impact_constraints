@@ -9,20 +9,8 @@
 namespace mc_impact
 {
 template<typename supportContact, typename Point>
-struct zmpWithImpulse : public mc_solver::InequalityConstraint
+struct zmpWithImpulse : public mc_solver::InequalityConstraintRobot
 {
-
-  /// ZMP defined by a rectangle
-  /*
-  zmpWithImpulse(
-     mi_qpEstimator & predictor,
-                 const std::vector<supportContact> & supports,
-                 double dt,
-                 double impact_dt,
-                 const ZMPArea & area,
-     bool allforce = true,
-                 bool debug = false);
-*/
 
   /// ZMP defined with a set of points
   zmpWithImpulse(mi_qpEstimator & predictor,
@@ -54,7 +42,7 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraint
     return b_;
   }
 
-  void computeAb() override;
+  void compute() override;
 
   void getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench);
   inline const Eigen::MatrixXd & getA()

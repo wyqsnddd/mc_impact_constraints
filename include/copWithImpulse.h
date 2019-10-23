@@ -15,7 +15,7 @@ struct newCoPArea
   double max_y;
 };
 
-struct copWithImpulse : public mc_solver::InequalityConstraint
+struct copWithImpulse : public mc_solver::InequalityConstraintRobot
 {
   copWithImpulse(mi_qpEstimator & predictor,
                  const std::string & bodyName,
@@ -57,9 +57,8 @@ struct copWithImpulse : public mc_solver::InequalityConstraint
     return b_;
   }
 
-  void computeAb() override;
+  void compute() override;
 
-  const newCoPArea area_;
 
 private:
   // Predictor
@@ -68,6 +67,7 @@ private:
   double dt_;
   // Impact duration
   double impact_dt_;
+  const newCoPArea area_;
   // Alpha vector
   Eigen::VectorXd alpha_;
   // Name of the body of interest.

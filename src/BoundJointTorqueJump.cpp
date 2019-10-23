@@ -23,7 +23,7 @@ BoundJointTorqueJump::BoundJointTorqueJump(mi_qpEstimator & predictor,
                                            const Eigen::VectorXd & LBound,
                                            const Eigen::VectorXd & UBound,
                                            bool debug)
-: mc_solver::GenInequalityConstraint(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt),
+: mc_solver::GenInequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt),
   impact_dt_(impact_dt), tau_L_(LBound), tau_U_(UBound), debug_(debug)
 {
   // std::cout<<"The lower impulsive torque bound is: "<<std::endl<<LBound.transpose()<<std::endl;
@@ -50,7 +50,7 @@ int BoundJointTorqueJump::maxGenInEq() const
   return static_cast<int>(tau_L_.size());
 }
 
-void BoundJointTorqueJump::computeALU()
+void BoundJointTorqueJump::compute()
 {
   const auto & robot = predictor_.getSimRobot();
   const auto & J_deltatau = predictor_.getJacobianDeltaTau();

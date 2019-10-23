@@ -13,7 +13,7 @@ zmpWithImpulse<supportContact, Point>::zmpWithImpulse(mi_qpEstimator & predictor
                                                       double lowerSlope,
                                                       double upperSlope,
                                                       bool debug)
-: InequalityConstraint(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt),
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt),
   supports_(supports), iniVertexSet_(vertexSet), allForce_(allforce), debug_(debug)
 {
 
@@ -213,7 +213,7 @@ bool zmpWithImpulse<supportContact, Point>::pointInsideSupportPolygon(const Poin
 }
 
 template<typename supportContact, typename Point>
-void zmpWithImpulse<supportContact, Point>::computeAb()
+void zmpWithImpulse<supportContact, Point>::compute()
 {
   const auto & robot = predictor_.getSimRobot();
   Eigen::MatrixXd sumJac;

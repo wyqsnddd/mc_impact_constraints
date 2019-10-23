@@ -25,7 +25,7 @@ include_directories(include)
 set(constraints
   BoundJointVelocityJump
   BoundJointTorqueJump
-  ContactWrenchMatrixToLambdaMatrix
+  #ContactWrenchMatrixToLambdaMatrix
   frictionWithImpulse
   copWithImpulse
   zmpWithImpulse

@@ -10,7 +10,7 @@ namespace mc_impact
  *
  * alpha_lower - alpha - J_dq * alpha <= J_dq * alphadD / dt <= alpha_upper - alpha - J_dq * alpha
  */
-struct BoundJointVelocityJump : public mc_solver::GenInequalityConstraint
+struct BoundJointVelocityJump : public mc_solver::GenInequalityConstraintRobot
 {
   /** Use the robot module provided velocity bounds */
   BoundJointVelocityJump(mi_qpEstimator & predictor, double dt, double multiplier = 1.0, bool debu = false);
@@ -54,8 +54,9 @@ struct BoundJointVelocityJump : public mc_solver::GenInequalityConstraint
     return test_delta_vel_;
   }
 
+  void compute() override;
+  
 private:
-  void computeALU() override;
 
   // Predictor
   mi_qpEstimator & predictor_;

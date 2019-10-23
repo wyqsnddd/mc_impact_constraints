@@ -13,7 +13,7 @@ namespace mc_impact
 {
 
 template<typename supportContact, typename Point>
-struct dcmWithImpulse : public mc_solver::InequalityConstraint
+struct dcmWithImpulse : public mc_solver::InequalityConstraintRobot
 {
 
   dcmWithImpulse(const mc_rbdyn::Robot & realRobot,
@@ -45,7 +45,7 @@ struct dcmWithImpulse : public mc_solver::InequalityConstraint
     return b_;
   }
 
-  void computeAb() override;
+  void compute() override;
 
   inline const Eigen::MatrixXd & getA()
   {
@@ -92,21 +92,28 @@ struct dcmWithImpulse : public mc_solver::InequalityConstraint
   }
 private:
   const mc_rbdyn::Robot & realRobot_;
+
+
   // Predictor
   mi_qpEstimator & predictor_;
+
+  std::vector<supportContact> supports_;
+
+
   // Timestep
   double dt_;
   // Impact duration
   double impact_dt_;
+
+  const std::vector<Point> iniVertexSet_;
+
   // Alpha vector
   Eigen::VectorXd alpha_;
 
-  const std::vector<Point> iniVertexSet_;
   double omega_ = 1.0;
 
   bool debug_;
 
-  std::vector<supportContact> supports_;
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;
 

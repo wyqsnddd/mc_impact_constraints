@@ -10,7 +10,7 @@ frictionWithImpulse::frictionWithImpulse(mi_qpEstimator & predictor,
                                          double dt,
                                          double impact_dt,
                                          double mu)
-: InequalityConstraint(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt)
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt)
 {
 
   // Eigen::Vector3d normal = contact.X_0_r2s(solver.robots()).rotation().row(2).transpose();
@@ -31,7 +31,7 @@ frictionWithImpulse::frictionWithImpulse(mi_qpEstimator & predictor,
   A_.resize(2, nDof);
   b_.resize(2);
 }
-void frictionWithImpulse::computeAb()
+void frictionWithImpulse::compute()
 {
 
   const auto & robot = predictor_.getSimRobot();

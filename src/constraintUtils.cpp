@@ -161,6 +161,8 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
     difference.normalize();
     double slope = difference[1] / difference[0];
 
+    clampSlope(slope, miniSlope, maxSlope);
+
     G(vNumber, 0) = -slope;
     h(vNumber) = -slope * point_one[0] + point_one[1];
 

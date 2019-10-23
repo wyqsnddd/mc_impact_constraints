@@ -13,8 +13,10 @@ dcmWithImpulse<supportContact, Point>::dcmWithImpulse(const mc_rbdyn::Robot & re
                                                       double lowerSlope,
                                                       double upperSlope,
                                                       bool debug)
-: InequalityConstraint(predictor.getSimRobot().robotIndex()), realRobot_(realRobot), predictor_(predictor), dt_(dt),
-  impact_dt_(impact_dt), supports_(supports), iniVertexSet_(vertexSet), debug_(debug)
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), realRobot_(realRobot), predictor_(predictor), 
+	supports_(supports), 
+	dt_(dt),
+  impact_dt_(impact_dt), iniVertexSet_(vertexSet), debug_(debug)
 {
 
   int numVertex = static_cast<int>(iniVertexSet_.size());
@@ -56,7 +58,7 @@ bool dcmWithImpulse<supportContact, Point>::pointInsideSupportPolygon(const Poin
 }
 
 template<typename supportContact, typename Point>
-void dcmWithImpulse<supportContact, Point>::computeAb()
+void dcmWithImpulse<supportContact, Point>::compute()
 {
   // const auto & robot = predictor_.getSimRobot();
   const auto & robot = realRobot_;

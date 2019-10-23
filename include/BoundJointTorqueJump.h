@@ -12,7 +12,7 @@ namespace mc_impact
  *
  * dt * J_deltatau * alphaD / impact_duration <= max_deltau - J_deltatau * alpha / impact_duration
  */
-struct BoundJointTorqueJump : public mc_solver::GenInequalityConstraint
+struct BoundJointTorqueJump : public mc_solver::GenInequalityConstraintRobot
 {
   /** Multiply the regular torque bounds limits by the provided multiplier */
   BoundJointTorqueJump(mi_qpEstimator & predictor, double dt, double impact_dt, double mult, bool debug = false);
@@ -57,8 +57,9 @@ struct BoundJointTorqueJump : public mc_solver::GenInequalityConstraint
     return test_delta_torque_;
   }
 
+  void compute() override;
+
 private:
-  void computeALU() override;
 
   // Predictor
   mi_qpEstimator & predictor_;

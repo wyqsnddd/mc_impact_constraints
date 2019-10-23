@@ -17,7 +17,7 @@ BoundJointVelocityJump::BoundJointVelocityJump(mi_qpEstimator & predictor,
                                                const Eigen::VectorXd & LBound,
                                                const Eigen::VectorXd & UBound,
                                                bool debug)
-: mc_solver::GenInequalityConstraint(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt),
+: mc_solver::GenInequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt),
   alpha_L_(LBound), alpha_U_(UBound), debug_(debug)
 {
   alpha_.resize(alpha_L_.size());
@@ -43,7 +43,7 @@ int BoundJointVelocityJump::maxGenInEq() const
   return static_cast<int>(alpha_L_.size());
 }
 
-void BoundJointVelocityJump::computeALU()
+void BoundJointVelocityJump::compute()
 {
   const auto & robot = predictor_.getSimRobot();
   const auto & J_delta = predictor_.getJacobianDeltaAlpha();

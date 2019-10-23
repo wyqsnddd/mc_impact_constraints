@@ -10,7 +10,7 @@ copWithImpulse::copWithImpulse(mi_qpEstimator & predictor,
                                double impact_dt,
                                // const mc_rbdyn::Contact & contact,
                                const newCoPArea & area)
-: InequalityConstraint(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt),
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt),
   area_(area)
 {
 
@@ -42,7 +42,7 @@ copWithImpulse::copWithImpulse(mi_qpEstimator & predictor,
   b_.resize(4);
 }
 
-void copWithImpulse::computeAb()
+void copWithImpulse::compute()
 {
 
   const auto & robot = predictor_.getSimRobot();
