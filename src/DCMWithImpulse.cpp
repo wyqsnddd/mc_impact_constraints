@@ -1,10 +1,10 @@
-#include "dcmWithImpulse.h"
+#include "DCMWithImpulse.h"
 
 namespace mc_impact
 {
 
 template<typename supportContact, typename Point>
-dcmWithImpulse<supportContact, Point>::dcmWithImpulse(const mc_rbdyn::Robot & realRobot,
+DCMWithImpulse<supportContact, Point>::DCMWithImpulse(const mc_rbdyn::Robot & realRobot,
                                                       mi_qpEstimator & predictor,
                                                       const std::vector<supportContact> & supports,
                                                       double dt,
@@ -44,7 +44,7 @@ dcmWithImpulse<supportContact, Point>::dcmWithImpulse(const mc_rbdyn::Robot & re
 }
 
 template<typename supportContact, typename Point>
-bool dcmWithImpulse<supportContact, Point>::pointInsideSupportPolygon(const Point & input)
+bool DCMWithImpulse<supportContact, Point>::pointInsideSupportPolygon(const Point & input)
 {
 
   Eigen::VectorXd result = G_dcm_ * input - h_dcm_;
@@ -58,7 +58,7 @@ bool dcmWithImpulse<supportContact, Point>::pointInsideSupportPolygon(const Poin
 }
 
 template<typename supportContact, typename Point>
-void dcmWithImpulse<supportContact, Point>::compute()
+void DCMWithImpulse<supportContact, Point>::compute()
 {
   // const auto & robot = predictor_.getSimRobot();
   const auto & robot = realRobot_;
@@ -127,7 +127,7 @@ void dcmWithImpulse<supportContact, Point>::compute()
 }
 
 // The explicit instantiation
-template struct mc_impact::dcmWithImpulse<zmpSupportContact, Eigen::Vector3d>;
-template struct mc_impact::dcmWithImpulse<zmpSupportContact, Eigen::Vector2d>;
+template struct mc_impact::DCMWithImpulse<ZMPSupportContact, Eigen::Vector3d>;
+template struct mc_impact::DCMWithImpulse<ZMPSupportContact, Eigen::Vector2d>;
 
 } // namespace mc_impact

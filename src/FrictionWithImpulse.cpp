@@ -1,9 +1,9 @@
-#include "frictionWithImpulse.h"
+#include "FrictionWithImpulse.h"
 
 namespace mc_impact
 {
 
-frictionWithImpulse::frictionWithImpulse(mi_qpEstimator & predictor,
+FrictionWithImpulse::FrictionWithImpulse(mi_qpEstimator & predictor,
                                          const std::string & bodyName,
                                          const std::string & sensorName,
                                          //const mc_rbdyn::Contact & contact,
@@ -31,7 +31,7 @@ frictionWithImpulse::frictionWithImpulse(mi_qpEstimator & predictor,
   A_.resize(2, nDof);
   b_.resize(2);
 }
-void frictionWithImpulse::compute()
+void FrictionWithImpulse::compute()
 {
 
   const auto & robot = predictor_.getSimRobot();

@@ -1,9 +1,9 @@
-#include "supportPolygon.h"
+#include "SupportPolygon.h"
 
 namespace mc_impact
 {
 
-void supportPolygon::addContactSurface(const std::string & surfaceName)
+void SupportPolygon::addContactSurface(const std::string & surfaceName)
 {
   // Find the surface
   if(!robot_.hasSurface(surfaceName))
@@ -11,7 +11,7 @@ void supportPolygon::addContactSurface(const std::string & surfaceName)
   surfaceContainer_.insert(std::pair<std::string, const mc_rbdyn::Surface &>(surfaceName, robot_.surface(surfaceName)));
 }
 
-void supportPolygon::removeContactSurface(const std::string & surfaceName)
+void SupportPolygon::removeContactSurface(const std::string & surfaceName)
 {
   const auto ee = surfaceContainer_.find(surfaceName);
 
@@ -25,7 +25,7 @@ void supportPolygon::removeContactSurface(const std::string & surfaceName)
   }
 }
 
-std::vector<std::string> supportPolygon::existingSurfaces() const
+std::vector<std::string> SupportPolygon::existingSurfaces() const
 {
   std::vector<std::string> * nameVectors;
   for(auto it = surfaceContainer_.begin(); it != surfaceContainer_.end(); ++it)
@@ -35,7 +35,7 @@ std::vector<std::string> supportPolygon::existingSurfaces() const
   return *nameVectors;
 }
 
-void supportPolygon::update()
+void SupportPolygon::update()
 {
 
   // sch::S_Polyhedron * poly = new sch::S_Polyhedron();
@@ -115,7 +115,7 @@ void supportPolygon::update()
   } // iterate for each vertex
 }
 
-bool supportPolygon::readMatricies(Eigen::MatrixXd & G, Eigen::VectorXd & h)
+bool SupportPolygon::readMatricies(Eigen::MatrixXd & G, Eigen::VectorXd & h)
 {
   if((G_zmp_ == nullptr) || (h_zmp_ == nullptr))
     return false;
@@ -127,7 +127,7 @@ bool supportPolygon::readMatricies(Eigen::MatrixXd & G, Eigen::VectorXd & h)
   }
 }
 
-sch::S_Polyhedron * supportPolygon::createPoly_(const orgQhull::Qhull & qhull)
+sch::S_Polyhedron * SupportPolygon::createPoly_(const orgQhull::Qhull & qhull)
 {
   sch::S_Polyhedron * poly = new sch::S_Polyhedron();
   auto & poly_algo = *(poly->getPolyhedronAlgorithm());

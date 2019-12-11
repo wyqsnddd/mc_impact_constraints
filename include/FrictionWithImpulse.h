@@ -10,9 +10,9 @@ namespace mc_impact
 /** This class imlements equation (25) of the Humanoids 2019 paper
  *
  */
-struct frictionWithImpulse : public mc_solver::InequalityConstraintRobot
+struct FrictionWithImpulse : public mc_solver::InequalityConstraintRobot
 {
-  frictionWithImpulse(mi_qpEstimator & predictor,
+  FrictionWithImpulse(mi_qpEstimator & predictor,
                       const std::string & bodyName,
                       const std::string & sensorName,
                       //const mc_rbdyn::Contact & contact,
@@ -27,7 +27,7 @@ struct frictionWithImpulse : public mc_solver::InequalityConstraintRobot
 
   inline std::string nameInEq() const override
   {
-    return "frictionWithImpulse";
+    return "FrictionWithImpulse";
   }
 
   inline const Eigen::MatrixXd & A() const override

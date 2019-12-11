@@ -1,9 +1,9 @@
-#include "copWithImpulse.h"
+#include "COPWithImpulse.h"
 
 namespace mc_impact
 {
 
-copWithImpulse::copWithImpulse(mi_qpEstimator & predictor,
+COPWithImpulse::COPWithImpulse(mi_qpEstimator & predictor,
                                const std::string & bodyName,
                                const std::string & sensorName,
                                double dt,
@@ -42,7 +42,7 @@ copWithImpulse::copWithImpulse(mi_qpEstimator & predictor,
   b_.resize(4);
 }
 
-void copWithImpulse::compute()
+void COPWithImpulse::compute()
 {
 
   const auto & robot = predictor_.getSimRobot();

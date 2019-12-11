@@ -6,19 +6,19 @@
 
 #include <RBDyn/CoM.h>
 
-#include "constraintUtils.h"
+#include "ConstraintUtils.h"
 #include <math.h>
 
 namespace mc_impact
 {
 
-template<typename supportContact, typename Point>
-struct dcmWithImpulse : public mc_solver::InequalityConstraintRobot
+template<typename SupportContact, typename Point>
+struct DCMWithImpulse : public mc_solver::InequalityConstraintRobot
 {
 
-  dcmWithImpulse(const mc_rbdyn::Robot & realRobot,
+  DCMWithImpulse(const mc_rbdyn::Robot & realRobot,
                  mi_qpEstimator & predictor,
-                 const std::vector<supportContact> & supports,
+                 const std::vector<SupportContact> & supports,
                  double dt,
                  double impact_dt,
                  const std::vector<Point> & vertexSet,
@@ -33,7 +33,7 @@ struct dcmWithImpulse : public mc_solver::InequalityConstraintRobot
 
   inline std::string nameInEq() const override
   {
-    return "dcmWithImpulse";
+    return "DCMWithImpulse";
   }
 
   inline const Eigen::MatrixXd & A() const override
@@ -97,7 +97,7 @@ private:
   // Predictor
   mi_qpEstimator & predictor_;
 
-  std::vector<supportContact> supports_;
+  std::vector<SupportContact> supports_;
 
 
   // Timestep

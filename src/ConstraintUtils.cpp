@@ -1,4 +1,4 @@
-#include "constraintUtils.h"
+#include "ConstraintUtils.h"
 
 template<typename T>
 T sgn(T val)
@@ -57,21 +57,27 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
   for(auto idx = inputPoints.begin(); idx != inputPoints.end(); idx++, vNumber++)
   {
 
-    Point point_one = *idx;
-    Point point_two;
+    Eigen::Vector2d point_one;
+    point_one.x() = idx->x();
+    point_one.y() = idx->y();
+
+    Eigen::Vector2d point_two;
 
     if((idx + 1) == inputPoints.end())
     {
-      point_two = *(inputPoints.begin());
+      point_two.x() = inputPoints.begin()->x();
+      point_two.y() = inputPoints.begin()->y();
     }
     else
     {
-      point_two = *(idx + 1);
+      point_two.x() = (idx + 1)->x();
+      point_two.y() = (idx + 1)->y();
     }
 
-    Point difference = point_two - point_one;
+    Eigen::Vector2d difference = point_two - point_one;
     //difference.normalize();
-    double slope = difference[1] / difference[0];
+    double slope = difference.y() / difference.x();
+
 
     clampSlope(slope, miniSlope, maxSlope);
 
@@ -144,22 +150,26 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
 
   for(auto idx = inputPoints.begin(); idx != inputPoints.end(); idx++, vNumber++)
   {
+    Eigen::Vector2d point_one;
+    point_one.x() = idx->x();
+    point_one.y() = idx->y();
 
-    Point point_one = *idx;
-    Point point_two;
+    Eigen::Vector2d point_two;
 
     if((idx + 1) == inputPoints.end())
     {
-      point_two = *(inputPoints.begin());
+      point_two.x() = inputPoints.begin()->x();
+      point_two.y() = inputPoints.begin()->y();
     }
     else
     {
-      point_two = *(idx + 1);
+      point_two.x() = (idx + 1)->x();
+      point_two.y() = (idx + 1)->y();
     }
 
-    Point difference = point_two - point_one;
-    difference.normalize();
-    double slope = difference[1] / difference[0];
+    Eigen::Vector2d difference = point_two - point_one;
+    //difference.normalize();
+    double slope = difference.y() / difference.x();
 
     clampSlope(slope, miniSlope, maxSlope);
 

@@ -1,13 +1,12 @@
 set(constraints
   BoundJointVelocityJump
   BoundJointTorqueJump
-  #ContactWrenchMatrixToLambdaMatrix
-  frictionWithImpulse
-  copWithImpulse
-  zmpWithImpulse
-  dcmWithImpulse
+  FrictionWithImpulse
+  COPWithImpulse
+  ZMPWithImpulse
+  DCMWithImpulse
   #supportPolygon
-  constraintUtils
+  ConstraintUtils
 )
 set(constraints_SRC)
 foreach(CSTR ${constraints})

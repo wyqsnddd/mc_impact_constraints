@@ -13,7 +13,7 @@ struct ZMPArea
   double min_y;
   double max_y;
 };
-struct zmpSupportContact
+struct ZMPSupportContact
 {
   std::string bodyName;
   std::string sensorName;

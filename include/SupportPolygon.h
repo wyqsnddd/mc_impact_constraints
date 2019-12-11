@@ -13,14 +13,14 @@
 namespace mc_impact
 {
 
-class supportPolygon
+class SupportPolygon
 {
 public:
-  supportPolygon(const mc_rbdyn::Robot & robot) : robot_(robot)
+  SupportPolygon(const mc_rbdyn::Robot & robot) : robot_(robot)
   {
     std::cout << "Support polygon calculator is constructed." << std::endl;
   }
-  ~supportPolygon()
+  ~SupportPolygon()
   {
     free(G_zmp_);
     free(h_zmp_);

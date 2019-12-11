@@ -15,9 +15,9 @@ struct newCoPArea
   double max_y;
 };
 
-struct copWithImpulse : public mc_solver::InequalityConstraintRobot
+struct COPWithImpulse : public mc_solver::InequalityConstraintRobot
 {
-  copWithImpulse(mi_qpEstimator & predictor,
+  COPWithImpulse(mi_qpEstimator & predictor,
                  const std::string & bodyName,
                  const std::string & sensorName,
                  double dt,
@@ -32,7 +32,7 @@ struct copWithImpulse : public mc_solver::InequalityConstraintRobot
 
   inline std::string nameInEq() const override
   {
-    return "copWithImpulse";
+    return "COPWithImpulse";
   }
   inline const Eigen::Vector2d & getCop() const
   {

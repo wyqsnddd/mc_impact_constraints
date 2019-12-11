@@ -6,31 +6,46 @@
 
 #include "constraintUtils.h"
 
+#include <mc_dynamicStability/mc_zmp_area.h>
+
 namespace mc_impact
 {
+
+
+
+
 template<typename supportContact, typename Point>
-struct zmpWithImpulse : public mc_solver::InequalityConstraintRobot
+struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
 {
 
   /// ZMP defined with a set of points
-  zmpWithImpulse(mi_qpEstimator & predictor,
+  ZMPWithImpulse(mi_qpEstimator & predictor,
+		  std::shared_ptr<mc_impact::McZMPArea<Point> > mcZMPAreaPtr,
                  const std::vector<supportContact> & supports,
                  double dt,
                  double impact_dt,
                  const std::vector<Point> & vertexSet,
                  bool allforce = true,
+		 bool updateMcZMPArea = true,
                  double lowerSlope = 0.01,
                  double upperSlope = 100.0,
                  bool debug = false);
 
+  /*! \brief returns the upper bound of the amount of constraints for the QP to reserve memory accordingly.
+   */
   inline int maxInEq() const override
   {
-    return static_cast<int>(iniVertexSet_.size());
+    if(updateMcZMPArea())
+    {
+      return getMcZMPArea()->getMaxNumVertex(); 
+    }else{
+      return static_cast<int>(iniVertexSet_.size());
+    }
   }
 
   inline std::string nameInEq() const override
   {
-    return "zmpWithImpulse";
+    return "ZMPWithImpulse";
   }
 
   inline const Eigen::MatrixXd & A() const override
@@ -41,7 +56,18 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraintRobot
   {
     return b_;
   }
-
+  /*!
+   * \brief returns  the number of rows in realtime such that the QP can adjust the constraint size. 
+   */
+  inline int nrInEq() const override
+  {
+    if(updateMcZMPArea())
+    {
+      return getMcZMPArea()->getNumVertex(); 
+    }else{
+      return static_cast<int>(iniVertexSet_.size());
+    }
+  }
   void compute() override;
 
   void getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench);
@@ -56,6 +82,11 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraintRobot
   inline const Eigen::MatrixXd & getZMP()
   {
     return A_zmp_;
+  }
+
+  inline bool updateMcZMPArea() const 
+  {
+    return updateMcZMPArea_; 
   }
   inline const Eigen::Vector3d & getZMP_sensor()
   {
@@ -106,15 +137,32 @@ struct zmpWithImpulse : public mc_solver::InequalityConstraintRobot
   Eigen::VectorXd slopeVec_ = Eigen::Vector3d::Zero();
 
   bool zmpTest_ = false;
-  Eigen::MatrixXd G_zmp_;
-  Eigen::VectorXd h_zmp_;
+  //Eigen::MatrixXd G_zmp_;
+  //Eigen::VectorXd h_zmp_;
+
+  inline void setIeqBlocks(const ieqConstraintBlocks & input)
+  {
+    ieqConstraintBlocks_ = input; 
+  }
+  inline const ieqConstraintBlocks & getIeqBlocks() const
+  {
+    return ieqConstraintBlocks_; 
+  }
 
   Eigen::MatrixXd A_zmp_;
   bool pointInsideSupportPolygon(const Point & input);
 
+  inline const std::shared_ptr<mc_impact::McZMPArea<Point> > getMcZMPArea() const
+  {
+    return mcZMPAreaPtr_; 
+  }
 private:
   // Predictor
   mi_qpEstimator & predictor_;
+
+  // Multi-contact ZMP area calculator: 
+  std::shared_ptr<mc_impact::McZMPArea<Point> > mcZMPAreaPtr_;
+
   // Timestep
   double dt_;
   // Impact duration
@@ -130,20 +178,31 @@ private:
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;
 
+  ieqConstraintBlocks  ieqConstraintBlocks_;
+
   const std::vector<Point> iniVertexSet_;
 
   // ZMPArea area_;
   bool allForce_;
+
+  bool updateMcZMPArea_;
+  void calcZMP_();
+  void computeMcZMPArea_(); 
+
+
+  double lowerSlope_;
+  double upperSlope_;
   bool debug_;
 
-  void calcZMP_();
-  Eigen::Vector3d zmpSensor_ = Eigen::Vector3d::Zero();
+
+    Eigen::Vector3d zmpSensor_ = Eigen::Vector3d::Zero();
   Eigen::Vector3d zmpPerturbation_ = Eigen::Vector3d::Zero();
 
   Eigen::Vector3d zmpPrediction_allforce_ = Eigen::Vector3d::Zero();
   Eigen::Vector3d zmpPrediction_feetforce_ = Eigen::Vector3d::Zero();
 
   Eigen::VectorXd difference_; 
+
 };
 
 } // namespace mc_impact

@@ -4,33 +4,39 @@ namespace mc_impact
 {
 
 template<typename supportContact, typename Point>
-zmpWithImpulse<supportContact, Point>::zmpWithImpulse(mi_qpEstimator & predictor,
+ZMPWithImpulse<supportContact, Point>::ZMPWithImpulse(mi_qpEstimator & predictor,
+		
+		std::shared_ptr<mc_impact::McZMPArea<Point> > mcZMPAreaPtr,
                                                       const std::vector<supportContact> & supports,
                                                       double dt,
                                                       double impact_dt,
                                                       const std::vector<Point> & vertexSet,
                                                       bool allforce,
+						      bool updateMcZMPArea, 
                                                       double lowerSlope,
                                                       double upperSlope,
                                                       bool debug)
-: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt),
-  supports_(supports), iniVertexSet_(vertexSet), allForce_(allforce), debug_(debug)
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), mcZMPAreaPtr_(mcZMPAreaPtr), dt_(dt), impact_dt_(impact_dt),
+  supports_(supports), iniVertexSet_(vertexSet), allForce_(allforce), updateMcZMPArea_(updateMcZMPArea), lowerSlope_(lowerSlope), upperSlope_(upperSlope), debug_(debug)
 {
-
   int numVertex = static_cast<int>(iniVertexSet_.size());
   A_zmp_ = Eigen::MatrixXd::Zero(numVertex, 6);
 
-  // Eigen::MatrixXd G_zmp;
-  // Eigen::VectorXd h_zmp;
 
-  pointsToInequalityMatrix<Point>(iniVertexSet_, G_zmp_, h_zmp_, centeroid_, slopeVec_, lowerSlope, upperSlope);
+  // Write the ieqConstraintBlocks:
+  pointsToInequalityMatrix<Point>(iniVertexSet_, ieqConstraintBlocks_.G_zmp, ieqConstraintBlocks_.h_zmp, centeroid_, slopeVec_, lowerSlope, upperSlope);
+
   /// Needs to be checked carefully, compare to the 4 dim case
   // A(:,0) = G_y
-  A_zmp_.block(0, 0, numVertex, 1) = G_zmp_.block(0, 1, numVertex, 1);
+  A_zmp_.block(0, 0, numVertex, 1) = getIeqBlocks().G_zmp.block(0, 1, numVertex, 1);
   /// A(:,1) = -G_x
-  A_zmp_.block(0, 1, numVertex, 1) = -G_zmp_.block(0, 0, numVertex, 1);
+  A_zmp_.block(0, 1, numVertex, 1) = -getIeqBlocks().G_zmp.block(0, 0, numVertex, 1);
   /// A(:,5) = h
-  A_zmp_.block(0, 5, numVertex, 1) = -h_zmp_;
+  A_zmp_.block(0, 5, numVertex, 1) = -getIeqBlocks().h_zmp;
+
+
+    // Eigen::MatrixXd G_zmp;
+  // Eigen::VectorXd h_zmp;
 
   int nDof = predictor_.getSimRobot().mb().nrDof();
 
@@ -45,52 +51,32 @@ zmpWithImpulse<supportContact, Point>::zmpWithImpulse(mi_qpEstimator & predictor
   area_.min_x = 0;
   area_.min_y = 0;
   */
-}
-
-/*
-template <typename supportContact, typename Point>
-zmpWithImpulse<supportContact, Point>::zmpWithImpulse(mi_qpEstimator & predictor,
-                               const std::vector<supportContact> & supports,
-                               double dt,
-                               double impact_dt,
-                               const ZMPArea & area,
-                               bool allforce,
-                               bool debug)
-: InequalityConstraint(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt),
-  supports_(supports), area_(area), allForce_(allforce), debug_(debug)
-{
-
-  // bName_ = bodyName;
-  // sName_ = sensorName;
-  A_zmp_ = Eigen::MatrixXd::Zero(4, 6);
-
-  // - cy - max_x * fz
-  A_zmp_(0, 1) = -1;
-  A_zmp_(0, 5) = -area_.max_x;
-
-  // cy + min_x * fz
-  A_zmp_(1, 1) = 1;
-  A_zmp_(1, 5) = area_.min_x;
-
-  // cx - max_y * fz
-  A_zmp_(2, 0) = 1;
-  A_zmp_(2, 5) = -area_.max_y;
-
-  // - cx + min_y * fz
-  A_zmp_(3, 0) = -1;
-  A_zmp_(3, 5) = area_.min_y;
-
-  int nDof = predictor_.getSimRobot().mb().nrDof();
-
-  alpha_.resize(nDof);
-  // This needs double check
-  A_.resize(4, nDof);
-  b_.resize(4);
 
 }
-*/
+
 template<typename supportContact, typename Point>
-void zmpWithImpulse<supportContact, Point>::getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench)
+void ZMPWithImpulse<supportContact, Point>::computeMcZMPArea_()
+{
+  //int numVertex = static_cast<int>(iniVertexSet_.size());
+  int numVertex = getMcZMPArea()->getNumVertex();
+  
+  A_zmp_ = Eigen::MatrixXd::Zero(numVertex, 6);
+
+  // Set the inequality matrix blocks
+  setIeqBlocks(getMcZMPArea()->getIeqConstraint());
+
+  /// Needs to be checked carefully, compare to the 4 dim case
+  // A(:,0) = G_y
+  A_zmp_.block(0, 0, numVertex, 1) = getIeqBlocks().G_zmp.block(0, 1, numVertex, 1);
+  /// A(:,1) = -G_x
+  A_zmp_.block(0, 1, numVertex, 1) = -getIeqBlocks().G_zmp.block(0, 0, numVertex, 1);
+  /// A(:,5) = h
+  A_zmp_.block(0, 5, numVertex, 1) = -getIeqBlocks().h_zmp;
+
+}
+
+template<typename supportContact, typename Point>
+void ZMPWithImpulse<supportContact, Point>::getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench)
 {
   exWrench.setZero();
   int dof = predictor_.getSimRobot().mb().nrDof();
@@ -140,7 +126,7 @@ void zmpWithImpulse<supportContact, Point>::getInertialItems(Eigen::MatrixXd & s
 }
 
 template<typename supportContact, typename Point>
-void zmpWithImpulse<supportContact, Point>::calcZMP_()
+void ZMPWithImpulse<supportContact, Point>::calcZMP_()
 {
   /*
     Eigen::VectorXd temp = (rbd::dofToVector(predictor_.getSimRobot().mb(), predictor_.getSimRobot().mbc().alpha)
@@ -198,10 +184,10 @@ void zmpWithImpulse<supportContact, Point>::calcZMP_()
 }
 
 template<typename supportContact, typename Point>
-bool zmpWithImpulse<supportContact, Point>::pointInsideSupportPolygon(const Point & input)
+bool ZMPWithImpulse<supportContact, Point>::pointInsideSupportPolygon(const Point & input)
 {
 
-  Eigen::VectorXd result = G_zmp_ * input - h_zmp_;
+  Eigen::VectorXd result = getIeqBlocks().G_zmp * input - getIeqBlocks().h_zmp;
 
   for(int ii = 0; ii < static_cast<int>(iniVertexSet_.size()); ii++)
   {
@@ -213,18 +199,24 @@ bool zmpWithImpulse<supportContact, Point>::pointInsideSupportPolygon(const Poin
 }
 
 template<typename supportContact, typename Point>
-void zmpWithImpulse<supportContact, Point>::compute()
+void ZMPWithImpulse<supportContact, Point>::compute()
 {
   const auto & robot = predictor_.getSimRobot();
   Eigen::MatrixXd sumJac;
   Eigen::Vector6d sumWrench;
   getInertialItems(sumJac, sumWrench);
 
+  if(updateMcZMPArea())
+  {
+    computeMcZMPArea_();   
+  }
+
   A_ = (dt_ / impact_dt_) * A_zmp_ * sumJac;
   /*
     alpha_ =
           (rbd::dofToVector(predictor_.getSimRobot().mb(), predictor_.getSimRobot().mbc().alpha));
-    */
+  */
+
   rbd::paramToVector(robot.mbc().alpha, alpha_);
   b_ = -(A_zmp_ * sumWrench + A_zmp_ * sumJac * alpha_ / impact_dt_);
 
@@ -236,7 +228,7 @@ void zmpWithImpulse<supportContact, Point>::compute()
 }
 
 // The explicit instantiation
-template struct mc_impact::zmpWithImpulse<zmpSupportContact, Eigen::Vector3d>;
-template struct mc_impact::zmpWithImpulse<zmpSupportContact, Eigen::Vector2d>;
+template struct mc_impact::ZMPWithImpulse<ZMPSupportContact, Eigen::Vector3d>;
+template struct mc_impact::ZMPWithImpulse<ZMPSupportContact, Eigen::Vector2d>;
 
 } // namespace mc_impact
