@@ -4,7 +4,7 @@
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
 
-#include "constraintUtils.h"
+#include "ConstraintUtils.h"
 
 #include <mc_dynamicStability/mc_zmp_area.h>
 
