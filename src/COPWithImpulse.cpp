@@ -10,8 +10,8 @@ COPWithImpulse::COPWithImpulse(mi_qpEstimator & predictor,
                                double impact_dt,
                                // const mc_rbdyn::Contact & contact,
                                const newCoPArea & area)
-: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt),
-  area_(area)
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt),
+  impact_dt_(impact_dt), area_(area)
 {
 
   bName_ = bodyName;

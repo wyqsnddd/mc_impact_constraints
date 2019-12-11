@@ -60,7 +60,6 @@ struct BoundJointTorqueJump : public mc_solver::GenInequalityConstraintRobot
   void compute() override;
 
 private:
-
   // Predictor
   mi_qpEstimator & predictor_;
   // Timestep

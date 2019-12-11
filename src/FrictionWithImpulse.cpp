@@ -6,11 +6,12 @@ namespace mc_impact
 FrictionWithImpulse::FrictionWithImpulse(mi_qpEstimator & predictor,
                                          const std::string & bodyName,
                                          const std::string & sensorName,
-                                         //const mc_rbdyn::Contact & contact,
+                                         // const mc_rbdyn::Contact & contact,
                                          double dt,
                                          double impact_dt,
                                          double mu)
-: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impact_dt_(impact_dt)
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt),
+  impact_dt_(impact_dt)
 {
 
   // Eigen::Vector3d normal = contact.X_0_r2s(solver.robots()).rotation().row(2).transpose();

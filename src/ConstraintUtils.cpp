@@ -75,9 +75,8 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
     }
 
     Eigen::Vector2d difference = point_two - point_one;
-    //difference.normalize();
+    // difference.normalize();
     double slope = difference.y() / difference.x();
-
 
     clampSlope(slope, miniSlope, maxSlope);
 
@@ -168,7 +167,7 @@ void mc_impact::pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
     }
 
     Eigen::Vector2d difference = point_two - point_one;
-    //difference.normalize();
+    // difference.normalize();
     double slope = difference.y() / difference.x();
 
     clampSlope(slope, miniSlope, maxSlope);

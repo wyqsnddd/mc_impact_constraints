@@ -15,7 +15,7 @@ struct FrictionWithImpulse : public mc_solver::InequalityConstraintRobot
   FrictionWithImpulse(mi_qpEstimator & predictor,
                       const std::string & bodyName,
                       const std::string & sensorName,
-                      //const mc_rbdyn::Contact & contact,
+                      // const mc_rbdyn::Contact & contact,
                       double dt,
                       double impact_dt,
                       double mu = mc_rbdyn::Contact::defaultFriction);

@@ -90,15 +90,14 @@ struct DCMWithImpulse : public mc_solver::InequalityConstraintRobot
   {
     return iniVertexSet_;
   }
+
 private:
   const mc_rbdyn::Robot & realRobot_;
-
 
   // Predictor
   mi_qpEstimator & predictor_;
 
   std::vector<SupportContact> supports_;
-
 
   // Timestep
   double dt_;

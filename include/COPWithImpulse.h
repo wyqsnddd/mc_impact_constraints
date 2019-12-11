@@ -59,7 +59,6 @@ struct COPWithImpulse : public mc_solver::InequalityConstraintRobot
 
   void compute() override;
 
-
 private:
   // Predictor
   mi_qpEstimator & predictor_;

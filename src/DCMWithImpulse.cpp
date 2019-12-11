@@ -13,10 +13,8 @@ DCMWithImpulse<supportContact, Point>::DCMWithImpulse(const mc_rbdyn::Robot & re
                                                       double lowerSlope,
                                                       double upperSlope,
                                                       bool debug)
-: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), realRobot_(realRobot), predictor_(predictor), 
-	supports_(supports), 
-	dt_(dt),
-  impact_dt_(impact_dt), iniVertexSet_(vertexSet), debug_(debug)
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), realRobot_(realRobot),
+  predictor_(predictor), supports_(supports), dt_(dt), impact_dt_(impact_dt), iniVertexSet_(vertexSet), debug_(debug)
 {
 
   int numVertex = static_cast<int>(iniVertexSet_.size());
@@ -24,11 +22,11 @@ DCMWithImpulse<supportContact, Point>::DCMWithImpulse(const mc_rbdyn::Robot & re
 
   pointsToInequalityMatrix<Point>(iniVertexSet_, G_dcm_, h_dcm_, centeroid_, slopeVec_, lowerSlope, upperSlope);
 
-  //A_dcm_.block(0, 0, numVertex, 1) = G_dcm_.block(0, 1, numVertex, 1);
+  // A_dcm_.block(0, 0, numVertex, 1) = G_dcm_.block(0, 1, numVertex, 1);
   /// A(:,1) = -G_x
-  //A_dcm_.block(0, 1, numVertex, 1) = -G_dcm_.block(0, 0, numVertex, 1);
+  // A_dcm_.block(0, 1, numVertex, 1) = -G_dcm_.block(0, 0, numVertex, 1);
   /// A(:,5) = h
-  //A_dcm_.block(0, 5, numVertex, 1) = -h_dcm_;
+  // A_dcm_.block(0, 5, numVertex, 1) = -h_dcm_;
 
   int nDof = predictor_.getSimRobot().mb().nrDof();
   alpha_.resize(nDof);
@@ -72,7 +70,7 @@ void DCMWithImpulse<supportContact, Point>::compute()
   rbd::paramToVector(robot.mbc().alpha, alpha_);
 
   Eigen::Vector3d Com = robot.com();
-  //Eigen::Vector3d 
+  // Eigen::Vector3d
   ComVel_ = robot.comVelocity();
 
   dcm_ = Com.segment(0, 2) + ComVel_.segment(0, 2) / getOmega();
