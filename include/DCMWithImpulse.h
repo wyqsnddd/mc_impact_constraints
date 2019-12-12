@@ -12,23 +12,18 @@
 namespace mc_impact
 {
 
-template<typename SupportContact, typename Point>
+template<typename Point>
 struct DCMWithImpulse : public mc_solver::InequalityConstraintRobot
 {
 
-  DCMWithImpulse(const mc_rbdyn::Robot & realRobot,
-                 mi_qpEstimator & predictor,
-                 const std::vector<SupportContact> & supports,
-                 double dt,
-                 double impact_dt,
-                 const std::vector<Point> & vertexSet,
-                 double lowerSlope = 0.01,
-                 double upperSlope = 100,
-                 bool debug = false);
+  DCMWithImpulse(mi_qpEstimator & predictor,
+		  const mc_rbdyn::Robot & realRobot,
+		  const ImpactAwareConstraintParams<Point> & params
+                 );
 
   inline int maxInEq() const override
   {
-    return static_cast<int>(iniVertexSet_.size());
+    return static_cast<int>(getParams().dcmAreaVertexSet.size());
   }
 
   inline std::string nameInEq() const override
@@ -88,30 +83,28 @@ struct DCMWithImpulse : public mc_solver::InequalityConstraintRobot
   }
   inline const std::vector<Point> & getVertices()
   {
-    return iniVertexSet_;
+    return getParams().dcmAreaVertexSet;
+  }
+  inline const ImpactAwareConstraintParams<Point> & getParams() const
+  {
+    return params_; 
   }
 
 private:
-  const mc_rbdyn::Robot & realRobot_;
 
   // Predictor
   mi_qpEstimator & predictor_;
 
-  std::vector<SupportContact> supports_;
-
-  // Timestep
-  double dt_;
-  // Impact duration
-  double impact_dt_;
-
-  const std::vector<Point> iniVertexSet_;
+  const mc_rbdyn::Robot & realRobot_;
+  const ImpactAwareConstraintParams<Point> & params_;
 
   // Alpha vector
   Eigen::VectorXd alpha_;
 
+  ///< Omega 
   double omega_ = 1.0;
 
-  bool debug_;
+  //bool debug_;
 
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;

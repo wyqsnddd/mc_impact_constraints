@@ -6,6 +6,7 @@ T sgn(T val)
   return (T(0) < val) - (val < T(0));
 }
 
+
 void clampSlope(double & slope, const double & mini, const double & max)
 {
   double sign = sgn<double>(slope);

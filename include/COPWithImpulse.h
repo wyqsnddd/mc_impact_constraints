@@ -4,9 +4,12 @@
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
 
+# include "ConstraintUtils.h"
+# include <McDynamicStability/McContact.h>
+
 namespace mc_impact
 {
-
+/*
 struct newCoPArea
 {
   double min_x;
@@ -14,16 +17,13 @@ struct newCoPArea
   double min_y;
   double max_y;
 };
-
+*/
 struct COPWithImpulse : public mc_solver::InequalityConstraintRobot
 {
   COPWithImpulse(mi_qpEstimator & predictor,
-                 const std::string & bodyName,
-                 const std::string & sensorName,
-                 double dt,
-                 double impact_dt,
-                 // const mc_rbdyn::Contact & contact,
-                 const newCoPArea & area);
+		  double dt,
+		  double impactDuration,
+		  const McContactParams & contactParams);
 
   inline int maxInEq() const override
   {
@@ -58,22 +58,24 @@ struct COPWithImpulse : public mc_solver::InequalityConstraintRobot
   }
 
   void compute() override;
-
+  
+  inline const McContactParams & getParams()
+  {
+    return mcContactParams_; 
+  }
 private:
   // Predictor
   mi_qpEstimator & predictor_;
-  // Timestep
-  double dt_;
-  // Impact duration
-  double impact_dt_;
-  const newCoPArea area_;
   // Alpha vector
   Eigen::VectorXd alpha_;
-  // Name of the body of interest.
-  std::string bName_;
-  // Name of the force sensor
-  std::string sName_;
-  // dt * J_deltatau / impact_duration
+
+  ///< Sampling period
+  double dt_;
+  ///< Impact duration 
+  double impactDuration_;
+
+  McContactParams mcContactParams_;
+    // dt * J_deltatau / impact_duration
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;
   Eigen::MatrixXd A_cop_;

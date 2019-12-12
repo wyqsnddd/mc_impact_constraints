@@ -3,30 +3,21 @@
 namespace mc_impact
 {
 
-template<typename supportContact, typename Point>
-ZMPWithImpulse<supportContact, Point>::ZMPWithImpulse(mi_qpEstimator & predictor,
+template<typename Point>
+ZMPWithImpulse<Point>::ZMPWithImpulse(mi_qpEstimator & predictor,
 
                                                       std::shared_ptr<mc_impact::McZMPArea<Point>> mcZMPAreaPtr,
-                                                      const std::vector<supportContact> & supports,
-                                                      double dt,
-                                                      double impact_dt,
-                                                      const std::vector<Point> & vertexSet,
-                                                      bool allforce,
-                                                      bool updateMcZMPArea,
-                                                      double lowerSlope,
-                                                      double upperSlope,
-                                                      bool debug)
-: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor),
-  mcZMPAreaPtr_(mcZMPAreaPtr), dt_(dt), impact_dt_(impact_dt), supports_(supports), iniVertexSet_(vertexSet),
-  allForce_(allforce), updateMcZMPArea_(updateMcZMPArea), lowerSlope_(lowerSlope), upperSlope_(upperSlope),
-  debug_(debug)
-{
+						      const ImpactAwareConstraintParams<Point> & params
+                                                      )
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), 
+  mcZMPAreaPtr_(mcZMPAreaPtr), params_(params)
+  {
   int numVertex = static_cast<int>(iniVertexSet_.size());
   A_zmp_ = Eigen::MatrixXd::Zero(numVertex, 6);
 
   // Write the ieqConstraintBlocks:
   pointsToInequalityMatrix<Point>(iniVertexSet_, ieqConstraintBlocks_.G_zmp, ieqConstraintBlocks_.h_zmp, centeroid_,
-                                  slopeVec_, lowerSlope, upperSlope);
+                                  slopeVec_, getParams().lowerSlope, getParams().upperSlope);
 
   /// Needs to be checked carefully, compare to the 4 dim case
   // A(:,0) = G_y
@@ -54,8 +45,8 @@ ZMPWithImpulse<supportContact, Point>::ZMPWithImpulse(mi_qpEstimator & predictor
   */
 }
 
-template<typename supportContact, typename Point>
-void ZMPWithImpulse<supportContact, Point>::computeMcZMPArea_()
+template<typename Point>
+void ZMPWithImpulse<Point>::computeMcZMPArea_()
 {
   // int numVertex = static_cast<int>(iniVertexSet_.size());
   int numVertex = getMcZMPArea()->getNumVertex();
@@ -74,8 +65,8 @@ void ZMPWithImpulse<supportContact, Point>::computeMcZMPArea_()
   A_zmp_.block(0, 5, numVertex, 1) = -getIeqBlocks().h_zmp;
 }
 
-template<typename supportContact, typename Point>
-void ZMPWithImpulse<supportContact, Point>::getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench)
+template<typename Point>
+void ZMPWithImpulse<Point>::getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench)
 {
   exWrench.setZero();
   int dof = predictor_.getSimRobot().mb().nrDof();
@@ -84,7 +75,7 @@ void ZMPWithImpulse<supportContact, Point>::getInertialItems(Eigen::MatrixXd & s
   // sva::PTransformd X_0_CoM = sva::PTransformd(predictor_.getRobot().com());
   // (1) Go through the bodies with contact
 
-  for(auto idx = supports_.begin(); idx != supports_.end(); ++idx)
+  for(auto idx = getParams().contacts.begin(); idx != getParams().contacts.end(); ++idx)
   {
     sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(idx->bodyName).inv();
     // exWrench += X_ee_0.dualMatrix() * predictor_.getSimRobot().forceSensor(idx->sensorName).wrench().vector();
@@ -98,7 +89,7 @@ void ZMPWithImpulse<supportContact, Point>::getInertialItems(Eigen::MatrixXd & s
   } // end of for
 
   // (2) Go through the impacts
-  if(allForce_)
+  if(getParams().multiContactCase)
   {
     for(auto impactIdx = predictor_.getImpactModels().begin(); impactIdx != predictor_.getImpactModels().end();
         ++impactIdx)
@@ -124,8 +115,8 @@ void ZMPWithImpulse<supportContact, Point>::getInertialItems(Eigen::MatrixXd & s
   }
 }
 
-template<typename supportContact, typename Point>
-void ZMPWithImpulse<supportContact, Point>::calcZMP_()
+template<typename Point>
+void ZMPWithImpulse<Point>::calcZMP_()
 {
   /*
     Eigen::VectorXd temp = (rbd::dofToVector(predictor_.getSimRobot().mb(), predictor_.getSimRobot().mbc().alpha)
@@ -144,7 +135,7 @@ void ZMPWithImpulse<supportContact, Point>::calcZMP_()
   // sva::PTransformd X_0_CoM = sva::PTransformd(predictor_.getRobot().com());
   // (1) Go through the bodies with contact
 
-  for(auto idx = supports_.begin(); idx != supports_.end(); ++idx)
+  for(auto idx = getParams().contacts.begin(); idx != getParams().contacts.end(); ++idx)
   {
     sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(idx->bodyName).inv();
     local_exWrench += X_ee_0.dualMatrix() * predictor_.getSimRobot().bodyWrench(idx->bodyName).vector();
@@ -182,8 +173,8 @@ void ZMPWithImpulse<supportContact, Point>::calcZMP_()
   zmpPrediction_allforce_ = zmpSensor_ + zmpPerturbation_;
 }
 
-template<typename supportContact, typename Point>
-bool ZMPWithImpulse<supportContact, Point>::pointInsideSupportPolygon(const Point & input)
+template<typename Point>
+bool ZMPWithImpulse< Point>::pointInsideSupportPolygon(const Point & input)
 {
 
   Eigen::VectorXd result = getIeqBlocks().G_zmp * input - getIeqBlocks().h_zmp;
@@ -196,8 +187,8 @@ bool ZMPWithImpulse<supportContact, Point>::pointInsideSupportPolygon(const Poin
   return true;
 }
 
-template<typename supportContact, typename Point>
-void ZMPWithImpulse<supportContact, Point>::compute()
+template<typename Point>
+void ZMPWithImpulse<Point>::compute()
 {
   const auto & robot = predictor_.getSimRobot();
   Eigen::MatrixXd sumJac;
@@ -209,16 +200,16 @@ void ZMPWithImpulse<supportContact, Point>::compute()
     computeMcZMPArea_();
   }
 
-  A_ = (dt_ / impact_dt_) * A_zmp_ * sumJac;
+  A_ = (getParams().dt/ getParams().impactDuration) * A_zmp_ * sumJac;
   /*
     alpha_ =
           (rbd::dofToVector(predictor_.getSimRobot().mb(), predictor_.getSimRobot().mbc().alpha));
   */
 
   rbd::paramToVector(robot.mbc().alpha, alpha_);
-  b_ = -(A_zmp_ * sumWrench + A_zmp_ * sumJac * alpha_ / impact_dt_);
+  b_ = -(A_zmp_ * sumWrench + A_zmp_ * sumJac * alpha_ / getParams().dt);
 
-  if(debug_)
+  if(getParams().debug)
   {
     calcZMP_();
     difference_ = A_ * rbd::dofToVector(predictor_.getSimRobot().mb(), predictor_.getSimRobot().mbc().alphaD) - b_;
@@ -226,7 +217,7 @@ void ZMPWithImpulse<supportContact, Point>::compute()
 }
 
 // The explicit instantiation
-template struct mc_impact::ZMPWithImpulse<ZMPSupportContact, Eigen::Vector3d>;
-template struct mc_impact::ZMPWithImpulse<ZMPSupportContact, Eigen::Vector2d>;
+template struct mc_impact::ZMPWithImpulse<Eigen::Vector3d>;
+template struct mc_impact::ZMPWithImpulse<Eigen::Vector2d>;
 
 } // namespace mc_impact

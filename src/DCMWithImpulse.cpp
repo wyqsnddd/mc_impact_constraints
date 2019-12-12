@@ -3,24 +3,19 @@
 namespace mc_impact
 {
 
-template<typename supportContact, typename Point>
-DCMWithImpulse<supportContact, Point>::DCMWithImpulse(const mc_rbdyn::Robot & realRobot,
-                                                      mi_qpEstimator & predictor,
-                                                      const std::vector<supportContact> & supports,
-                                                      double dt,
-                                                      double impact_dt,
-                                                      const std::vector<Point> & vertexSet,
-                                                      double lowerSlope,
-                                                      double upperSlope,
-                                                      bool debug)
-: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), realRobot_(realRobot),
-  predictor_(predictor), supports_(supports), dt_(dt), impact_dt_(impact_dt), iniVertexSet_(vertexSet), debug_(debug)
+template<typename Point>
+DCMWithImpulse<Point>::DCMWithImpulse(mi_qpEstimator & predictor,
+		const mc_rbdyn::Robot & realRobot,
+		const ImpactAwareConstraintParams<Point> & params
+		)
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), realRobot_(realRobot),
+  params_(params) 
 {
 
-  int numVertex = static_cast<int>(iniVertexSet_.size());
+  int numVertex = static_cast<int>(getParams().dcmAreaVertexSet.size());
   // A_dcm_ = Eigen::MatrixXd::Zero(numVertex, 6);
 
-  pointsToInequalityMatrix<Point>(iniVertexSet_, G_dcm_, h_dcm_, centeroid_, slopeVec_, lowerSlope, upperSlope);
+  pointsToInequalityMatrix<Point>(getParams().dcmAreaVertexSet, G_dcm_, h_dcm_, centeroid_, slopeVec_, getParams().lowerSlope, getParams().upperSlope);
 
   // A_dcm_.block(0, 0, numVertex, 1) = G_dcm_.block(0, 1, numVertex, 1);
   /// A(:,1) = -G_x
@@ -41,13 +36,13 @@ DCMWithImpulse<supportContact, Point>::DCMWithImpulse(const mc_rbdyn::Robot & re
   calcOmega(predictor_.getSimRobot().com().z());
 }
 
-template<typename supportContact, typename Point>
-bool DCMWithImpulse<supportContact, Point>::pointInsideSupportPolygon(const Point & input)
+template<typename Point>
+bool DCMWithImpulse<Point>::pointInsideSupportPolygon(const Point & input)
 {
 
   Eigen::VectorXd result = G_dcm_ * input - h_dcm_;
 
-  for(int ii = 0; ii < static_cast<int>(iniVertexSet_.size()); ii++)
+  for(int ii = 0; ii < static_cast<int>(getParams().dcmAreaVertexSet.size()); ii++)
   {
     if(result(ii) > 0) return false;
   }
@@ -55,8 +50,8 @@ bool DCMWithImpulse<supportContact, Point>::pointInsideSupportPolygon(const Poin
   return true;
 }
 
-template<typename supportContact, typename Point>
-void DCMWithImpulse<supportContact, Point>::compute()
+template<typename Point>
+void DCMWithImpulse<Point>::compute()
 {
   // const auto & robot = predictor_.getSimRobot();
   const auto & robot = realRobot_;
@@ -65,7 +60,7 @@ void DCMWithImpulse<supportContact, Point>::compute()
   // std::cout<<"comJacobian size is: "<<comJacobian.rows() << ", "<<comJacobian.cols()<<std::endl;
   Eigen::MatrixXd jacDcm = (comJacobian * predictor_.getJacobianDeltaAlpha()).block(0, 0, 2, dof);
 
-  A_ = dt_ / getOmega() * G_dcm_ * jacDcm;
+  A_ = getParams().dt/ getOmega() * G_dcm_ * jacDcm;
 
   rbd::paramToVector(robot.mbc().alpha, alpha_);
 
@@ -85,7 +80,7 @@ void DCMWithImpulse<supportContact, Point>::compute()
    - G_dcm_*( dcm_*getOmega() + jacDcm*alpha_);
 
    */
-  if(debug_)
+  if(getParams().debug)
   {
     Eigen::VectorXd temp = (rbd::dofToVector(predictor_.getSimRobot().mb(), predictor_.getSimRobot().mbc().alpha)
                             + rbd::dofToVector(predictor_.getSimRobot().mb(), predictor_.getSimRobot().mbc().alphaD)
@@ -125,7 +120,7 @@ void DCMWithImpulse<supportContact, Point>::compute()
 }
 
 // The explicit instantiation
-template struct mc_impact::DCMWithImpulse<ZMPSupportContact, Eigen::Vector3d>;
-template struct mc_impact::DCMWithImpulse<ZMPSupportContact, Eigen::Vector2d>;
+template struct mc_impact::DCMWithImpulse<Eigen::Vector3d>;
+template struct mc_impact::DCMWithImpulse<Eigen::Vector2d>;
 
 } // namespace mc_impact

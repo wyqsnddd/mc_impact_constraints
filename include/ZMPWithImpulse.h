@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mc_dynamicStability/mc_zmp_area.h>
+#include <McDynamicStability/McZMPArea.h>
 #include <mc_prediction/mi_qpEstimator.h>
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
@@ -10,22 +10,15 @@
 namespace mc_impact
 {
 
-template<typename supportContact, typename Point>
+template<typename Point>
 struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
 {
 
   /// ZMP defined with a set of points
   ZMPWithImpulse(mi_qpEstimator & predictor,
                  std::shared_ptr<mc_impact::McZMPArea<Point>> mcZMPAreaPtr,
-                 const std::vector<supportContact> & supports,
-                 double dt,
-                 double impact_dt,
-                 const std::vector<Point> & vertexSet,
-                 bool allforce = true,
-                 bool updateMcZMPArea = true,
-                 double lowerSlope = 0.01,
-                 double upperSlope = 100.0,
-                 bool debug = false);
+		 const ImpactAwareConstraintParams<Point> & params
+               );
 
   /*! \brief returns the upper bound of the amount of constraints for the QP to reserve memory accordingly.
    */
@@ -90,35 +83,35 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
   }
   inline const Eigen::Vector3d & getZMP_sensor()
   {
-    if(debug_)
+    if(getParams().debug)
       return zmpSensor_;
     else
       throw std::runtime_error("zmp constraint not in debug mode.");
   }
   inline const Eigen::Vector3d & getZMP_perturbation()
   {
-    if(debug_)
+    if(getParams().debug)
       return zmpPerturbation_;
     else
       throw std::runtime_error("zmp constraint not in debug mode.");
   }
   inline const Eigen::Vector3d & getZMP_prediction_feetforce()
   {
-    if(debug_)
+    if(getParams().debug)
       return zmpPrediction_feetforce_;
     else
       throw std::runtime_error("zmp constraint not in debug mode.");
   }
   inline const Eigen::Vector3d & getZMP_prediction_allforce()
   {
-    if(debug_)
+    if(getParams().debug)
       return zmpPrediction_allforce_;
     else
       throw std::runtime_error("zmp constraint not in debug mode.");
   }
   inline const Eigen::VectorXd & getZMP_constraint_difference()
   {
-    if(debug_)
+    if(getParams().debug)
       return difference_;
     else
       throw std::runtime_error("zmp constraint not in debug mode.");
@@ -166,6 +159,10 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
     return mcZMPAreaPtr_;
   }
 
+  inline const ImpactAwareConstraintParams<Point>& getParams()
+  {
+    return params_; 
+  }
 private:
   // Predictor
   mi_qpEstimator & predictor_;
@@ -174,12 +171,13 @@ private:
   std::shared_ptr<mc_impact::McZMPArea<Point>> mcZMPAreaPtr_;
 
   // Timestep
-  double dt_;
+  //double dt_;
   // Impact duration
-  double impact_dt_;
+  //double impact_dt_;
+  
   // Alpha vector
   Eigen::VectorXd alpha_;
-  std::vector<supportContact> supports_;
+
   // Name of the body of interest.
   // std::string bName_;
   // Name of the force sensor
@@ -192,16 +190,18 @@ private:
 
   const std::vector<Point> iniVertexSet_;
 
+  ImpactAwareConstraintParams<Point> params_;
+
   // ZMPArea area_;
-  bool allForce_;
+  //bool allForce_;
 
   bool updateMcZMPArea_;
   void calcZMP_();
   void computeMcZMPArea_();
 
-  double lowerSlope_;
-  double upperSlope_;
-  bool debug_;
+  //double lowerSlope_;
+  //double upperSlope_;
+  //bool debug_;
 
   Eigen::Vector3d zmpSensor_ = Eigen::Vector3d::Zero();
   Eigen::Vector3d zmpPerturbation_ = Eigen::Vector3d::Zero();
