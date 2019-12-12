@@ -3,7 +3,7 @@
 #include <mc_rtc/GUIState.h>
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
-# include <mc_solver/utils/ContactWrenchMatrixToLambdaMatrix.h>
+#include <mc_solver/utils/ContactWrenchMatrixToLambdaMatrix.h>
 // #include "ContactWrenchMatrixToLambdaMatrix.h"
 
 namespace mc_impact

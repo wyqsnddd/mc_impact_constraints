@@ -4,10 +4,12 @@ namespace mc_impact
 {
 
 COPWithImpulse::COPWithImpulse(mi_qpEstimator & predictor,
-		double dt,
-		double impactDuration,
-		const McContactParams & contactParams)
-                : mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt), impactDuration_(impactDuration), mcContactParams_(contactParams){
+                               double dt,
+                               double impactDuration,
+                               const McContactParams & contactParams)
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt),
+  impactDuration_(impactDuration), mcContactParams_(contactParams)
+{
 
   A_cop_ = Eigen::MatrixXd::Zero(4, 6);
 

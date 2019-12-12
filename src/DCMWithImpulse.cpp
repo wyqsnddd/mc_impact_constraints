@@ -5,17 +5,17 @@ namespace mc_impact
 
 template<typename Point>
 DCMWithImpulse<Point>::DCMWithImpulse(mi_qpEstimator & predictor,
-		const mc_rbdyn::Robot & realRobot,
-		const ImpactAwareConstraintParams<Point> & params
-		)
-: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), realRobot_(realRobot),
-  params_(params) 
+                                      const mc_rbdyn::Robot & realRobot,
+                                      const ImpactAwareConstraintParams<Point> & params)
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor),
+  realRobot_(realRobot), params_(params)
 {
 
   int numVertex = static_cast<int>(getParams().dcmAreaVertexSet.size());
   // A_dcm_ = Eigen::MatrixXd::Zero(numVertex, 6);
 
-  pointsToInequalityMatrix<Point>(getParams().dcmAreaVertexSet, G_dcm_, h_dcm_, centeroid_, slopeVec_, getParams().lowerSlope, getParams().upperSlope);
+  pointsToInequalityMatrix<Point>(getParams().dcmAreaVertexSet, G_dcm_, h_dcm_, centeroid_, slopeVec_,
+                                  getParams().lowerSlope, getParams().upperSlope);
 
   // A_dcm_.block(0, 0, numVertex, 1) = G_dcm_.block(0, 1, numVertex, 1);
   /// A(:,1) = -G_x
@@ -60,7 +60,7 @@ void DCMWithImpulse<Point>::compute()
   // std::cout<<"comJacobian size is: "<<comJacobian.rows() << ", "<<comJacobian.cols()<<std::endl;
   Eigen::MatrixXd jacDcm = (comJacobian * predictor_.getJacobianDeltaAlpha()).block(0, 0, 2, dof);
 
-  A_ = getParams().dt/ getOmega() * G_dcm_ * jacDcm;
+  A_ = getParams().dt / getOmega() * G_dcm_ * jacDcm;
 
   rbd::paramToVector(robot.mbc().alpha, alpha_);
 

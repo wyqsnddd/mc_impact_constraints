@@ -1,13 +1,11 @@
 #pragma once
 
 #include <Eigen/Dense>
-#include <iostream>
-
 #include <McDynamicStability/McContact.h>
+#include <iostream>
 
 namespace mc_impact
 {
-
 
 template<typename Point>
 struct ImpactAwareConstraintParams
@@ -20,11 +18,11 @@ struct ImpactAwareConstraintParams
   bool multiContactCase = true;
   ///< Update the Mc-ZMP-area
   bool updateMcZMPArea = true;
-  ///< 
+  ///<
   double lowerSlope = 0.01;
-  ///< 
+  ///<
   double upperSlope = 100.0;
-  ///< Debug mode ore not. 
+  ///< Debug mode ore not.
   bool debug = false;
 
   const std::vector<McContactParams> contacts;
@@ -36,8 +34,6 @@ struct ImpactAwareConstraintParams
 
 template struct ImpactAwareConstraintParams<Eigen::Vector3d>;
 template struct ImpactAwareConstraintParams<Eigen::Vector2d>;
-
-
 
 struct ZMPArea
 {

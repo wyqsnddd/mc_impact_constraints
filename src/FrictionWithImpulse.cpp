@@ -6,7 +6,7 @@ namespace mc_impact
 FrictionWithImpulse::FrictionWithImpulse(mi_qpEstimator & predictor,
                                          double dt,
                                          double impact_dt,
-					 const McContactParams & params)
+                                         const McContactParams & params)
 : mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), dt_(dt),
   impactDuration_(impact_dt), mcContactParams_(params)
 {
@@ -42,7 +42,8 @@ void FrictionWithImpulse::compute()
   // std::cout<<"size of alpha_"<<alpha_.rows()<<std::endl;
   // b_ = -multiplier_ * (predictor_.getSimRobot().forceSensor(sName_).wrench().force() + J_deltaF * alpha_ /
   // impact_dt_);
-  b_ = -multiplier_ * (predictor_.getSimRobot().bodyWrench(getParams().bodyName).force() + J_deltaF * alpha_ / impactDuration_);
+  b_ = -multiplier_
+       * (predictor_.getSimRobot().bodyWrench(getParams().bodyName).force() + J_deltaF * alpha_ / impactDuration_);
 }
 
 } // namespace mc_impact

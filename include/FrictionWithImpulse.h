@@ -4,7 +4,7 @@
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
 
-# include <McDynamicStability/McContact.h>
+#include <McDynamicStability/McContact.h>
 
 namespace mc_impact
 {
@@ -14,10 +14,7 @@ namespace mc_impact
  */
 struct FrictionWithImpulse : public mc_solver::InequalityConstraintRobot
 {
-  FrictionWithImpulse(mi_qpEstimator & predictor,
-                      double dt,
-                      double impact_dt,
-		      const McContactParams & params);
+  FrictionWithImpulse(mi_qpEstimator & predictor, double dt, double impact_dt, const McContactParams & params);
 
   inline int maxInEq() const override
   {
@@ -42,8 +39,9 @@ struct FrictionWithImpulse : public mc_solver::InequalityConstraintRobot
 
   const McContactParams & getParams()
   {
-    return mcContactParams_; 
+    return mcContactParams_;
   }
+
 private:
   // Predictor
   mi_qpEstimator & predictor_;

@@ -4,8 +4,8 @@
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
 
-# include "ConstraintUtils.h"
-# include <McDynamicStability/McContact.h>
+#include "ConstraintUtils.h"
+#include <McDynamicStability/McContact.h>
 
 namespace mc_impact
 {
@@ -20,10 +20,7 @@ struct newCoPArea
 */
 struct COPWithImpulse : public mc_solver::InequalityConstraintRobot
 {
-  COPWithImpulse(mi_qpEstimator & predictor,
-		  double dt,
-		  double impactDuration,
-		  const McContactParams & contactParams);
+  COPWithImpulse(mi_qpEstimator & predictor, double dt, double impactDuration, const McContactParams & contactParams);
 
   inline int maxInEq() const override
   {
@@ -58,11 +55,12 @@ struct COPWithImpulse : public mc_solver::InequalityConstraintRobot
   }
 
   void compute() override;
-  
+
   inline const McContactParams & getParams()
   {
-    return mcContactParams_; 
+    return mcContactParams_;
   }
+
 private:
   // Predictor
   mi_qpEstimator & predictor_;
@@ -71,11 +69,11 @@ private:
 
   ///< Sampling period
   double dt_;
-  ///< Impact duration 
+  ///< Impact duration
   double impactDuration_;
 
   McContactParams mcContactParams_;
-    // dt * J_deltatau / impact_duration
+  // dt * J_deltatau / impact_duration
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;
   Eigen::MatrixXd A_cop_;

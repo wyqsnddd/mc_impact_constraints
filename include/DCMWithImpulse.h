@@ -17,9 +17,8 @@ struct DCMWithImpulse : public mc_solver::InequalityConstraintRobot
 {
 
   DCMWithImpulse(mi_qpEstimator & predictor,
-		  const mc_rbdyn::Robot & realRobot,
-		  const ImpactAwareConstraintParams<Point> & params
-                 );
+                 const mc_rbdyn::Robot & realRobot,
+                 const ImpactAwareConstraintParams<Point> & params);
 
   inline int maxInEq() const override
   {
@@ -87,11 +86,10 @@ struct DCMWithImpulse : public mc_solver::InequalityConstraintRobot
   }
   inline const ImpactAwareConstraintParams<Point> & getParams() const
   {
-    return params_; 
+    return params_;
   }
 
 private:
-
   // Predictor
   mi_qpEstimator & predictor_;
 
@@ -101,10 +99,10 @@ private:
   // Alpha vector
   Eigen::VectorXd alpha_;
 
-  ///< Omega 
+  ///< Omega
   double omega_ = 1.0;
 
-  //bool debug_;
+  // bool debug_;
 
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;

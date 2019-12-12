@@ -6,12 +6,11 @@ namespace mc_impact
 template<typename Point>
 ZMPWithImpulse<Point>::ZMPWithImpulse(mi_qpEstimator & predictor,
 
-                                                      std::shared_ptr<mc_impact::McZMPArea<Point>> mcZMPAreaPtr,
-						      const ImpactAwareConstraintParams<Point> & params
-                                                      )
-: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), 
+                                      std::shared_ptr<mc_impact::McZMPArea<Point>> mcZMPAreaPtr,
+                                      const ImpactAwareConstraintParams<Point> & params)
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor),
   mcZMPAreaPtr_(mcZMPAreaPtr), params_(params)
-  {
+{
   int numVertex = static_cast<int>(iniVertexSet_.size());
   A_zmp_ = Eigen::MatrixXd::Zero(numVertex, 6);
 
@@ -174,7 +173,7 @@ void ZMPWithImpulse<Point>::calcZMP_()
 }
 
 template<typename Point>
-bool ZMPWithImpulse< Point>::pointInsideSupportPolygon(const Point & input)
+bool ZMPWithImpulse<Point>::pointInsideSupportPolygon(const Point & input)
 {
 
   Eigen::VectorXd result = getIeqBlocks().G_zmp * input - getIeqBlocks().h_zmp;
@@ -200,7 +199,7 @@ void ZMPWithImpulse<Point>::compute()
     computeMcZMPArea_();
   }
 
-  A_ = (getParams().dt/ getParams().impactDuration) * A_zmp_ * sumJac;
+  A_ = (getParams().dt / getParams().impactDuration) * A_zmp_ * sumJac;
   /*
     alpha_ =
           (rbd::dofToVector(predictor_.getSimRobot().mb(), predictor_.getSimRobot().mbc().alpha));
