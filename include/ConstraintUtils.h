@@ -18,14 +18,16 @@ struct ImpactAwareConstraintParams
   bool multiContactCase = true;
   ///< Update the Mc-ZMP-area
   bool updateMcZMPArea = true;
-  ///<
-  double lowerSlope = 0.01;
-  ///<
-  double upperSlope = 100.0;
   ///< Debug mode ore not.
   bool debug = false;
 
-  const std::vector<McContactParams> contacts;
+  ///<   ProjectionSlop
+  double lowerSlope = 0.01;
+  ///<   ProjectionSlop
+  double upperSlope = 100.0;
+
+  std::shared_ptr<McContactSet> contactSetPtr;
+  //const std::vector<McContactParams> contacts;
   ///< Vertices of the multi-contact DCM area.
   std::vector<Point> dcmAreaVertexSet;
   ///< Vertices of the multi-contact ZMP area.

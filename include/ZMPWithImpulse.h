@@ -14,7 +14,7 @@ template<typename Point>
 struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
 {
 
-  /// ZMP defined with a set of points
+  ///< ZMP defined with a set of points
   ZMPWithImpulse(mi_qpEstimator & predictor,
                  std::shared_ptr<mc_impact::McZMPArea<Point>> mcZMPAreaPtr,
                  const ImpactAwareConstraintParams<Point> & params);

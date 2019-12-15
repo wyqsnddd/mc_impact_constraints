@@ -74,16 +74,20 @@ void ZMPWithImpulse<Point>::getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Ve
   // sva::PTransformd X_0_CoM = sva::PTransformd(predictor_.getRobot().com());
   // (1) Go through the bodies with contact
 
-  for(auto idx = getParams().contacts.begin(); idx != getParams().contacts.end(); ++idx)
+  //for(auto idx = getParams().contactSetPtr->getContactMap().begin(); idx != getParams().contacts.end(); ++idx)
+
+  for (auto & contactPair : getParams().contactSetPtr->getContactMap())
   {
-    sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(idx->bodyName).inv();
+    std::string bodyName = contactPair.second.getContactParams().bodyName;
+    sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(contactPair.second.getContactParams().bodyName).inv();
+    //sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(idx->bodyName).inv();
     // exWrench += X_ee_0.dualMatrix() * predictor_.getSimRobot().forceSensor(idx->sensorName).wrench().vector();
-    exWrench += X_ee_0.dualMatrix() * predictor_.getSimRobot().bodyWrench(idx->bodyName).vector();
+    exWrench += X_ee_0.dualMatrix() * predictor_.getSimRobot().bodyWrench(bodyName).vector();
 
     // sumJac += X_ee_0.dualMatrix().block(0, 3, 6, 3) * predictor_.getJacobianDeltaF(idx->bodyName);
 
-    sumJac.block(0, 0, 3, dof) += X_ee_0.dualMatrix().block(0, 3, 3, 3) * predictor_.getJacobianDeltaF(idx->bodyName);
-    sumJac.block(3, 0, 3, dof) += X_ee_0.dualMatrix().block(3, 3, 3, 3) * predictor_.getJacobianDeltaF(idx->bodyName);
+    sumJac.block(0, 0, 3, dof) += X_ee_0.dualMatrix().block(0, 3, 3, 3) * predictor_.getJacobianDeltaF(bodyName);
+    sumJac.block(3, 0, 3, dof) += X_ee_0.dualMatrix().block(3, 3, 3, 3) * predictor_.getJacobianDeltaF(bodyName);
     //
   } // end of for
 
@@ -134,11 +138,13 @@ void ZMPWithImpulse<Point>::calcZMP_()
   // sva::PTransformd X_0_CoM = sva::PTransformd(predictor_.getRobot().com());
   // (1) Go through the bodies with contact
 
-  for(auto idx = getParams().contacts.begin(); idx != getParams().contacts.end(); ++idx)
+  //for(auto idx = getParams().contactSetPtr->getContactMap().begin(); idx != getParams().contacts.end(); ++idx)
+  for(auto & contactPair: getParams().contactSetPtr->getContactMap())
   {
-    sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(idx->bodyName).inv();
-    local_exWrench += X_ee_0.dualMatrix() * predictor_.getSimRobot().bodyWrench(idx->bodyName).vector();
-    local_sumJac += X_ee_0.dualMatrix().block(0, 3, 6, 3) * predictor_.getJacobianDeltaF(idx->bodyName);
+    std::string bodyName = contactPair.second.getContactParams().bodyName;
+    sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(bodyName).inv();
+    local_exWrench += X_ee_0.dualMatrix() * predictor_.getSimRobot().bodyWrench(bodyName).vector();
+    local_sumJac += X_ee_0.dualMatrix().block(0, 3, 6, 3) * predictor_.getJacobianDeltaF(bodyName);
 
   } // end of for
 

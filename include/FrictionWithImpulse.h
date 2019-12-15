@@ -4,7 +4,7 @@
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
 
-#include <McDynamicStability/McContact.h>
+#include "ConstraintUtils.h"
 
 namespace mc_impact
 {
@@ -14,7 +14,7 @@ namespace mc_impact
  */
 struct FrictionWithImpulse : public mc_solver::InequalityConstraintRobot
 {
-  FrictionWithImpulse(mi_qpEstimator & predictor, double dt, double impact_dt, const McContactParams & params);
+  FrictionWithImpulse(const std::string & mcContactName, mi_qpEstimator & predictor, const ImpactAwareConstraintParams<Eigen::Vector2d> & impactAwareConstraintParams);
 
   inline int maxInEq() const override
   {
@@ -37,22 +37,31 @@ struct FrictionWithImpulse : public mc_solver::InequalityConstraintRobot
 
   void compute() override;
 
-  const McContactParams & getParams()
+  inline const std::string & getMcContactName() const
   {
-    return mcContactParams_;
+    return mcContactName_; 
+  }
+
+
+  inline const ImpactAwareConstraintParams<Eigen::Vector2d> & getConstraintParams() const
+  {
+    return constraintParams_; 
+  }
+
+  inline const McContactParams & getParams() const
+  {
+    return constraintParams_.contactSetPtr->getContact(getMcContactName()).getContactParams();
   }
 
 private:
+
+  std::string mcContactName_;
+
   // Predictor
   mi_qpEstimator & predictor_;
-  // Timestep
-  double dt_;
-  // Impact duration
-  double impactDuration_;
-
-  McContactParams mcContactParams_;
-
-  // Alpha vector
+  
+  const ImpactAwareConstraintParams<Eigen::Vector2d> & constraintParams_;
+   // Alpha vector
   Eigen::VectorXd alpha_;
   // dt * J_deltatau / impact_duration
   Eigen::MatrixXd A_;
