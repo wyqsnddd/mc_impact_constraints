@@ -74,13 +74,13 @@ void ZMPWithImpulse<Point>::getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Ve
   // sva::PTransformd X_0_CoM = sva::PTransformd(predictor_.getRobot().com());
   // (1) Go through the bodies with contact
 
-  //for(auto idx = getParams().contactSetPtr->getContactMap().begin(); idx != getParams().contacts.end(); ++idx)
+  // for(auto idx = getParams().contactSetPtr->getContactMap().begin(); idx != getParams().contacts.end(); ++idx)
 
-  for (auto & contactPair : getParams().contactSetPtr->getContactMap())
+  for(auto & contactPair : getParams().contactSetPtr->getContactMap())
   {
     std::string bodyName = contactPair.second.getContactParams().bodyName;
     sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(contactPair.second.getContactParams().bodyName).inv();
-    //sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(idx->bodyName).inv();
+    // sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(idx->bodyName).inv();
     // exWrench += X_ee_0.dualMatrix() * predictor_.getSimRobot().forceSensor(idx->sensorName).wrench().vector();
     exWrench += X_ee_0.dualMatrix() * predictor_.getSimRobot().bodyWrench(bodyName).vector();
 
@@ -138,8 +138,8 @@ void ZMPWithImpulse<Point>::calcZMP_()
   // sva::PTransformd X_0_CoM = sva::PTransformd(predictor_.getRobot().com());
   // (1) Go through the bodies with contact
 
-  //for(auto idx = getParams().contactSetPtr->getContactMap().begin(); idx != getParams().contacts.end(); ++idx)
-  for(auto & contactPair: getParams().contactSetPtr->getContactMap())
+  // for(auto idx = getParams().contactSetPtr->getContactMap().begin(); idx != getParams().contacts.end(); ++idx)
+  for(auto & contactPair : getParams().contactSetPtr->getContactMap())
   {
     std::string bodyName = contactPair.second.getContactParams().bodyName;
     sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(bodyName).inv();

@@ -3,11 +3,11 @@
 namespace mc_impact
 {
 
-COPWithImpulse::COPWithImpulse(
-		const std::string & mcContactName, 
-		mi_qpEstimator & predictor, 
-		const ImpactAwareConstraintParams<Eigen::Vector2d> & impactAwareConstraintParams
-		): mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), mcContactName_(mcContactName), predictor_(predictor), constraintParams_(impactAwareConstraintParams)
+COPWithImpulse::COPWithImpulse(const std::string & mcContactName,
+                               mi_qpEstimator & predictor,
+                               const ImpactAwareConstraintParams<Eigen::Vector2d> & impactAwareConstraintParams)
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), mcContactName_(mcContactName),
+  predictor_(predictor), constraintParams_(impactAwareConstraintParams)
 {
 
   A_cop_ = Eigen::MatrixXd::Zero(4, 6);
@@ -50,13 +50,14 @@ void COPWithImpulse::compute()
 
   // A_ = (dt_ / impact_dt_) * A_cop_.block(0, 3, 4, 3)*J_deltaF.block(0, startIndex_, J_deltaF.rows(), J_deltaF.cols()
   // - startIndex_);
-  A_ = (getConstraintParams().dt/ getConstraintParams().impactDuration) * A_cop_.block(0, 3, 4, 3) * J_deltaF;
+  A_ = (getConstraintParams().dt / getConstraintParams().impactDuration) * A_cop_.block(0, 3, 4, 3) * J_deltaF;
   // std::cout<<"size of A_: "<<A_.rows()<<", "<<A_.cols()<<std::endl;
   rbd::paramToVector(robot.mbc().alpha, alpha_);
 
   // std::cout<<"size of alpha_"<<alpha_.rows()<<std::endl;
   sva::ForceVecd bodyWrenchSensor = predictor_.getSimRobot().bodyWrench(getParams().bodyName);
-  b_ = -(A_cop_ * bodyWrenchSensor.vector() + A_cop_.block(0, 3, 4, 3) * J_deltaF * alpha_ / getConstraintParams().impactDuration);
+  b_ = -(A_cop_ * bodyWrenchSensor.vector()
+         + A_cop_.block(0, 3, 4, 3) * J_deltaF * alpha_ / getConstraintParams().impactDuration);
   /*
   b_ = -(A_cop_ * predictor_.getSimRobot().forceSensor(sName_).wrench().vector()
          + A_cop_.block(0, 3, 4, 3) * J_deltaF * alpha_ / impact_dt_);

@@ -3,12 +3,12 @@
 namespace mc_impact
 {
 FrictionWithImpulse::FrictionWithImpulse(
-		const std::string & mcContactName, 
-		mi_qpEstimator & predictor, 
-		const ImpactAwareConstraintParams<Eigen::Vector2d> & impactAwareConstraintParams
-		): mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), mcContactName_(mcContactName), predictor_(predictor), constraintParams_(impactAwareConstraintParams)
+    const std::string & mcContactName,
+    mi_qpEstimator & predictor,
+    const ImpactAwareConstraintParams<Eigen::Vector2d> & impactAwareConstraintParams)
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), mcContactName_(mcContactName),
+  predictor_(predictor), constraintParams_(impactAwareConstraintParams)
 {
-
 
   // Eigen::Vector3d normal = contact.X_0_r2s(solver.robots()).rotation().row(2).transpose();
   // multiplier_ = (Eigen::MatrixXd::Identity(3, 3) - (1 + mu) * normal * normal.transpose());
@@ -33,7 +33,7 @@ void FrictionWithImpulse::compute()
   // std::cout<<"size of J_deltaF: "<<J_deltaF.rows()<<", "<<J_deltaF.cols()<<std::endl;
   // std::cout<<"size of reduced J_deltaF: "<<J_deltaF.rows()<<", "<<J_deltaF.cols()<<std::endl;
 
-  A_ = (getConstraintParams().dt/ getConstraintParams().impactDuration) * multiplier_ * J_deltaF;
+  A_ = (getConstraintParams().dt / getConstraintParams().impactDuration) * multiplier_ * J_deltaF;
 
   // std::cout<<"size of A_: "<<A_.rows()<<", "<<A_.cols()<<std::endl;
   rbd::paramToVector(robot.mbc().alpha, alpha_);
@@ -42,7 +42,8 @@ void FrictionWithImpulse::compute()
   // b_ = -multiplier_ * (predictor_.getSimRobot().forceSensor(sName_).wrench().force() + J_deltaF * alpha_ /
   // impact_dt_);
   b_ = -multiplier_
-       * (predictor_.getSimRobot().bodyWrench(getParams().bodyName).force() + J_deltaF * alpha_ / getConstraintParams().impactDuration);
+       * (predictor_.getSimRobot().bodyWrench(getParams().bodyName).force()
+          + J_deltaF * alpha_ / getConstraintParams().impactDuration);
 }
 
 } // namespace mc_impact

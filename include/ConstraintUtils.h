@@ -27,7 +27,7 @@ struct ImpactAwareConstraintParams
   double upperSlope = 100.0;
 
   std::shared_ptr<McContactSet> contactSetPtr;
-  //const std::vector<McContactParams> contacts;
+  // const std::vector<McContactParams> contacts;
   ///< Vertices of the multi-contact DCM area.
   std::vector<Point> dcmAreaVertexSet;
   ///< Vertices of the multi-contact ZMP area.

@@ -11,7 +11,9 @@ namespace mc_impact
 
 struct COPWithImpulse : public mc_solver::InequalityConstraintRobot
 {
-  COPWithImpulse(const std::string & mcContactName, mi_qpEstimator & predictor, const ImpactAwareConstraintParams<Eigen::Vector2d> & impactAwareConstraintParams);
+  COPWithImpulse(const std::string & mcContactName,
+                 mi_qpEstimator & predictor,
+                 const ImpactAwareConstraintParams<Eigen::Vector2d> & impactAwareConstraintParams);
 
   inline int maxInEq() const override
   {
@@ -49,12 +51,12 @@ struct COPWithImpulse : public mc_solver::InequalityConstraintRobot
 
   inline const std::string & getMcContactName() const
   {
-    return mcContactName_; 
+    return mcContactName_;
   }
 
   inline const ImpactAwareConstraintParams<Eigen::Vector2d> & getConstraintParams() const
   {
-    return constraintParams_; 
+    return constraintParams_;
   }
 
   inline const McContactParams & getParams() const
@@ -63,12 +65,10 @@ struct COPWithImpulse : public mc_solver::InequalityConstraintRobot
   }
 
 private:
-
   std::string mcContactName_;
 
   // Predictor
   mi_qpEstimator & predictor_;
-
 
   // Alpha vector
   Eigen::VectorXd alpha_;
