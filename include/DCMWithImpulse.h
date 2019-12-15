@@ -1,5 +1,6 @@
 #pragma once
 
+#include <math.h>
 #include <mc_prediction/mi_qpEstimator.h>
 #include <mc_rbdyn/Robots.h>
 #include <mc_solver/InequalityConstraint.h>
@@ -7,7 +8,6 @@
 #include <RBDyn/CoM.h>
 
 #include "ConstraintUtils.h"
-#include <math.h>
 
 namespace mc_impact
 {

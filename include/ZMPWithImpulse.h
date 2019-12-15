@@ -4,8 +4,9 @@
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
 
-#include "ConstraintUtils.h"
 #include <McDynamicStability/McZMPArea.h>
+
+#include "ConstraintUtils.h"
 
 namespace mc_impact
 {
