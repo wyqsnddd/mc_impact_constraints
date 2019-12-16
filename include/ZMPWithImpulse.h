@@ -30,7 +30,7 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
     }
     else
     {
-      return static_cast<int>(iniVertexSet_.size());
+      return static_cast<int>(getParams().zmpAreaVertexSet.size());
     }
   }
 
@@ -58,7 +58,7 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
     }
     else
     {
-      return static_cast<int>(iniVertexSet_.size());
+      return static_cast<int>(getParams().zmpAreaVertexSet.size());
     }
   }
   void compute() override;
@@ -124,13 +124,13 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
   inline const std::vector<Point> & getVertices()
   {
 
-    return iniVertexSet_;
-    /*
+    return getParams().zmpAreaVertexSet;
+    /*! requires to update the StabiliPlus library
   if(updateMcZMPArea())
   {
     return getMcZMPArea()->
   }else{
-    return iniVertexSet_;
+    return getParams().zmpAreaVertexSet;
   }
   */
   }
@@ -159,7 +159,7 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
     return mcZMPAreaPtr_;
   }
 
-  inline const ImpactAwareConstraintParams<Point> & getParams()
+  inline const ImpactAwareConstraintParams<Point> & getParams() const
   {
     return params_;
   }
@@ -189,7 +189,7 @@ private:
 
   IeqConstraintBlocks ieqConstraintBlocks_;
 
-  const std::vector<Point> iniVertexSet_;
+  //const std::vector<Point> iniVertexSet_;
 
   ImpactAwareConstraintParams<Point> params_;
 

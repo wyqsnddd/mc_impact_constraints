@@ -11,11 +11,11 @@ ZMPWithImpulse<Point>::ZMPWithImpulse(mi_qpEstimator & predictor,
 : mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor),
   mcZMPAreaPtr_(mcZMPAreaPtr), params_(params)
 {
-  int numVertex = static_cast<int>(iniVertexSet_.size());
+  int numVertex = static_cast<int>(getParams().zmpAreaVertexSet.size());
   A_zmp_ = Eigen::MatrixXd::Zero(numVertex, 6);
 
   // Write the ieqConstraintBlocks:
-  pointsToInequalityMatrix<Point>(iniVertexSet_, ieqConstraintBlocks_.G_zmp, ieqConstraintBlocks_.h_zmp, centeroid_,
+  pointsToInequalityMatrix<Point>(getParams().zmpAreaVertexSet, ieqConstraintBlocks_.G_zmp, ieqConstraintBlocks_.h_zmp, centeroid_,
                                   slopeVec_, getParams().lowerSlope, getParams().upperSlope);
 
   /// Needs to be checked carefully, compare to the 4 dim case
@@ -184,7 +184,7 @@ bool ZMPWithImpulse<Point>::pointInsideSupportPolygon(const Point & input)
 
   Eigen::VectorXd result = getIeqBlocks().G_zmp * input - getIeqBlocks().h_zmp;
 
-  for(int ii = 0; ii < static_cast<int>(iniVertexSet_.size()); ii++)
+  for(int ii = 0; ii < static_cast<int>(getParams().zmpAreaVertexSet.size()); ii++)
   {
     if(result(ii) > 0) return false;
   }

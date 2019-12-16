@@ -10,10 +10,13 @@ namespace mc_impact
 template<typename Point>
 struct ImpactAwareConstraintParams
 {
+  public:
   ImpactAwareConstraintParams()
   {
     contactSetPtr.reset(new McContactSet());
   }
+
+  ~ImpactAwareConstraintParams(){}
   ///< Sampling Period
   double dt = 0.05;
   ///< Impact duration
