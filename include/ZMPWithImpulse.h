@@ -79,7 +79,7 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
 
   inline bool updateMcZMPArea() const
   {
-    return updateMcZMPArea_;
+    return getParams().updateMcZMPArea;
   }
   inline const Eigen::Vector3d & getZMP_sensor()
   {
@@ -123,29 +123,27 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
     */
   inline const std::vector<Point> & getVertices()
   {
-
-    return getParams().zmpAreaVertexSet;
-    /*! requires to update the StabiliPlus library
   if(updateMcZMPArea())
   {
-    return getMcZMPArea()->
+    return getMcZMPArea()->getPolygonVertices();
   }else{
     return getParams().zmpAreaVertexSet;
   }
-  */
   }
   // Debugging:
   Point centeroid_;
-  Eigen::VectorXd slopeVec_ = Eigen::Vector3d::Zero();
+  //Eigen::VectorXd slopeVec_ = Eigen::Vector3d::Zero();
 
   bool zmpTest_ = false;
   // Eigen::MatrixXd G_zmp_;
   // Eigen::VectorXd h_zmp_;
 
+  
   inline void setIeqBlocks(const IeqConstraintBlocks & input)
   {
     ieqConstraintBlocks_ = input;
   }
+  
   inline const IeqConstraintBlocks & getIeqBlocks() const
   {
     return ieqConstraintBlocks_;
@@ -196,7 +194,6 @@ private:
   // ZMPArea area_;
   // bool allForce_;
 
-  bool updateMcZMPArea_;
   void calcZMP_();
   void computeMcZMPArea_();
 

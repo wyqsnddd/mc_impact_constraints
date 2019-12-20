@@ -19,7 +19,7 @@ void clampSlope(double & slope, const double & mini, const double & max)
     slope = sign * max;
   }
 }
-
+/*
 template<typename Point>
 void mc_impact::pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
                                          Eigen::MatrixXd & G,
@@ -199,3 +199,4 @@ template void mc_impact::pointsToInequalityMatrix<Eigen::Vector3d>(const std::ve
                                                                    Eigen::VectorXd & h,
                                                                    double miniSlope,
                                                                    double maxSlope);
+*/

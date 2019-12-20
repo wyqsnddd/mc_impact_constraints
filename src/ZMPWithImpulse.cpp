@@ -15,8 +15,13 @@ ZMPWithImpulse<Point>::ZMPWithImpulse(mi_qpEstimator & predictor,
   A_zmp_ = Eigen::MatrixXd::Zero(numVertex, 6);
 
   // Write the ieqConstraintBlocks:
-  pointsToInequalityMatrix<Point>(getParams().zmpAreaVertexSet, ieqConstraintBlocks_.G_zmp, ieqConstraintBlocks_.h_zmp, centeroid_,
+  /*
+  pointsToInequalityMatrix(getParams().zmpAreaVertexSet, ieqConstraintBlocks_.G_zmp, ieqConstraintBlocks_.h_zmp, centeroid_,
                                   slopeVec_, getParams().lowerSlope, getParams().upperSlope);
+				  */
+  pointsToInequalityMatrix(getParams().zmpAreaVertexSet, ieqConstraintBlocks_.G_zmp, ieqConstraintBlocks_.h_zmp,
+                                   getParams().lowerSlope, getParams().upperSlope);
+
 
   /// Needs to be checked carefully, compare to the 4 dim case
   // A(:,0) = G_y
@@ -182,7 +187,12 @@ template<typename Point>
 bool ZMPWithImpulse<Point>::pointInsideSupportPolygon(const Point & input)
 {
 
+  std::cout<<"G_zmp: is: "<<std::endl<<getIeqBlocks().G_zmp<<std::endl;
+  std::cout<<"h_zmp: is: "<<std::endl<<getIeqBlocks().h_zmp.transpose()<<std::endl;
   Eigen::VectorXd result = getIeqBlocks().G_zmp * input - getIeqBlocks().h_zmp;
+
+  std::cout<<"The test result is: "<< result.transpose()<<std::endl; 
+  std::cout<<"The zmp area vertices size is: "<< getParams().zmpAreaVertexSet.size()<<std::endl;
 
   for(int ii = 0; ii < static_cast<int>(getParams().zmpAreaVertexSet.size()); ii++)
   {
@@ -222,7 +232,6 @@ void ZMPWithImpulse<Point>::compute()
 }
 
 // The explicit instantiation
-template struct mc_impact::ZMPWithImpulse<Eigen::Vector3d>;
 template struct mc_impact::ZMPWithImpulse<Eigen::Vector2d>;
 
 } // namespace mc_impact

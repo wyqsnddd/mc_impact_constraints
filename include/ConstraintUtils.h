@@ -44,14 +44,7 @@ struct ImpactAwareConstraintParams
 template struct ImpactAwareConstraintParams<Eigen::Vector3d>;
 template struct ImpactAwareConstraintParams<Eigen::Vector2d>;
 
-struct ZMPArea
-{
-  double min_x;
-  double max_x;
-  double min_y;
-  double max_y;
-};
-
+/*
 template<typename Point>
 void pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
                               Eigen::MatrixXd & G,
@@ -68,4 +61,5 @@ void pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
                               double miniSlope = 0.01,
                               double maxSlope = 100);
 
+			      */
 } // namespace mc_impact
