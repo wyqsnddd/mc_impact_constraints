@@ -14,12 +14,8 @@ ZMPWithImpulse<Point>::ZMPWithImpulse(mi_qpEstimator & predictor,
   int numVertex = static_cast<int>(getParams().zmpAreaVertexSet.size());
   A_zmp_ = Eigen::MatrixXd::Zero(numVertex, 6);
 
-  // Write the ieqConstraintBlocks:
-  /*
-  pointsToInequalityMatrix(getParams().zmpAreaVertexSet, ieqConstraintBlocks_.G_zmp, ieqConstraintBlocks_.h_zmp, centeroid_,
-                                  slopeVec_, getParams().lowerSlope, getParams().upperSlope);
-				  */
-  pointsToInequalityMatrix(getParams().zmpAreaVertexSet, ieqConstraintBlocks_.G_zmp, ieqConstraintBlocks_.h_zmp,
+  // Modify the ieqConstraintBlocks. 
+  pointsToInequalityMatrix(getParams().zmpAreaVertexSet, ieqConstraintBlocks_.G_zmp, ieqConstraintBlocks_.h_zmp, 
                                    getParams().lowerSlope, getParams().upperSlope);
 
 
@@ -50,13 +46,17 @@ ZMPWithImpulse<Point>::ZMPWithImpulse(mi_qpEstimator & predictor,
 }
 
 template<typename Point>
-void ZMPWithImpulse<Point>::computeMcZMPArea_()
+void ZMPWithImpulse<Point>::computeMcZMPArea_(double height)
 {
+
+  // Update the Multi-contact ZMP area. 
+  getMcZMPArea()->computeMcZMPArea(height);
+
   // int numVertex = static_cast<int>(iniVertexSet_.size());
   int numVertex = getMcZMPArea()->getNumVertex();
 
+  /*
   A_zmp_ = Eigen::MatrixXd::Zero(numVertex, 6);
-
   // Set the inequality matrix blocks
   setIeqBlocks(getMcZMPArea()->getIeqConstraint());
 
@@ -67,6 +67,8 @@ void ZMPWithImpulse<Point>::computeMcZMPArea_()
   A_zmp_.block(0, 1, numVertex, 1) = -getIeqBlocks().G_zmp.block(0, 0, numVertex, 1);
   /// A(:,5) = h
   A_zmp_.block(0, 5, numVertex, 1) = -getIeqBlocks().h_zmp;
+
+  */
 }
 
 template<typename Point>
@@ -212,7 +214,7 @@ void ZMPWithImpulse<Point>::compute()
 
   if(updateMcZMPArea())
   {
-    computeMcZMPArea_();
+    computeMcZMPArea_(2.0);
   }
 
   A_ = (getParams().dt / getParams().impactDuration) * A_zmp_ * sumJac;
