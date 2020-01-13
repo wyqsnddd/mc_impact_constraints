@@ -27,22 +27,12 @@ ZMPWithImpulse<Point>::ZMPWithImpulse(mi_qpEstimator & predictor,
   /// A(:,5) = h
   A_zmp_.block(0, 5, numVertex, 1) = -getIeqBlocks().h_zmp;
 
-  // Eigen::MatrixXd G_zmp;
-  // Eigen::VectorXd h_zmp;
-
   int nDof = predictor_.getSimRobot().mb().nrDof();
 
   alpha_.resize(nDof);
   A_.resize(numVertex, nDof);
   b_.resize(numVertex);
 
-  // Place holders
-  /*
-  area_.max_x = 0;
-  area_.max_y = 0;
-  area_.min_x = 0;
-  area_.min_y = 0;
-  */
 }
 
 template<typename Point>
@@ -105,12 +95,6 @@ void ZMPWithImpulse<Point>::getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Ve
         ++impactIdx)
     {
       sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(impactIdx->second->getImpactBody()).inv();
-
-      /*
-      sumJac +=
-          X_ee_0.dualMatrix().block(0, 3, 6, 3) * predictor_.getJacobianDeltaF(impactIdx->second->getImpactBody());
-
-    */
 
       sumJac.block(0, 0, 3, dof) +=
           X_ee_0.dualMatrix().block(0, 3, 3, 3) * predictor_.getJacobianDeltaF(impactIdx->second->getImpactBody());
@@ -189,18 +173,20 @@ template<typename Point>
 bool ZMPWithImpulse<Point>::pointInsideSupportPolygon(const Point & input)
 {
 
-  std::cout<<"G_zmp: is: "<<std::endl<<getIeqBlocks().G_zmp<<std::endl;
-  std::cout<<"h_zmp: is: "<<std::endl<<getIeqBlocks().h_zmp.transpose()<<std::endl;
   Eigen::VectorXd result = getIeqBlocks().G_zmp * input - getIeqBlocks().h_zmp;
-
-  std::cout<<"The test result is: "<< result.transpose()<<std::endl; 
-  std::cout<<"The zmp area vertices size is: "<< getParams().zmpAreaVertexSet.size()<<std::endl;
-
-  for(int ii = 0; ii < static_cast<int>(getParams().zmpAreaVertexSet.size()); ii++)
+  if(getParams().debug)
   {
-    if(result(ii) > 0) return false;
-  }
+    std::cerr<<"G_zmp: is: "<<std::endl<<getIeqBlocks().G_zmp<<std::endl;
+    std::cerr<<"h_zmp: is: "<<std::endl<<getIeqBlocks().h_zmp.transpose()<<std::endl;
 
+    std::cerr<<"The test result is: "<< result.transpose()<<std::endl; 
+    std::cerr<<"The zmp area vertices size is: "<< getParams().zmpAreaVertexSet.size()<<std::endl;
+    
+  }
+for(int ii = 0; ii < static_cast<int>(getParams().zmpAreaVertexSet.size()); ii++)
+    {
+      if(result(ii) > 0) return false;
+    }
   return true;
 }
 
