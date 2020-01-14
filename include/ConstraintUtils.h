@@ -2,10 +2,12 @@
 
 #include <Eigen/Dense>
 #include <McDynamicStability/McContact.h>
+#include <McDynamicStability/Utils.h>
 #include <iostream>
 
 namespace mc_impact
 {
+
 
 template<typename Point>
 struct ImpactAwareConstraintParams

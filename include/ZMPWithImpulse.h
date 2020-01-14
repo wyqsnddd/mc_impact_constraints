@@ -26,9 +26,9 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
   {
     if(updateMcZMPArea())
     {
-      //return getMcZMPArea()->getMaxNumVertex();
+      return getMcZMPArea()->getMaxNumVertex();
 
-      return static_cast<int>(getParams().zmpAreaVertexSet.size());
+      //return static_cast<int>(getParams().zmpAreaVertexSet.size());
     }
     else
     {
@@ -56,9 +56,9 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
   {
     if(updateMcZMPArea())
     {
-      //return getMcZMPArea()->getNumVertex();
+      return getMcZMPArea()->getNumVertex();
 
-      return static_cast<int>(getParams().zmpAreaVertexSet.size());
+      //return static_cast<int>(getParams().zmpAreaVertexSet.size());
     }
     else
     {

@@ -45,8 +45,8 @@ void ZMPWithImpulse<Point>::computeMcZMPArea_(double height)
   // int numVertex = static_cast<int>(iniVertexSet_.size());
   int numVertex = getMcZMPArea()->getNumVertex();
 
-  /*
   A_zmp_ = Eigen::MatrixXd::Zero(numVertex, 6);
+
   // Set the inequality matrix blocks
   setIeqBlocks(getMcZMPArea()->getIeqConstraint());
 
@@ -58,7 +58,7 @@ void ZMPWithImpulse<Point>::computeMcZMPArea_(double height)
   /// A(:,5) = h
   A_zmp_.block(0, 5, numVertex, 1) = -getIeqBlocks().h_zmp;
 
-  */
+  
 }
 
 template<typename Point>
@@ -176,11 +176,10 @@ bool ZMPWithImpulse<Point>::pointInsideSupportPolygon(const Point & input)
   Eigen::VectorXd result = getIeqBlocks().G_zmp * input - getIeqBlocks().h_zmp;
   if(getParams().debug)
   {
-    std::cerr<<"G_zmp: is: "<<std::endl<<getIeqBlocks().G_zmp<<std::endl;
-    std::cerr<<"h_zmp: is: "<<std::endl<<getIeqBlocks().h_zmp.transpose()<<std::endl;
-
-    std::cerr<<"The test result is: "<< result.transpose()<<std::endl; 
-    std::cerr<<"The zmp area vertices size is: "<< getParams().zmpAreaVertexSet.size()<<std::endl;
+    //std::cerr<<"G_zmp: is: "<<std::endl<<getIeqBlocks().G_zmp<<std::endl;
+    //std::cerr<<"h_zmp: is: "<<std::endl<<getIeqBlocks().h_zmp.transpose()<<std::endl;
+    std::cerr<<cyan<<"The difference (lhs-rhs) of ZMP constraint should be all negative: "<< std::endl<<result.transpose()<<reset<<std::endl; 
+    std::cerr<<red<<"The zmp area vertices size is: "<< getMcZMPArea()->getNumVertex()<<reset<<std::endl;
     
   }
 for(int ii = 0; ii < static_cast<int>(getParams().zmpAreaVertexSet.size()); ii++)
