@@ -14,8 +14,8 @@ DCMWithImpulse<Point>::DCMWithImpulse(mi_qpEstimator & predictor,
   int numVertex = static_cast<int>(getParams().dcmAreaVertexSet.size());
   // A_dcm_ = Eigen::MatrixXd::Zero(numVertex, 6);
 
-  pointsToInequalityMatrix<Point>(getParams().dcmAreaVertexSet, G_dcm_, h_dcm_,  
-                                  getParams().lowerSlope, getParams().upperSlope);
+  pointsToInequalityMatrix<Point>(getParams().dcmAreaVertexSet, G_dcm_, h_dcm_, getParams().lowerSlope,
+                                  getParams().upperSlope);
 
   // A_dcm_.block(0, 0, numVertex, 1) = G_dcm_.block(0, 1, numVertex, 1);
   /// A(:,1) = -G_x

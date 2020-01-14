@@ -4,9 +4,8 @@
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
 
-#include <McDynamicStability/McZMPArea.h>
-
 #include "ConstraintUtils.h"
+#include <McDynamicStability/McZMPArea.h>
 
 namespace mc_impact
 {
@@ -28,7 +27,7 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
     {
       return getMcZMPArea()->getMaxNumVertex();
 
-      //return static_cast<int>(getParams().zmpAreaVertexSet.size());
+      // return static_cast<int>(getParams().zmpAreaVertexSet.size());
     }
     else
     {
@@ -58,7 +57,7 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
     {
       return getMcZMPArea()->getNumVertex();
 
-      //return static_cast<int>(getParams().zmpAreaVertexSet.size());
+      // return static_cast<int>(getParams().zmpAreaVertexSet.size());
     }
     else
     {
@@ -127,27 +126,28 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
     */
   inline const std::vector<Point> & getVertices()
   {
-  if(updateMcZMPArea())
-  {
-    return getMcZMPArea()->getPolygonVertices();
-  }else{
-    return getParams().zmpAreaVertexSet;
-  }
+    if(updateMcZMPArea())
+    {
+      return getMcZMPArea()->getPolygonVertices();
+    }
+    else
+    {
+      return getParams().zmpAreaVertexSet;
+    }
   }
   // Debugging:
   Point centeroid_;
-  //Eigen::VectorXd slopeVec_ = Eigen::Vector3d::Zero();
+  // Eigen::VectorXd slopeVec_ = Eigen::Vector3d::Zero();
 
   bool zmpTest_ = false;
   // Eigen::MatrixXd G_zmp_;
   // Eigen::VectorXd h_zmp_;
 
-  
   inline void setIeqBlocks(const IeqConstraintBlocks & input)
   {
     ieqConstraintBlocks_ = input;
   }
-  
+
   inline const IeqConstraintBlocks & getIeqBlocks() const
   {
     return ieqConstraintBlocks_;
@@ -191,7 +191,7 @@ private:
 
   IeqConstraintBlocks ieqConstraintBlocks_;
 
-  //const std::vector<Point> iniVertexSet_;
+  // const std::vector<Point> iniVertexSet_;
 
   ImpactAwareConstraintParams<Point> params_;
 

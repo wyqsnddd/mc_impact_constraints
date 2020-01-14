@@ -14,10 +14,9 @@ ZMPWithImpulse<Point>::ZMPWithImpulse(mi_qpEstimator & predictor,
   int numVertex = static_cast<int>(getParams().zmpAreaVertexSet.size());
   A_zmp_ = Eigen::MatrixXd::Zero(numVertex, 6);
 
-  // Modify the ieqConstraintBlocks. 
-  pointsToInequalityMatrix(getParams().zmpAreaVertexSet, ieqConstraintBlocks_.G_zmp, ieqConstraintBlocks_.h_zmp, 
-                                   getParams().lowerSlope, getParams().upperSlope);
-
+  // Modify the ieqConstraintBlocks.
+  pointsToInequalityMatrix(getParams().zmpAreaVertexSet, ieqConstraintBlocks_.G_zmp, ieqConstraintBlocks_.h_zmp,
+                           getParams().lowerSlope, getParams().upperSlope);
 
   /// Needs to be checked carefully, compare to the 4 dim case
   // A(:,0) = G_y
@@ -32,14 +31,13 @@ ZMPWithImpulse<Point>::ZMPWithImpulse(mi_qpEstimator & predictor,
   alpha_.resize(nDof);
   A_.resize(numVertex, nDof);
   b_.resize(numVertex);
-
 }
 
 template<typename Point>
 void ZMPWithImpulse<Point>::computeMcZMPArea_(double height)
 {
 
-  // Update the Multi-contact ZMP area. 
+  // Update the Multi-contact ZMP area.
   getMcZMPArea()->computeMcZMPArea(height);
 
   // int numVertex = static_cast<int>(iniVertexSet_.size());
@@ -57,8 +55,6 @@ void ZMPWithImpulse<Point>::computeMcZMPArea_(double height)
   A_zmp_.block(0, 1, numVertex, 1) = -getIeqBlocks().G_zmp.block(0, 0, numVertex, 1);
   /// A(:,5) = h
   A_zmp_.block(0, 5, numVertex, 1) = -getIeqBlocks().h_zmp;
-
-  
 }
 
 template<typename Point>
@@ -176,16 +172,16 @@ bool ZMPWithImpulse<Point>::pointInsideSupportPolygon(const Point & input)
   Eigen::VectorXd result = getIeqBlocks().G_zmp * input - getIeqBlocks().h_zmp;
   if(getParams().debug)
   {
-    //std::cerr<<"G_zmp: is: "<<std::endl<<getIeqBlocks().G_zmp<<std::endl;
-    //std::cerr<<"h_zmp: is: "<<std::endl<<getIeqBlocks().h_zmp.transpose()<<std::endl;
-    std::cerr<<cyan<<"The difference (lhs-rhs) of ZMP constraint should be all negative: "<< std::endl<<result.transpose()<<reset<<std::endl; 
-    std::cerr<<red<<"The zmp area vertices size is: "<< getMcZMPArea()->getNumVertex()<<reset<<std::endl;
-    
+    // std::cerr<<"G_zmp: is: "<<std::endl<<getIeqBlocks().G_zmp<<std::endl;
+    // std::cerr<<"h_zmp: is: "<<std::endl<<getIeqBlocks().h_zmp.transpose()<<std::endl;
+    std::cerr << cyan << "The difference (lhs-rhs) of ZMP constraint should be all negative: " << std::endl
+              << result.transpose() << reset << std::endl;
+    std::cerr << red << "The zmp area vertices size is: " << getMcZMPArea()->getNumVertex() << reset << std::endl;
   }
-for(int ii = 0; ii < static_cast<int>(getParams().zmpAreaVertexSet.size()); ii++)
-    {
-      if(result(ii) > 0) return false;
-    }
+  for(int ii = 0; ii < static_cast<int>(getParams().zmpAreaVertexSet.size()); ii++)
+  {
+    if(result(ii) > 0) return false;
+  }
   return true;
 }
 

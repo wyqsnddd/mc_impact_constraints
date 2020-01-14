@@ -8,17 +8,16 @@
 namespace mc_impact
 {
 
-
 template<typename Point>
 struct ImpactAwareConstraintParams
 {
-  public:
+public:
   ImpactAwareConstraintParams()
   {
     contactSetPtr.reset(new McContactSet());
   }
 
-  ~ImpactAwareConstraintParams(){}
+  ~ImpactAwareConstraintParams() {}
   ///< Sampling Period
   double dt = 0.05;
   ///< Impact duration
@@ -63,5 +62,5 @@ void pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
                               double miniSlope = 0.01,
                               double maxSlope = 100);
 
-			      */
+            */
 } // namespace mc_impact
