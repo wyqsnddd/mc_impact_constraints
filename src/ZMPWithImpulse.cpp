@@ -38,7 +38,7 @@ void ZMPWithImpulse<Point>::computeMcZMPArea_(double height)
 {
 
   // Update the Multi-contact ZMP area.
-  getMcZMPArea()->computeMcZMPArea(height);
+  getMcZMPArea()->updateMcZMPArea(height);
 
   // int numVertex = static_cast<int>(iniVertexSet_.size());
   int numVertex = getMcZMPArea()->getNumVertex();
