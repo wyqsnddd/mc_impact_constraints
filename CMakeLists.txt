@@ -26,6 +26,6 @@ include_directories(include)
 
 add_subdirectory(src)
 
-
 setup_project_finalize()
 setup_project_package_finalize()
+
