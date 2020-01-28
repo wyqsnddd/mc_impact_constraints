@@ -32,6 +32,12 @@ install(
   EXPORT "${TARGETS_EXPORT_NAME}"
   DESTINATION ${MC_RTC_LIBDIR})
 
+install(EXPORT mc_impact_constraintsTargets
+  FILE mc_impact_constraintsTargets.cmake
+  NAMESPACE mc_impact_constraints::
+  DESTINATION lib/cmake/mc_impact_constraints
+)
+
 install(
 	DIRECTORY ${CMAKE_SOURCE_DIR}/include/
 	DESTINATION include/mc_impact_constraints

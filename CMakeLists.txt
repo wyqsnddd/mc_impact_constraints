@@ -26,6 +26,9 @@ include_directories(include)
 
 add_subdirectory(src)
 
-setup_project_finalize()
-setup_project_package_finalize()
+install(
+  FILES "${CMAKE_SOURCE_DIR}/mc_impact_constraintsConfig.cmake"
+  DESTINATION lib/cmake/mc_impact_constraints
+)
 
+setup_project_finalize()
