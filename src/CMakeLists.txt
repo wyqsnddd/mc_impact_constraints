@@ -22,9 +22,9 @@ endforeach()
 
 add_library(mc_impact_constraints SHARED ${constraints_SRC})
 #target_include_directories(mc_impact_constraints PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
-target_link_libraries(mc_impact_constraints mc_rtc::mc_control)
-target_link_libraries(mc_impact_constraints mc_impact_predictor::mc_impact_predictor)
-target_link_libraries(mc_impact_constraints mc_dynamicStability::mc_dynamicStability)
+target_link_libraries(mc_impact_constraints PUBLIC mc_rtc::mc_control)
+target_link_libraries(mc_impact_constraints PUBLIC mc_impact_predictor::mc_impact_predictor)
+target_link_libraries(mc_impact_constraints PUBLIC mc_dynamicStability::mc_dynamicStability)
 # target_link_libraries(mc_impact_constraints qhullcpp qhullstatic_r)
 
 install(
