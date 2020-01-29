@@ -15,28 +15,16 @@ foreach(CSTR ${constraints})
 	  ${CMAKE_SOURCE_DIR}/src/${CSTR}.cpp)
 endforeach()
 
-# add_definitions(-fPIC)
-# set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-# set(CMAKE_CXX_FLAGS "-Wall -fPIC -o2")
-
 add_library(mc_impact_constraints SHARED ${constraints_SRC})
-#target_include_directories(mc_impact_constraints PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
+target_include_directories(mc_impact_constraints PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 target_link_libraries(mc_impact_constraints PUBLIC mc_rtc::mc_control)
 target_link_libraries(mc_impact_constraints PUBLIC mc_impact_predictor::mc_impact_predictor)
 target_link_libraries(mc_impact_constraints PUBLIC mc_dynamicStability::mc_dynamicStability)
-# target_link_libraries(mc_impact_constraints qhullcpp qhullstatic_r)
 
 install(
   TARGETS mc_impact_constraints 
   EXPORT "${TARGETS_EXPORT_NAME}"
   DESTINATION ${MC_RTC_LIBDIR})
-
-install(EXPORT mc_impact_constraintsTargets
-  FILE mc_impact_constraintsTargets.cmake
-  NAMESPACE mc_impact_constraints::
-  DESTINATION lib/cmake/mc_impact_constraints
-)
 
 install(
 	DIRECTORY ${CMAKE_SOURCE_DIR}/include/
