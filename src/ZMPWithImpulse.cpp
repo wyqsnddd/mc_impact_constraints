@@ -7,9 +7,10 @@ template<typename Point>
 ZMPWithImpulse<Point>::ZMPWithImpulse(mi_qpEstimator & predictor,
 
                                       std::shared_ptr<mc_impact::McZMPArea<Point>> mcZMPAreaPtr,
+                                      std::shared_ptr<mc_impact::McComArea> mcComAreaPtr,
                                       const ImpactAwareConstraintParams<Point> & params)
 : mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor),
-  mcZMPAreaPtr_(mcZMPAreaPtr), params_(params)
+  mcZMPAreaPtr_(mcZMPAreaPtr), mcComAreaPtr_(mcComAreaPtr), params_(params)
 {
   int numVertex = static_cast<int>(getParams().zmpAreaVertexSet.size());
   A_zmp_ = Eigen::MatrixXd::Zero(numVertex, 6);
@@ -38,13 +39,16 @@ void ZMPWithImpulse<Point>::computeMcZMPArea_(double height)
 {
 
   // Update the Multi-contact ZMP area.
-  getMcZMPArea()->updateMcZMPArea(height);
+  //getMcZMPArea()->updateMcZMPArea(height);
+  mcZMPAreaPtr_->updateMcZMPArea(height);
+  mcComAreaPtr_->updateMcComArea();
 
   // int numVertex = static_cast<int>(iniVertexSet_.size());
   int numVertex = getMcZMPArea()->getNumVertex();
 
   A_zmp_ = Eigen::MatrixXd::Zero(numVertex, 6);
 
+  /*
   // Set the inequality matrix blocks
   setIeqBlocks(getMcZMPArea()->getIeqConstraint());
 
@@ -55,6 +59,7 @@ void ZMPWithImpulse<Point>::computeMcZMPArea_(double height)
   A_zmp_.block(0, 1, numVertex, 1) = -getIeqBlocks().G_zmp.block(0, 0, numVertex, 1);
   /// A(:,5) = h
   A_zmp_.block(0, 5, numVertex, 1) = -getIeqBlocks().h_zmp;
+  */
 }
 
 template<typename Point>
@@ -177,6 +182,7 @@ bool ZMPWithImpulse<Point>::pointInsideSupportPolygon(const Point & input)
     std::cerr << cyan << "The difference (lhs-rhs) of ZMP constraint should be all negative: " << std::endl
               << result.transpose() << reset << std::endl;
     std::cerr << red << "The zmp area vertices size is: " << getMcZMPArea()->getNumVertex() << reset << std::endl;
+
   }
   for(int ii = 0; ii < static_cast<int>(getParams().zmpAreaVertexSet.size()); ii++)
   {

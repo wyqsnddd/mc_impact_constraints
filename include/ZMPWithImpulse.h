@@ -5,7 +5,9 @@
 #include <mc_solver/QPSolver.h>
 
 #include "ConstraintUtils.h"
+
 #include <McDynamicStability/McZMPArea.h>
+#include <McDynamicStability/McComArea.h>
 
 namespace mc_impact
 {
@@ -17,6 +19,7 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
   ///< ZMP defined with a set of points
   ZMPWithImpulse(mi_qpEstimator & predictor,
                  std::shared_ptr<mc_impact::McZMPArea<Point>> mcZMPAreaPtr,
+                 std::shared_ptr<mc_impact::McComArea> mcComAreaPtr,
                  const ImpactAwareConstraintParams<Point> & params);
 
   /*! \brief returns the upper bound of the amount of constraints for the QP to reserve memory accordingly.
@@ -156,9 +159,14 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
   Eigen::MatrixXd A_zmp_;
   bool pointInsideSupportPolygon(const Point & input);
 
-  inline const std::shared_ptr<mc_impact::McZMPArea<Point>> getMcZMPArea() const
+  inline const std::shared_ptr<const mc_impact::McZMPArea<Point>> getMcZMPArea() const
   {
     return mcZMPAreaPtr_;
+  }
+
+  inline const std::shared_ptr<const mc_impact::McComArea> getMcComArea() const
+  {
+    return mcComAreaPtr_;
   }
 
   inline const ImpactAwareConstraintParams<Point> & getParams() const
@@ -172,6 +180,9 @@ private:
 
   // Multi-contact ZMP area calculator:
   std::shared_ptr<mc_impact::McZMPArea<Point>> mcZMPAreaPtr_;
+
+  // Multi-contact Com area calculator:
+  std::shared_ptr<mc_impact::McComArea> mcComAreaPtr_;
 
   // Timestep
   // double dt_;
