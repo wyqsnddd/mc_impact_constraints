@@ -138,6 +138,13 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
       return getParams().zmpAreaVertexSet;
     }
   }
+  inline const std::vector<Point> & getComAreaVertices()
+  {
+      return getMcComArea()->getPolygonVertices();
+  }
+
+
+
   // Debugging:
   Point centeroid_;
   // Eigen::VectorXd slopeVec_ = Eigen::Vector3d::Zero();
