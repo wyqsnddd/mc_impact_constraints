@@ -8,6 +8,7 @@
 
 #include <McDynamicStability/McZMPArea.h>
 #include <McDynamicStability/McComArea.h>
+#include <McDynamicStability/McDCMArea.h>
 
 namespace mc_impact
 {
@@ -142,8 +143,10 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
   {
       return getMcComArea()->getPolygonVertices();
   }
-
-
+  inline const std::vector<Point> & getDCMAreaVertices()
+  {
+      return getMcDCMArea()->getPolygonVertices();
+  }
 
   // Debugging:
   Point centeroid_;
@@ -176,6 +179,11 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
     return mcComAreaPtr_;
   }
 
+  inline const std::shared_ptr<const mc_impact::McDCMArea> getMcDCMArea() const
+  {
+    return mcDCMAreaPtr_;
+  }
+
   inline const ImpactAwareConstraintParams<Point> & getParams() const
   {
     return params_;
@@ -190,6 +198,10 @@ private:
 
   // Multi-contact Com area calculator:
   std::shared_ptr<mc_impact::McComArea> mcComAreaPtr_;
+
+  // Multi-contact DCM area calculator:
+  std::shared_ptr<mc_impact::McDCMArea> mcDCMAreaPtr_;
+
 
   // Timestep
   // double dt_;

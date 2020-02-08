@@ -12,13 +12,15 @@ ZMPWithImpulse<Point>::ZMPWithImpulse(mi_qpEstimator & predictor,
 : mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor),
   mcZMPAreaPtr_(mcZMPAreaPtr), mcComAreaPtr_(mcComAreaPtr), params_(params)
 {
+
+  mcDCMAreaPtr_ = std::make_shared<mc_impact::McDCMArea>(mcZMPAreaPtr_, mcComAreaPtr_);
+
   int numVertex = static_cast<int>(getParams().zmpAreaVertexSet.size());
   A_zmp_ = Eigen::MatrixXd::Zero(numVertex, 6);
 
   // Modify the ieqConstraintBlocks.
   pointsToInequalityMatrix(getParams().zmpAreaVertexSet, ieqConstraintBlocks_.G_zmp, ieqConstraintBlocks_.h_zmp,
                            getParams().lowerSlope, getParams().upperSlope);
-
   /// Needs to be checked carefully, compare to the 4 dim case
   // A(:,0) = G_y
   A_zmp_.block(0, 0, numVertex, 1) = getIeqBlocks().G_zmp.block(0, 1, numVertex, 1);
@@ -42,6 +44,8 @@ void ZMPWithImpulse<Point>::computeMcZMPArea_(double height)
   //getMcZMPArea()->updateMcZMPArea(height);
   mcZMPAreaPtr_->updateMcZMPArea(height);
   mcComAreaPtr_->updateMcComArea();
+  // Update the mcDCMArea after ZMP and Com:
+  mcDCMAreaPtr_->updateMcDCMArea();
 
   // int numVertex = static_cast<int>(iniVertexSet_.size());
   int numVertex = getMcZMPArea()->getNumVertex();
