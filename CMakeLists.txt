@@ -6,11 +6,12 @@ set(PROJECT_URL https://gite.lirmm.fr/jrl-collaborators/mc_impact_constraints)
 set(PROJECT_VERSION 1.0.0)
 set(PROJECT_USE_CMAKE_EXPORT TRUE)
 set(PROJECT_DEBUG_POSTFIX "_d")
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CXX_DISABLE_WERROR 1)
 set(CMAKE_CXX_STANDARD 11)
 
 include(cmake/base.cmake)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(${PROJECT_NAME} LANGUAGES CXX VERSION ${PROJECT_VERSION})
 
