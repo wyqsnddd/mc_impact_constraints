@@ -19,15 +19,15 @@ ZMPWithImpulse<Point>::ZMPWithImpulse(mi_qpEstimator & predictor,
   A_zmp_ = Eigen::MatrixXd::Zero(numVertex, 6);
 
   // Modify the ieqConstraintBlocks.
-  pointsToInequalityMatrix(getParams().zmpAreaVertexSet, ieqConstraintBlocks_.G_zmp, ieqConstraintBlocks_.h_zmp,
+  pointsToInequalityMatrix(getParams().zmpAreaVertexSet, ieqConstraintBlocks_.G, ieqConstraintBlocks_.h,
                            getParams().lowerSlope, getParams().upperSlope);
   /// Needs to be checked carefully, compare to the 4 dim case
   // A(:,0) = G_y
-  A_zmp_.block(0, 0, numVertex, 1) = getIeqBlocks().G_zmp.block(0, 1, numVertex, 1);
+  A_zmp_.block(0, 0, numVertex, 1) = getIeqBlocks().G.block(0, 1, numVertex, 1);
   /// A(:,1) = -G_x
-  A_zmp_.block(0, 1, numVertex, 1) = -getIeqBlocks().G_zmp.block(0, 0, numVertex, 1);
+  A_zmp_.block(0, 1, numVertex, 1) = -getIeqBlocks().G.block(0, 0, numVertex, 1);
   /// A(:,5) = h
-  A_zmp_.block(0, 5, numVertex, 1) = -getIeqBlocks().h_zmp;
+  A_zmp_.block(0, 5, numVertex, 1) = -getIeqBlocks().h;
 
   int nDof = predictor_.getSimRobot().mb().nrDof();
 
@@ -50,20 +50,22 @@ void ZMPWithImpulse<Point>::computeMcZMPArea_(double height)
   // int numVertex = static_cast<int>(iniVertexSet_.size());
   int numVertex = getMcZMPArea()->getNumVertex();
 
+  /*
   A_zmp_ = Eigen::MatrixXd::Zero(numVertex, 6);
 
-  /*
+  
   // Set the inequality matrix blocks
   setIeqBlocks(getMcZMPArea()->getIeqConstraint());
 
   /// Needs to be checked carefully, compare to the 4 dim case
   // A(:,0) = G_y
-  A_zmp_.block(0, 0, numVertex, 1) = getIeqBlocks().G_zmp.block(0, 1, numVertex, 1);
+  A_zmp_.block(0, 0, numVertex, 1) = getIeqBlocks().G.block(0, 1, numVertex, 1);
   /// A(:,1) = -G_x
-  A_zmp_.block(0, 1, numVertex, 1) = -getIeqBlocks().G_zmp.block(0, 0, numVertex, 1);
+  A_zmp_.block(0, 1, numVertex, 1) = -getIeqBlocks().G.block(0, 0, numVertex, 1);
   /// A(:,5) = h
-  A_zmp_.block(0, 5, numVertex, 1) = -getIeqBlocks().h_zmp;
+  A_zmp_.block(0, 5, numVertex, 1) = -getIeqBlocks().h;
   */
+  
 }
 
 template<typename Point>
@@ -178,11 +180,11 @@ template<typename Point>
 bool ZMPWithImpulse<Point>::pointInsideSupportPolygon(const Point & input)
 {
 
-  Eigen::VectorXd result = getIeqBlocks().G_zmp * input - getIeqBlocks().h_zmp;
+  Eigen::VectorXd result = getIeqBlocks().G * input - getIeqBlocks().h;
   if(getParams().debug)
   {
-    // std::cerr<<"G_zmp: is: "<<std::endl<<getIeqBlocks().G_zmp<<std::endl;
-    // std::cerr<<"h_zmp: is: "<<std::endl<<getIeqBlocks().h_zmp.transpose()<<std::endl;
+    // std::cerr<<"G: is: "<<std::endl<<getIeqBlocks().G<<std::endl;
+    // std::cerr<<"h: is: "<<std::endl<<getIeqBlocks().h.transpose()<<std::endl;
     std::cerr << cyan << "The difference (lhs-rhs) of ZMP constraint should be all negative: " << std::endl
               << result.transpose() << reset << std::endl;
     std::cerr << red << "The zmp area vertices size is: " << getMcZMPArea()->getNumVertex() << reset << std::endl;
