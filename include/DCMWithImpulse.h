@@ -1,13 +1,18 @@
 #pragma once
 
 #include <mc_prediction/mi_qpEstimator.h>
-#include <mc_rbdyn/Robots.h>
 #include <mc_solver/InequalityConstraint.h>
-
+#include <mc_solver/QPSolver.h>
 #include <RBDyn/CoM.h>
+#include <mc_rbdyn/Robots.h>
+#include <math.h>
 
 #include "ConstraintUtils.h"
-#include <math.h>
+
+#include <McDynamicStability/McZMPArea.h>
+#include <McDynamicStability/McComArea.h>
+#include <McDynamicStability/McDCMArea.h>
+
 
 namespace mc_impact
 {
@@ -18,11 +23,13 @@ struct DCMWithImpulse : public mc_solver::InequalityConstraintRobot
 
   DCMWithImpulse(mi_qpEstimator & predictor,
                  const mc_rbdyn::Robot & realRobot,
+                 std::shared_ptr<mc_impact::McZMPArea<Point>> mcZMPAreaPtr,
+                 std::shared_ptr<mc_impact::McComArea> mcComAreaPtr,
                  const ImpactAwareConstraintParams<Point> & params);
 
   inline int maxInEq() const override
   {
-    return static_cast<int>(getParams().dcmAreaVertexSet.size());
+     return getMcDCMArea()->getMaxNumVertex();
   }
 
   inline std::string nameInEq() const override
@@ -41,6 +48,7 @@ struct DCMWithImpulse : public mc_solver::InequalityConstraintRobot
 
   void compute() override;
 
+  /*
   inline const Eigen::MatrixXd & getA()
   {
     return A_;
@@ -49,14 +57,25 @@ struct DCMWithImpulse : public mc_solver::InequalityConstraintRobot
   {
     return b_;
   }
+  */
+  /*!
+   * \brief returns  the number of rows in realtime such that the QP can adjust the constraint size.
+   */
+  inline int nrInEq() const override
+  {
+    return getMcDCMArea()->getNumVertex();
+  }
 
   // Debugging:
   Point centeroid_;
   Eigen::VectorXd slopeVec_ = Eigen::Vector3d::Zero();
 
   bool zmpTest_ = false;
+
+  /*
   Eigen::MatrixXd G_dcm_;
   Eigen::VectorXd h_dcm_;
+  */
 
   Eigen::Vector2d dcm_;
   Eigen::Vector2d predicted_dcm_;
@@ -82,19 +101,49 @@ struct DCMWithImpulse : public mc_solver::InequalityConstraintRobot
   }
   inline const std::vector<Point> & getVertices()
   {
-    return getParams().dcmAreaVertexSet;
+    return getMcDCMArea()->getPolygonVertices(); 
   }
   inline const ImpactAwareConstraintParams<Point> & getParams() const
   {
     return params_;
   }
 
+  inline const std::shared_ptr<const mc_impact::McZMPArea<Point>> getMcZMPArea() const
+  {
+    return mcZMPAreaPtr_;
+  }
+  inline const std::shared_ptr<const mc_impact::McComArea> getMcComArea() const
+  {
+    return mcComAreaPtr_;
+  }
+  inline const std::shared_ptr<const mc_impact::McDCMArea> getMcDCMArea() const
+  {
+    return mcDCMAreaPtr_;
+  }
+  inline void setIeqBlocks(const IeqConstraintBlocks & input)
+  {
+    ieqConstraintBlocks_ = input;
+  }
+
+  inline const IeqConstraintBlocks & getIeqBlocks() const
+  {
+    return ieqConstraintBlocks_;
+  }
 private:
   // Predictor
   mi_qpEstimator & predictor_;
 
+  // Multi-contact ZMP area calculator:
+  std::shared_ptr<mc_impact::McZMPArea<Point>> mcZMPAreaPtr_;
+
+  // Multi-contact Com area calculator:
+  std::shared_ptr<mc_impact::McComArea> mcComAreaPtr_;
+
+  // Multi-contact DCM area calculator:
+  std::shared_ptr<mc_impact::McDCMArea> mcDCMAreaPtr_;
+
   const mc_rbdyn::Robot & realRobot_;
-  const ImpactAwareConstraintParams<Point> & params_;
+  ImpactAwareConstraintParams<Point> params_;
 
   // Alpha vector
   Eigen::VectorXd alpha_;
@@ -106,6 +155,10 @@ private:
 
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;
+
+  // Building block 
+  Eigen::MatrixXd A_dcm_;
+  IeqConstraintBlocks ieqConstraintBlocks_;
 
   Eigen::Vector3d predictedComVelJump_;
   std::shared_ptr<rbd::CoMJacobian> comJacobianPtr_;
