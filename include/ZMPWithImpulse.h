@@ -71,6 +71,7 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
   void compute() override;
 
   void getInertialItems(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench);
+  /*
   inline const Eigen::MatrixXd & getA()
   {
     return A_;
@@ -79,6 +80,7 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
   {
     return b_;
   }
+  */
   inline const Eigen::MatrixXd & getZMP()
   {
     return A_zmp_;
