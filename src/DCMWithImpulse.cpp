@@ -6,16 +6,19 @@ namespace mc_impact
 template<typename Point>
 DCMWithImpulse<Point>::DCMWithImpulse(mi_qpEstimator & predictor,
                                       const mc_rbdyn::Robot & realRobot,
+                                      std::shared_ptr<mc_impact::McZMPArea<Point>> mcZMPAreaPtr,
+                                      std::shared_ptr<mc_impact::McComArea> mcComAreaPtr,
                                       const ImpactAwareConstraintParams<Point> & params)
 : mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor),
-  realRobot_(realRobot), params_(params)
+  mcZMPAreaPtr_(mcZMPAreaPtr), mcComAreaPtr_(mcComAreaPtr),realRobot_(realRobot), params_(params)
 {
 
-  int numVertex = static_cast<int>(getParams().dcmAreaVertexSet.size());
-  // A_dcm_ = Eigen::MatrixXd::Zero(numVertex, 6);
 
+  int numVertex = static_cast<int>(getParams().zmpAreaVertexSet.size());
+  /*
   pointsToInequalityMatrix<Point>(getParams().dcmAreaVertexSet, G_dcm_, h_dcm_, getParams().lowerSlope,
                                   getParams().upperSlope);
+                                  */
 
   // A_dcm_.block(0, 0, numVertex, 1) = G_dcm_.block(0, 1, numVertex, 1);
   /// A(:,1) = -G_x
@@ -34,13 +37,33 @@ DCMWithImpulse<Point>::DCMWithImpulse(mi_qpEstimator & predictor,
   comJacobianPtr_ = std::make_shared<rbd::CoMJacobian>(predictor_.getSimRobot().mb());
 
   calcOmega(predictor_.getSimRobot().com().z());
+
+  // Create the Multi-contact DCM Area
+  mcDCMAreaPtr_ = std::make_shared<mc_impact::McDCMArea>(mcZMPAreaPtr_, mcComAreaPtr_);
+
+  //A_dcm_ = Eigen::MatrixXd::Zero(numVertex, 6);
+
+
+  // Modify the ieqConstraintBlocks.
+  pointsToInequalityMatrix(getParams().dcmAreaVertexSet, ieqConstraintBlocks_.G, ieqConstraintBlocks_.h,
+                           getParams().lowerSlope, getParams().upperSlope);
+  /// Needs to be checked carefully, compare to the 4 dim case
+  // A(:,0) = G_y
+  //A_dcm_.block(0, 0, numVertex, 1) = getIeqBlocks().G.block(0, 1, numVertex, 1);
+  /// A(:,1) = -G_x
+  //A_dcm_.block(0, 1, numVertex, 1) = -getIeqBlocks().G.block(0, 0, numVertex, 1);
+  /// A(:,5) = h
+  //A_dcm_.block(0, 5, numVertex, 1) = -getIeqBlocks().h;
+
+
+
 }
 
 template<typename Point>
 bool DCMWithImpulse<Point>::pointInsideSupportPolygon(const Point & input)
 {
 
-  Eigen::VectorXd result = G_dcm_ * input - h_dcm_;
+  Eigen::VectorXd result = ieqConstraintBlocks_.G* input - ieqConstraintBlocks_.h;
 
   for(int ii = 0; ii < static_cast<int>(getParams().dcmAreaVertexSet.size()); ii++)
   {
@@ -53,6 +76,36 @@ bool DCMWithImpulse<Point>::pointInsideSupportPolygon(const Point & input)
 template<typename Point>
 void DCMWithImpulse<Point>::compute()
 {
+  
+  mcZMPAreaPtr_->updateMcZMPArea(2.0);
+  mcComAreaPtr_->updateMcComArea();
+  // update the Multi-contact DCM area
+  mcDCMAreaPtr_->updateMcDCMArea();
+
+  // int numVertex = static_cast<int>(iniVertexSet_.size());
+  //int numVertex = getMcDCMArea()->getNumVertex();
+
+  
+  
+  //A_= Eigen::MatrixXd::Zero(numVertex, 6);
+
+  
+  // Set the inequality matrix blocks
+  setIeqBlocks(getMcDCMArea()->getIeqConstraint());
+
+  /// Needs to be checked carefully, compare to the 4 dim case
+  // A(:,0) = G_y
+  //A_dcm_.block(0, 0, numVertex, 1) = getIeqBlocks().G.block(0, 1, numVertex, 1);
+  /// A(:,1) = -G_x
+  //A_dcm_.block(0, 1, numVertex, 1) = -getIeqBlocks().G.block(0, 0, numVertex, 1);
+  /// A(:,5) = h
+  //A_dcm_.block(0, 5, numVertex, 1) = -getIeqBlocks().h;
+  
+  
+
+
+
+
   // const auto & robot = predictor_.getSimRobot();
   const auto & robot = realRobot_;
   int dof = predictor_.getSimRobot().mb().nrDof();
@@ -60,7 +113,7 @@ void DCMWithImpulse<Point>::compute()
   // std::cout<<"comJacobian size is: "<<comJacobian.rows() << ", "<<comJacobian.cols()<<std::endl;
   Eigen::MatrixXd jacDcm = (comJacobian * predictor_.getJacobianDeltaAlpha()).block(0, 0, 2, dof);
 
-  A_ = getParams().dt / getOmega() * G_dcm_ * jacDcm;
+  A_ = getParams().dt / getOmega() * getIeqBlocks().G * jacDcm;
 
   rbd::paramToVector(robot.mbc().alpha, alpha_);
 
@@ -74,7 +127,7 @@ void DCMWithImpulse<Point>::compute()
 
   predicted_dcm_ = dcm_ + predicted_dcm_jump_;
 
-  b_ = (h_dcm_ - G_dcm_ * dcm_) - G_dcm_ * jacDcm * alpha_ / getOmega();
+  b_ = (getIeqBlocks().h- getIeqBlocks().G* dcm_) - getIeqBlocks().G* jacDcm * alpha_ / getOmega();
   /*
    getOmega()*h_dcm_
    - G_dcm_*( dcm_*getOmega() + jacDcm*alpha_);
@@ -120,7 +173,7 @@ void DCMWithImpulse<Point>::compute()
 }
 
 // The explicit instantiation
-template struct mc_impact::DCMWithImpulse<Eigen::Vector3d>;
+//template struct mc_impact::DCMWithImpulse<Eigen::Vector3d>;
 template struct mc_impact::DCMWithImpulse<Eigen::Vector2d>;
 
 } // namespace mc_impact
