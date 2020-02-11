@@ -34,12 +34,34 @@ public:
   ///<   ProjectionSlop
   double upperSlope = 100.0;
 
+  ///< Update the Mc-ZMP-area
+  bool constrainingZMP = true;
+  bool constrainingDCM = true;
+  bool constrainingCOMAcc = false;
+
   std::shared_ptr<McContactSet> contactSetPtr;
   // const std::vector<McContactParams> contacts;
   ///< Vertices of the multi-contact DCM area.
   std::vector<Point> dcmAreaVertexSet;
   ///< Vertices of the multi-contact ZMP area.
   std::vector<Point> zmpAreaVertexSet;
+};
+
+struct ImpactAwareState
+{
+  Eigen::Vector3d current = Eigen::Vector3d::Zero();
+  Eigen::Vector3d stateJump= Eigen::Vector3d::Zero();
+  Eigen::Vector3d oneStepPreview= Eigen::Vector3d::Zero();
+};
+
+struct FloatingBaseStates
+{
+  ImpactAwareState mcZMP;
+  ImpactAwareState bipedalZMP;
+  ImpactAwareState ComVel;
+  ImpactAwareState DCM;
+  Eigen::Vector3d Com;
+  Eigen::Vector3d ComAcc;
 };
 
 template struct ImpactAwareConstraintParams<Eigen::Vector3d>;
