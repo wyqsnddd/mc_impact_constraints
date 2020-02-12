@@ -25,7 +25,10 @@ namespace mc_impact
   {
     constrainingStatus_ +=3; 
   }
+
+  // Initialize the com Jacobian 
   comJacobianPtr_ = std::make_shared<rbd::CoMJacobian>(realRobot_.mb());
+
 }
 void ImpactAwareFloatingBaseConstraint::reset_()
 {
@@ -45,18 +48,18 @@ void ImpactAwareFloatingBaseConstraint::reset_()
   A_zmp_.block(0, 5, numVertexZMP, 1) = -getIeqBlocksZMP().h;
 
 
-  int numVertexDCM = mcDCMAreaPtr_->getNumVertex();
-  A_dcm_ = Eigen::MatrixXd::Zero(numVertexDCM, 6);
+  //int numVertexDCM = mcDCMAreaPtr_->getNumVertex();
+  //A_dcm_ = Eigen::MatrixXd::Zero(numVertexDCM, 6);
   // Modify the ieqConstraintBlocks.
   pointsToInequalityMatrix(getParams().dcmAreaVertexSet, ieqConstraintBlocksDCM_.G, ieqConstraintBlocksDCM_.h,
                            getParams().lowerSlope, getParams().upperSlope);
   /// Needs to be checked carefully, compare to the 4 dim case
   // A(:,0) = G_y
-  A_dcm_.block(0, 0, numVertexDCM, 1) = getIeqBlocksDCM().G.block(0, 1, numVertexDCM, 1);
+  //A_dcm_.block(0, 0, numVertexDCM, 1) = getIeqBlocksDCM().G.block(0, 1, numVertexDCM, 1);
   /// A(:,1) = -G_x
-  A_dcm_.block(0, 1, numVertexDCM, 1) = -getIeqBlocksDCM().G.block(0, 0, numVertexDCM, 1);
+  //A_dcm_.block(0, 1, numVertexDCM, 1) = -getIeqBlocksDCM().G.block(0, 0, numVertexDCM, 1);
   /// A(:,5) = h
-  A_dcm_.block(0, 5, numVertexDCM, 1) = -getIeqBlocksDCM().h;
+  //A_dcm_.block(0, 5, numVertexDCM, 1) = -getIeqBlocksDCM().h;
 
 
   // Initialie the building blocks
@@ -91,23 +94,30 @@ void ImpactAwareFloatingBaseConstraint::updateMcZMPAreas_(double height)
 void ImpactAwareFloatingBaseConstraint::updateMcDCMAreas_()
 {
   // --------------- (2) Update the Multi-contact ZMP area:
+  
+  // If ZMP constraint is not used, we also need to update the ZMP area: 
+  if(zmpConstraintEnabled_())
+  {
+    mcZMPAreaPtr_->updateMcZMPArea(2.0);
+  }
+
   mcComAreaPtr_->updateMcComArea();
   mcDCMAreaPtr_->updateMcDCMArea();
   // int numVertex = static_cast<int>(iniVertexSet_.size());
-  int numVertexDCM = getMcDCMArea()->getNumVertex();
+  //int numVertexDCM = getMcDCMArea()->getNumVertex();
 
-  A_dcm_ = Eigen::MatrixXd::Zero(numVertexDCM, 6);
+  //A_dcm_ = Eigen::MatrixXd::Zero(numVertexDCM, 6);
 
   // Set the inequality matrix blocks
   setIeqBlocksDCM(getMcDCMArea()->getIeqConstraint());
 
   /// Needs to be checked carefully, compare to the 4 dim case
   // A(:,0) = G_y
-  A_dcm_.block(0, 0, numVertexDCM, 1) = getIeqBlocksDCM().G.block(0, 1, numVertexDCM, 1);
+  //A_dcm_.block(0, 0, numVertexDCM, 1) = getIeqBlocksDCM().G.block(0, 1, numVertexDCM, 1);
   /// A(:,1) = -G_x
-  A_dcm_.block(0, 1, numVertexDCM, 1) = -getIeqBlocksDCM().G.block(0, 0, numVertexDCM, 1);
+  //A_dcm_.block(0, 1, numVertexDCM, 1) = -getIeqBlocksDCM().G.block(0, 0, numVertexDCM, 1);
   /// A(:,5) = h
-  A_dcm_.block(0, 5, numVertexDCM, 1) = -getIeqBlocksDCM().h;
+  //A_dcm_.block(0, 5, numVertexDCM, 1) = -getIeqBlocksDCM().h;
 
 }
 
@@ -266,9 +276,12 @@ void ImpactAwareFloatingBaseConstraint::updateFloatingBaseState_()
 
 void ImpactAwareFloatingBaseConstraint::updateDCMConstraint_()
 {
+  // Calculates the new DCM constraint blocks internally.  
+  updateMcDCMAreas_();
+
    // Should we use the real robot or the simulated one? 
   //const auto & robot = predictor_.getSimRobot();
-  int dof = dof_(); 
+  //int dof = dof_(); 
 
   //Eigen::MatrixXd jacCom= comJacobianPtr_->jacobian(realRobot().mb(), realRobot().mbc());
   // std::cout<<"comJacobian size is: "<<comJacobian.rows() << ", "<<comJacobian.cols()<<std::endl;

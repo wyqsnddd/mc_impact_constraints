@@ -35,6 +35,16 @@ struct ImpactAwareFloatingBaseConstraint: public mc_solver::InequalityConstraint
     return constrainingStatus_; 
   }
 
+  inline bool zmpConstraintEnabled_() const{
+
+    if(getConstrainingStatus() == 3) 
+    {
+      return false;
+    }else{
+      return true;
+    }
+  }
+
   /*! \brief returns the upper bound of the amount of constraints for the QP to reserve memory accordingly.
   */
   inline int maxInEq() const override
