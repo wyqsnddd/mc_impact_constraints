@@ -161,6 +161,9 @@ struct ImpactAwareFloatingBaseConstraint: public mc_solver::InequalityConstraint
     return omega_;
   }
 private:
+  // Predictor
+  mi_qpEstimator & predictor_;
+
   const mc_rbdyn::Robot & realRobot_;
 
   inline int  dof_() const
@@ -192,8 +195,6 @@ private:
 
   }
 
-  // Predictor
-  mi_qpEstimator & predictor_;
   // Multi-contact ZMP area calculator:
   std::shared_ptr<mc_impact::McZMPArea<Eigen::Vector2d>> mcZMPAreaPtr_;
 

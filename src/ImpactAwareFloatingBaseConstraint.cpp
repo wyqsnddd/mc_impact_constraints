@@ -1,4 +1,4 @@
-# include "ImpactAwareFloatingBaseContraint.h"
+# include "ImpactAwareFloatingBaseConstraint.h"
 
 
 namespace mc_impact
@@ -319,11 +319,14 @@ void ImpactAwareFloatingBaseConstraint::compute()
    switch(getConstrainingStatus()){
    case 1:
       updateZMPConstraint_();
+      break;
    case 3:
       updateDCMConstraint_();
+      break;
    case 4:
       updateZMPConstraint_();
       updateDCMConstraint_();
+      break;
    default:
       throw std::runtime_error("The constraining status is not set correctly");
    }
