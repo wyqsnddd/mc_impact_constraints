@@ -19,8 +19,6 @@ struct ImpactAwareFloatingBaseConstraint: public mc_solver::InequalityConstraint
   ///< ZMP defined with a set of points
   ImpactAwareFloatingBaseConstraint(mi_qpEstimator & predictor,
                  const mc_rbdyn::Robot & realRobot,
-                 std::shared_ptr<mc_impact::McZMPArea<Eigen::Vector2d>> mcZMPAreaPtr,
-                 std::shared_ptr<mc_impact::McComArea> mcComAreaPtr,
                  const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
 
 
@@ -35,12 +33,25 @@ struct ImpactAwareFloatingBaseConstraint: public mc_solver::InequalityConstraint
     return constrainingStatus_; 
   }
 
-  inline bool zmpConstraintEnabled_() const{
+  inline bool zmpConstraintEnabled() const{
 
     if(getConstrainingStatus() == 3) 
     {
+      // Only DCM
       return false;
     }else{
+      return true;
+    }
+  }
+
+  inline bool dcmConstraintEnabled() const
+  {
+    if(getConstrainingStatus() == 1) 
+    {
+      // Only ZMP
+      return false;
+    }else{
+      // DCM, DCM + ZMP
       return true;
     }
   }
@@ -110,6 +121,9 @@ struct ImpactAwareFloatingBaseConstraint: public mc_solver::InequalityConstraint
        throw std::runtime_error("ZMP inequality constraint is not set.");
 
   }
+
+  
+ 
    inline void setIeqBlocksDCM(const IeqConstraintBlocks & input)
   {
     if(getParams().constrainingDCM)

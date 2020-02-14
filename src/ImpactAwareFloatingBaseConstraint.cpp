@@ -5,12 +5,16 @@ namespace mc_impact
 {
    ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(mi_qpEstimator & predictor,
                  const mc_rbdyn::Robot & realRobot,
-                 std::shared_ptr<mc_impact::McZMPArea<Eigen::Vector2d>> mcZMPAreaPtr,
-                 std::shared_ptr<mc_impact::McComArea> mcComAreaPtr,
                  const ImpactAwareConstraintParams<Eigen::Vector2d> & params)
-: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), realRobot_(realRobot),
-  mcZMPAreaPtr_(mcZMPAreaPtr), mcComAreaPtr_(mcComAreaPtr), params_(params)
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), realRobot_(realRobot), params_(params)
 {
+
+  mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(
+          realRobot_, getParams().contactSetPtr, getParams().mcProjectionParams);
+
+  mcComAreaPtr_ = std::make_shared<mc_impact::McComArea>(
+          realRobot_, getParams().contactSetPtr, getParams().mcProjectionParams);
+
 
   mcDCMAreaPtr_ = std::make_shared<mc_impact::McDCMArea>(mcZMPAreaPtr_, mcComAreaPtr_);
 
@@ -96,7 +100,7 @@ void ImpactAwareFloatingBaseConstraint::updateMcDCMAreas_()
   // --------------- (2) Update the Multi-contact ZMP area:
   
   // If ZMP constraint is not used, we also need to update the ZMP area: 
-  if(zmpConstraintEnabled_())
+  if(zmpConstraintEnabled())
   {
     mcZMPAreaPtr_->updateMcZMPArea(2.0);
   }

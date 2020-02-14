@@ -45,6 +45,10 @@ public:
   std::vector<Point> dcmAreaVertexSet;
   ///< Vertices of the multi-contact ZMP area.
   std::vector<Point> zmpAreaVertexSet;
+
+  ///< Specify the projection of McZMP and McCom areas.
+  McProjectionParams mcProjectionParams;
+  
 };
 
 struct ImpactAwareState
