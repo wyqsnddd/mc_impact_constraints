@@ -1,75 +1,75 @@
-# pragma once 
+#pragma once
 
 #include <mc_prediction/mi_qpEstimator.h>
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
 
-
-#include <McDynamicStability/McZMPArea.h>
+#include "ConstraintUtils.h"
 #include <McDynamicStability/McComArea.h>
 #include <McDynamicStability/McDCMArea.h>
-
-#include "ConstraintUtils.h"
-
+#include <McDynamicStability/McZMPArea.h>
 
 namespace mc_impact
 {
-struct ImpactAwareFloatingBaseConstraint: public mc_solver::InequalityConstraintRobot
+struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstraintRobot
 {
   ///< ZMP defined with a set of points
   ImpactAwareFloatingBaseConstraint(mi_qpEstimator & predictor,
-                 const mc_rbdyn::Robot & realRobot,
-                 const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
-
-
-
+                                    const mc_rbdyn::Robot & realRobot,
+                                    const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
 
   /*! \brief We use this status to check what floating-base state do we constrain:
    * 1: only ZMP
    * 3: only DCM
    * 4: ZMP + DCM
    */
-  int getConstrainingStatus() const{
-    return constrainingStatus_; 
+  int getConstrainingStatus() const
+  {
+    return constrainingStatus_;
   }
 
-  inline bool zmpConstraintEnabled() const{
+  inline bool zmpConstraintEnabled() const
+  {
 
-    if(getConstrainingStatus() == 3) 
+    if(getConstrainingStatus() == 3)
     {
       // Only DCM
       return false;
-    }else{
+    }
+    else
+    {
       return true;
     }
   }
 
   inline bool dcmConstraintEnabled() const
   {
-    if(getConstrainingStatus() == 1) 
+    if(getConstrainingStatus() == 1)
     {
       // Only ZMP
       return false;
-    }else{
+    }
+    else
+    {
       // DCM, DCM + ZMP
       return true;
     }
   }
 
   /*! \brief returns the upper bound of the amount of constraints for the QP to reserve memory accordingly.
-  */
+   */
   inline int maxInEq() const override
   {
     switch(constrainingStatus_)
     {
-     case 1: // Only constraining ZMP 
-       return getMcZMPArea()->getMaxNumVertex();
-     case 3: // Only constraining DCM
-       return getMcDCMArea()->getMaxNumVertex();
-     case 4: // Constraining both ZMP and DCM
-       return (getMcZMPArea()->getMaxNumVertex() + getMcDCMArea()->getMaxNumVertex());
-     default:
-       throw std::runtime_error("The constrainingStatus is not set.");
+      case 1: // Only constraining ZMP
+        return getMcZMPArea()->getMaxNumVertex();
+      case 3: // Only constraining DCM
+        return getMcDCMArea()->getMaxNumVertex();
+      case 4: // Constraining both ZMP and DCM
+        return (getMcZMPArea()->getMaxNumVertex() + getMcDCMArea()->getMaxNumVertex());
+      default:
+        throw std::runtime_error("The constrainingStatus is not set.");
     }
   }
   /*!
@@ -77,16 +77,16 @@ struct ImpactAwareFloatingBaseConstraint: public mc_solver::InequalityConstraint
    */
   inline int nrInEq() const override
   {
-  switch(constrainingStatus_)
+    switch(constrainingStatus_)
     {
-     case 1: // Only constraining ZMP 
-       return getMcZMPArea()->getNumVertex();
-     case 3: // Only constraining DCM
-       return getMcDCMArea()->getNumVertex();
-     case 4: // Constraining both ZMP and DCM
-       return (getMcZMPArea()->getNumVertex() + getMcDCMArea()->getNumVertex());
-     default:
-       throw std::runtime_error("The constrainingStatus is not set.");
+      case 1: // Only constraining ZMP
+        return getMcZMPArea()->getNumVertex();
+      case 3: // Only constraining DCM
+        return getMcDCMArea()->getNumVertex();
+      case 4: // Constraining both ZMP and DCM
+        return (getMcZMPArea()->getNumVertex() + getMcDCMArea()->getNumVertex());
+      default:
+        throw std::runtime_error("The constrainingStatus is not set.");
     }
   }
 
@@ -108,37 +108,33 @@ struct ImpactAwareFloatingBaseConstraint: public mc_solver::InequalityConstraint
   inline void setIeqBlocksZMP(const IeqConstraintBlocks & input)
   {
     if(getParams().constrainingZMP)
-       ieqConstraintBlocksZMP_ = input;
+      ieqConstraintBlocksZMP_ = input;
     else
-       throw std::runtime_error("ZMP inequality constraint is not set.");
+      throw std::runtime_error("ZMP inequality constraint is not set.");
   }
 
   inline const IeqConstraintBlocks & getIeqBlocksZMP() const
   {
-     if(getParams().constrainingZMP)
-       return ieqConstraintBlocksZMP_;
+    if(getParams().constrainingZMP)
+      return ieqConstraintBlocksZMP_;
     else
-       throw std::runtime_error("ZMP inequality constraint is not set.");
-
+      throw std::runtime_error("ZMP inequality constraint is not set.");
   }
 
-  
- 
-   inline void setIeqBlocksDCM(const IeqConstraintBlocks & input)
+  inline void setIeqBlocksDCM(const IeqConstraintBlocks & input)
   {
     if(getParams().constrainingDCM)
-       ieqConstraintBlocksDCM_= input;
+      ieqConstraintBlocksDCM_ = input;
     else
-       throw std::runtime_error("DCM inequality constraint is not set.");
+      throw std::runtime_error("DCM inequality constraint is not set.");
   }
 
   inline const IeqConstraintBlocks & getIeqBlocksDCM() const
   {
-     if(getParams().constrainingDCM)
-       return ieqConstraintBlocksDCM_;
+    if(getParams().constrainingDCM)
+      return ieqConstraintBlocksDCM_;
     else
-       throw std::runtime_error("DCM inequality constraint is not set.");
-
+      throw std::runtime_error("DCM inequality constraint is not set.");
   }
 
   inline const std::shared_ptr<const mc_impact::McZMPArea<Eigen::Vector2d>> getMcZMPArea() const
@@ -161,16 +157,16 @@ struct ImpactAwareFloatingBaseConstraint: public mc_solver::InequalityConstraint
     return params_;
   }
 
-  inline const FloatingBaseStates & getFloatingBaseStates()const
+  inline const FloatingBaseStates & getFloatingBaseStates() const
   {
-    return floatingBaseStates_; 
-  } 
+    return floatingBaseStates_;
+  }
 
   /*! \return reference to the robot (either pyhsices-engine simulated or real)
    */
   inline const mc_rbdyn::Robot & realRobot() const
   {
-   return realRobot_; 
+    return realRobot_;
   }
 
   /*! \return The constant: \omega = sqrt(9.8/com-z)
@@ -194,9 +190,9 @@ private:
 
   const mc_rbdyn::Robot & realRobot_;
 
-  inline int  dof_() const
+  inline int dof_() const
   {
-   return realRobot_.mb().nrDof(); 
+    return realRobot_.mb().nrDof();
   }
 
   inline void calcOmega(const double & c_z)
@@ -209,18 +205,17 @@ private:
 
   int getDCMRowNr_() const
   {
-   switch(constrainingStatus_)
+    switch(constrainingStatus_)
     {
-     case 1: // Only constraining ZMP 
-       throw std::runtime_error("Akding for DCM row number when only the ZMP constraint is used.");
-     case 3: // Only constraining DCM
-       return 0; 
-     case 4: // Constraining both ZMP and DCM
-       return getMcZMPArea()->getNumVertex();
-     default:
-       throw std::runtime_error("The constrainingStatus is not set.");
+      case 1: // Only constraining ZMP
+        throw std::runtime_error("Akding for DCM row number when only the ZMP constraint is used.");
+      case 3: // Only constraining DCM
+        return 0;
+      case 4: // Constraining both ZMP and DCM
+        return getMcZMPArea()->getNumVertex();
+      default:
+        throw std::runtime_error("The constrainingStatus is not set.");
     }
-
   }
 
   // Multi-contact ZMP area calculator:
@@ -243,7 +238,7 @@ private:
 
   Eigen::VectorXd robotJointVelocity_;
 
-  // Left hand side of the ZMP and DCM constraint 
+  // Left hand side of the ZMP and DCM constraint
   Eigen::MatrixXd A_zmp_;
   Eigen::MatrixXd A_dcm_;
   void reset_();

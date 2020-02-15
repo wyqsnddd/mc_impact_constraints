@@ -48,7 +48,7 @@ public:
 
   ///< Specify the projection of McZMP and McCom areas.
   McProjectionParams mcProjectionParams;
-  
+
   bool enableImpactAwareFloatingBaseConstraint = true;
   bool enableImpactAwareJointVelocityConstraint = true;
   bool enableImpactAwareJointTorqueConstraint = true;
@@ -59,8 +59,8 @@ public:
 struct ImpactAwareState
 {
   Eigen::Vector3d current = Eigen::Vector3d::Zero();
-  Eigen::Vector3d stateJump= Eigen::Vector3d::Zero();
-  Eigen::Vector3d oneStepPreview= Eigen::Vector3d::Zero();
+  Eigen::Vector3d stateJump = Eigen::Vector3d::Zero();
+  Eigen::Vector3d oneStepPreview = Eigen::Vector3d::Zero();
 };
 /*
 struct ComparisonState
@@ -77,10 +77,9 @@ struct FloatingBaseStates
   ImpactAwareState ComVel;
   ImpactAwareState DCM;
 
-
   Eigen::Vector3d Com;
   Eigen::Vector3d ComAcc;
-  //Eigen::Vector3d ComVelSimRobot;
+  // Eigen::Vector3d ComVelSimRobot;
 };
 
 template struct ImpactAwareConstraintParams<Eigen::Vector3d>;

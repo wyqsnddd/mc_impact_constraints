@@ -41,7 +41,7 @@ void ZMPWithImpulse<Point>::computeMcZMPArea_(double height)
 {
 
   // Update the Multi-contact ZMP area.
-  //getMcZMPArea()->updateMcZMPArea(height);
+  // getMcZMPArea()->updateMcZMPArea(height);
   mcZMPAreaPtr_->updateMcZMPArea(height);
   mcComAreaPtr_->updateMcComArea();
   // Update the mcDCMArea after ZMP and Com:
@@ -53,7 +53,7 @@ void ZMPWithImpulse<Point>::computeMcZMPArea_(double height)
   /*
   A_zmp_ = Eigen::MatrixXd::Zero(numVertex, 6);
 
-  
+
   // Set the inequality matrix blocks
   setIeqBlocks(getMcZMPArea()->getIeqConstraint());
 
@@ -65,7 +65,6 @@ void ZMPWithImpulse<Point>::computeMcZMPArea_(double height)
   /// A(:,5) = h
   A_zmp_.block(0, 5, numVertex, 1) = -getIeqBlocks().h;
   */
-  
 }
 
 template<typename Point>
@@ -188,7 +187,6 @@ bool ZMPWithImpulse<Point>::pointInsideSupportPolygon(const Point & input)
     std::cerr << cyan << "The difference (lhs-rhs) of ZMP constraint should be all negative: " << std::endl
               << result.transpose() << reset << std::endl;
     std::cerr << red << "The zmp area vertices size is: " << getMcZMPArea()->getNumVertex() << reset << std::endl;
-
   }
   for(int ii = 0; ii < static_cast<int>(getParams().zmpAreaVertexSet.size()); ii++)
   {

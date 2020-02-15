@@ -1,18 +1,17 @@
 #pragma once
 
 #include <mc_prediction/mi_qpEstimator.h>
+#include <mc_rbdyn/Robots.h>
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
+
 #include <RBDyn/CoM.h>
-#include <mc_rbdyn/Robots.h>
-#include <math.h>
 
 #include "ConstraintUtils.h"
-
-#include <McDynamicStability/McZMPArea.h>
 #include <McDynamicStability/McComArea.h>
 #include <McDynamicStability/McDCMArea.h>
-
+#include <McDynamicStability/McZMPArea.h>
+#include <math.h>
 
 namespace mc_impact
 {
@@ -29,7 +28,7 @@ struct DCMWithImpulse : public mc_solver::InequalityConstraintRobot
 
   inline int maxInEq() const override
   {
-     return getMcDCMArea()->getMaxNumVertex();
+    return getMcDCMArea()->getMaxNumVertex();
   }
 
   inline std::string nameInEq() const override
@@ -101,7 +100,7 @@ struct DCMWithImpulse : public mc_solver::InequalityConstraintRobot
   }
   inline const std::vector<Point> & getVertices()
   {
-    return getMcDCMArea()->getPolygonVertices(); 
+    return getMcDCMArea()->getPolygonVertices();
   }
   inline const ImpactAwareConstraintParams<Point> & getParams() const
   {
@@ -129,6 +128,7 @@ struct DCMWithImpulse : public mc_solver::InequalityConstraintRobot
   {
     return ieqConstraintBlocks_;
   }
+
 private:
   // Predictor
   mi_qpEstimator & predictor_;
@@ -156,7 +156,7 @@ private:
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;
 
-  // Building block 
+  // Building block
   Eigen::MatrixXd A_dcm_;
   IeqConstraintBlocks ieqConstraintBlocks_;
 

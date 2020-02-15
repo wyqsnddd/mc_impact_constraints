@@ -5,10 +5,9 @@
 #include <mc_solver/QPSolver.h>
 
 #include "ConstraintUtils.h"
-
-#include <McDynamicStability/McZMPArea.h>
 #include <McDynamicStability/McComArea.h>
 #include <McDynamicStability/McDCMArea.h>
+#include <McDynamicStability/McZMPArea.h>
 
 namespace mc_impact
 {
@@ -143,11 +142,11 @@ struct ZMPWithImpulse : public mc_solver::InequalityConstraintRobot
   }
   inline const std::vector<Point> & getComAreaVertices()
   {
-      return getMcComArea()->getPolygonVertices();
+    return getMcComArea()->getPolygonVertices();
   }
   inline const std::vector<Point> & getDCMAreaVertices()
   {
-      return getMcDCMArea()->getPolygonVertices();
+    return getMcDCMArea()->getPolygonVertices();
   }
 
   // Debugging:
@@ -203,7 +202,6 @@ private:
 
   // Multi-contact DCM area calculator:
   std::shared_ptr<mc_impact::McDCMArea> mcDCMAreaPtr_;
-
 
   // Timestep
   // double dt_;
