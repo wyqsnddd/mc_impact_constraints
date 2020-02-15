@@ -25,7 +25,7 @@ namespace mc_impact
   {
     constrainingStatus_ +=1; 
   }
-  if (getParams().constrainingZMP)
+  if (getParams().constrainingDCM)
   {
     constrainingStatus_ +=3; 
   }
@@ -258,7 +258,7 @@ void ImpactAwareFloatingBaseConstraint::updateFloatingBaseState_()
   Eigen::MatrixXd comJacobian = comJacobianPtr_->jacobian(realRobot().mb(), realRobot().mbc());
   Eigen::MatrixXd dcmJacobian  = (comJacobian * predictor_.getJacobianDeltaAlpha()).block(0, 0, 2, dof_());
 
-  floatingBaseStates_.Com = realRobot().com();
+  floatingBaseStates_.Com= realRobot().com();
   floatingBaseStates_.ComAcc = realRobot().comAcceleration();
 
   // (1) COM velocity
@@ -337,8 +337,30 @@ void ImpactAwareFloatingBaseConstraint::compute()
 }
 
 
+bool ImpactAwareFloatingBaseConstraint::pointInsideMcZMPArea(const Eigen::Vector3d & samplePoint) const
+{
+  Eigen::VectorXd result = getIeqBlocksZMP().G * samplePoint - getIeqBlocksZMP().h;
+
+  
+  for(int ii = 0; ii < static_cast<int>(result.size()); ii++)
+  {
+    if(result(ii) > 0) return false;
+  }
+  return true;
+}
+
+bool ImpactAwareFloatingBaseConstraint::pointInsideMcDCMArea(const Eigen::Vector3d & samplePoint) const
+{
+
+  Eigen::VectorXd result = getIeqBlocksDCM().G * samplePoint - getIeqBlocksDCM().h;
+
+  for(int ii = 0; ii < static_cast<int>(result.size()); ii++)
+  {
+    if(result(ii) > 0) return false;
+  }
+  return true;
 
 }
 
 
-
+}// end of namespace mc_impact

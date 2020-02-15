@@ -160,20 +160,34 @@ struct ImpactAwareFloatingBaseConstraint: public mc_solver::InequalityConstraint
   {
     return params_;
   }
+
   inline const FloatingBaseStates & getFloatingBaseStates()const
   {
     return floatingBaseStates_; 
   } 
+
+  /*! \return reference to the robot (either pyhsices-engine simulated or real)
+   */
   inline const mc_rbdyn::Robot & realRobot() const
   {
    return realRobot_; 
   }
-  /*! \brief get \omega = sqrt(9.8/com-z)
+
+  /*! \return The constant: \omega = sqrt(9.8/com-z)
    */
-  inline const double & getOmega()
+  inline double getOmega() const
   {
     return omega_;
   }
+
+  /*! \return if the 'samplePoint' is inside the multi-contact ZMP area.
+   */
+  bool pointInsideMcZMPArea(const Eigen::Vector3d & samplePoint) const;
+
+  /*! \return if the 'samplePoint' is inside the multi-contact DCM area.
+   */
+  bool pointInsideMcDCMArea(const Eigen::Vector3d & samplePoint) const;
+
 private:
   // Predictor
   mi_qpEstimator & predictor_;
