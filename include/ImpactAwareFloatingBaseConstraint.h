@@ -56,6 +56,7 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
     }
   }
 
+  
   /*! \brief returns the upper bound of the amount of constraints for the QP to reserve memory accordingly.
    */
   inline int maxInEq() const override
@@ -63,11 +64,11 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
     switch(constrainingStatus_)
     {
       case 1: // Only constraining ZMP
-        return getMcZMPArea()->getMaxNumVertex();
+	 return getZMPConstraintMaxSize_();
       case 3: // Only constraining DCM
-        return getMcDCMArea()->getMaxNumVertex();
+	 return getDCMConstraintMaxSize_(); 
       case 4: // Constraining both ZMP and DCM
-        return (getMcZMPArea()->getMaxNumVertex() + getMcDCMArea()->getMaxNumVertex());
+        return (getZMPConstraintMaxSize_() + getDCMConstraintMaxSize_()); 
       default:
         throw std::runtime_error("The constrainingStatus is not set.");
     }
@@ -80,11 +81,11 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
     switch(constrainingStatus_)
     {
       case 1: // Only constraining ZMP
-        return getMcZMPArea()->getNumVertex();
+        return getZMPConstraintSize_();
       case 3: // Only constraining DCM
-        return getMcDCMArea()->getNumVertex();
+        return getDCMConstraintSize_(); 
       case 4: // Constraining both ZMP and DCM
-        return (getMcZMPArea()->getNumVertex() + getMcDCMArea()->getNumVertex());
+        return (getZMPConstraintSize_() + getDCMConstraintSize_());
       default:
         throw std::runtime_error("The constrainingStatus is not set.");
     }
@@ -139,17 +140,30 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
 
   inline const std::shared_ptr<const mc_impact::McZMPArea<Eigen::Vector2d>> getMcZMPArea() const
   {
-    return mcZMPAreaPtr_;
+   if(getParams().updateMcZMPArea){
+	return mcZMPAreaPtr_;
+    }else{
+	LOG_ERROR_AND_THROW(std::runtime_error, "Asking for McDCMArea, which  is not initialized and updated.");
+    }
   }
 
   inline const std::shared_ptr<const mc_impact::McComArea> getMcComArea() const
   {
-    return mcComAreaPtr_;
+    // McComArea will be updated if the McDCMArea is updated.
+    if(getParams().updateMcDCMArea){
+        return mcComAreaPtr_;
+    }else{
+	LOG_ERROR_AND_THROW(std::runtime_error, "Asking for McDCMArea, which  is not initialized and updated.");
+    }
   }
 
   inline const std::shared_ptr<const mc_impact::McDCMArea> getMcDCMArea() const
   {
-    return mcDCMAreaPtr_;
+    if(getParams().updateMcDCMArea){
+	return mcDCMAreaPtr_;
+    }else{
+	LOG_ERROR_AND_THROW(std::runtime_error, "Asking for McDCMArea, which  is not initialized and updated.");
+    }
   }
 
   inline const ImpactAwareConstraintParams<Eigen::Vector2d> & getParams() const
@@ -184,6 +198,8 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
    */
   bool pointInsideMcDCMArea(const Eigen::Vector3d & samplePoint) const;
 
+  void printDCMConstraintMatrix() const;
+  void printZMPConstraintMatrix() const;
 private:
   // Predictor
   mi_qpEstimator & predictor_;
@@ -227,8 +243,45 @@ private:
   // Multi-contact DCM area calculator:
   std::shared_ptr<mc_impact::McDCMArea> mcDCMAreaPtr_;
 
+  void updateMcAreas_(double height);
   void updateMcZMPAreas_(double height);
   void updateMcDCMAreas_();
+
+  inline int getZMPConstraintSize_() const
+  {
+    if(getParams().updateMcZMPArea){
+       return getMcZMPArea()->getNumVertex();
+    }else{
+       return static_cast<int>(getParams().zmpAreaVertexSet.size());
+    }
+  }
+
+  inline int getDCMConstraintSize_() const
+  {
+    if(getParams().updateMcDCMArea){
+      return getMcDCMArea()->getNumVertex();
+    }else{
+      return static_cast<int>(getParams().dcmAreaVertexSet.size());
+    }
+  }
+
+  inline int getZMPConstraintMaxSize_() const
+  {
+    if(getParams().updateMcZMPArea){
+      return getMcZMPArea()->getMaxNumVertex();
+    }else{
+      return static_cast<int>(getParams().zmpAreaVertexSet.size());
+    }
+  }
+
+  inline int getDCMConstraintMaxSize_() const
+  {
+    if(getParams().updateMcDCMArea){
+      return getMcDCMArea()->getMaxNumVertex();
+    }else{
+      return static_cast<int>(getParams().dcmAreaVertexSet.size());
+    }
+  }
   void getZMPBlocks(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench);
 
   int constrainingStatus_;
@@ -245,6 +298,9 @@ private:
 
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;
+
+  // Needs to be reset in each iteration if we update the Multi-contact areas in realtime.
+  void updateAbMatrixsize_();
 
   FloatingBaseStates floatingBaseStates_;
   void updateFloatingBaseState_();

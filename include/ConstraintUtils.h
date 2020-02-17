@@ -24,8 +24,12 @@ public:
   double impactDuration = 0.05;
   ///< Consider multiple contacts (not only the two feet contacts)
   bool multiContactCase = true;
-  ///< Update the Mc-ZMP-area
+
+  ///< Update the Mc-ZMP-area for the ZMP constraint
   bool updateMcZMPArea = true;
+  ///< Update the Mc-DCM-area for the DCM constraint
+  bool updateMcDCMArea = true;
+
   ///< Debug mode ore not.
   bool debug = false;
 
@@ -35,8 +39,8 @@ public:
   double upperSlope = 100.0;
 
   ///< Update the Mc-ZMP-area
-  bool constrainingZMP = true;
-  bool constrainingDCM = true;
+  bool constrainingZMP = false;
+  bool constrainingDCM = false;
   bool constrainingCOMAcc = false;
 
   std::shared_ptr<McContactSet> contactSetPtr;
@@ -49,11 +53,11 @@ public:
   ///< Specify the projection of McZMP and McCom areas.
   McProjectionParams mcProjectionParams;
 
-  bool enableImpactAwareFloatingBaseConstraint = true;
-  bool enableImpactAwareJointVelocityConstraint = true;
-  bool enableImpactAwareJointTorqueConstraint = true;
-  bool enableImpactAwareCOPConstraint = true;
-  bool enableImpactAwareFrictionConeConstraint = true;
+  bool enableImpactAwareFloatingBaseConstraint = false;
+  bool enableImpactAwareJointVelocityConstraint = false;
+  bool enableImpactAwareJointTorqueConstraint = false;
+  bool enableImpactAwareCOPConstraint = false;
+  bool enableImpactAwareFrictionConeConstraint = false;
 };
 
 struct ImpactAwareState
