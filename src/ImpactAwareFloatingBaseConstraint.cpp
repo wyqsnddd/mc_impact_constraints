@@ -10,7 +10,6 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
   realRobot_(realRobot), params_(params)
 {
 
-  
   // Set the constraining status of the floating-base state.
   constrainingStatus_ = 0;
   if(getParams().constrainingZMP)
@@ -23,47 +22,49 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
   }
 
   // When the constraints are enabled and  the realtime computation of McComArea and McDCMArea are needed.
-  // As long as McZMPArea needs to be udpated
-  if( getParams().updateMcZMPArea){
+  // As long as McZMPArea or McDCMArea need to be udpated
+  //if((getParams().updateMcZMPArea or getParams().updateMcDCMArea))
+  if(enabledMcZMPArea())
+  {
 
-    mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(realRobot_, getParams().contactSetPtr,                                                                          getParams().mcProjectionParams);
-    //mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(predictor_.getSimRobot(), getParams().contactSetPtr, getParams().mcProjectionParams);
-
+    mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(realRobot_, getParams().contactSetPtr,
+                                                                            getParams().mcProjectionParams);
+    // mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(predictor_.getSimRobot(),
+    // getParams().contactSetPtr, getParams().mcProjectionParams);
   }
 
   // When the constraints are enabled and  the realtime computation of McComArea and McDCMArea are needed.
-  if(getParams().constrainingDCM && getParams().updateMcDCMArea){
+  //if(getParams().constrainingDCM and getParams().updateMcDCMArea)
+  if(enabledMcDCMArea())
+  {
 
     assert(mcZMPAreaPtr_ != nullptr);
 
     /*
     mcComAreaPtr_ =
-      std::make_shared<mc_impact::McComArea>(predictor_.getSimRobot(), getParams().contactSetPtr, getParams().mcProjectionParams);
-    mcDCMAreaPtr_ = std::make_shared<mc_impact::McDCMArea>(mcZMPAreaPtr_, mcComAreaPtr_);
+      std::make_shared<mc_impact::McComArea>(predictor_.getSimRobot(), getParams().contactSetPtr,
+    getParams().mcProjectionParams); mcDCMAreaPtr_ = std::make_shared<mc_impact::McDCMArea>(mcZMPAreaPtr_,
+    mcComAreaPtr_);
 
     */
-    
+
     mcComAreaPtr_ =
-      std::make_shared<mc_impact::McComArea>(realRobot_, getParams().contactSetPtr, getParams().mcProjectionParams);
+        std::make_shared<mc_impact::McComArea>(realRobot_, getParams().contactSetPtr, getParams().mcProjectionParams);
 
     mcDCMAreaPtr_ = std::make_shared<mc_impact::McDCMArea>(mcZMPAreaPtr_, mcComAreaPtr_);
-    
-
   }
   // Initialize the com Jacobian
   comJacobianPtr_ = std::make_shared<rbd::CoMJacobian>(realRobot_.mb());
 
-
   // Initialize the building blocks for the constraints.
   reset_();
 
-
-  std::cout<<red <<"Created ImpactAwareFloatingBaseConstraint."<<reset<<std::endl;
+  std::cout << red << "Created ImpactAwareFloatingBaseConstraint." << reset << std::endl;
 }
 void ImpactAwareFloatingBaseConstraint::reset_()
 {
-  //int numVertexZMP = mcZMPAreaPtr_->getNumVertex();
-  int numVertexZMP =  static_cast<int>(getParams().zmpAreaVertexSet.size());
+  // int numVertexZMP = mcZMPAreaPtr_->getNumVertex();
+  int numVertexZMP = static_cast<int>(getParams().zmpAreaVertexSet.size());
 
   A_zmp_ = Eigen::MatrixXd::Zero(numVertexZMP, 6);
 
@@ -93,14 +94,13 @@ void ImpactAwareFloatingBaseConstraint::reset_()
 
   // Initialie the building blocks
   robotJointVelocity_.resize(dof_());
-  
 
   /*
   A_.resize(nrInEq(), dof_());
   b_.resize(nrInEq());
   */
 
-  std::cout<<red <<"Reset ImpactAwareFloatingBaseConstraint."<<reset<<std::endl;
+  std::cout << red << "Reset ImpactAwareFloatingBaseConstraint." << reset << std::endl;
 }
 void ImpactAwareFloatingBaseConstraint::updateMcZMPAreas_(double height)
 {
@@ -108,7 +108,7 @@ void ImpactAwareFloatingBaseConstraint::updateMcZMPAreas_(double height)
   assert(mcZMPAreaPtr_ != nullptr);
 
   // --------------- (1) Update the Multi-contact ZMP area:
-  
+
   mcZMPAreaPtr_->updateMcZMPArea(height);
   // int numVertex = static_cast<int>(iniVertexSet_.size());
   int numVertexZMP = getMcZMPArea()->getNumVertex();
@@ -127,48 +127,48 @@ void ImpactAwareFloatingBaseConstraint::updateMcZMPAreas_(double height)
   A_zmp_.block(0, 5, numVertexZMP, 1) = -getIeqBlocksZMP().h;
 }
 
-
 void ImpactAwareFloatingBaseConstraint::updateMcAreas_(double height)
 {
-switch(getConstrainingStatus())
+  switch(getConstrainingStatus())
   {
     case 1:
-     if(getParams().updateMcZMPArea) 
-     {
-       updateMcZMPAreas_(height);
-       getMcZMPArea()->print();
-     }
-          break;
-    case 3:
-
-      if(getParams().updateMcDCMArea){
-        updateMcDCMAreas_();
-
+      if(getParams().updateMcZMPArea)
+      {
+        updateMcZMPAreas_(height);
         getMcZMPArea()->print();
-        getMcComArea()->print();
-        getMcDCMArea()->print();
-
       }
-           break;
-    case 4:
-	   if(getParams().updateMcZMPArea) 
-     {
-       updateMcZMPAreas_(height);
-       getMcZMPArea()->print();
-     }
-      if(getParams().updateMcDCMArea){
+      break;
+    case 3:
+      if(getParams().updateMcDCMArea)
+      {
         updateMcDCMAreas_();
 
+	// TODO temp debug
         getMcZMPArea()->print();
         getMcComArea()->print();
         getMcDCMArea()->print();
+      }
+      break;
+    case 4:
 
+      if(getParams().updateMcZMPArea)
+      {
+        updateMcZMPAreas_(height);
+        getMcZMPArea()->print();
+      }
+      if(getParams().updateMcDCMArea)
+      {
+        updateMcDCMAreas_();
+
+	// TODO temp debug
+        getMcZMPArea()->print();
+        getMcComArea()->print();
+        getMcDCMArea()->print();
       }
       break;
     default:
       throw std::runtime_error("The constraining status is not set correctly");
   }
-
 }
 void ImpactAwareFloatingBaseConstraint::updateMcDCMAreas_()
 {
@@ -176,16 +176,15 @@ void ImpactAwareFloatingBaseConstraint::updateMcDCMAreas_()
   assert(mcComAreaPtr_ != nullptr);
   assert(mcDCMAreaPtr_ != nullptr);
 
-
   // --------------- (2) Update the Multi-contact ZMP area:
 
   // If ZMP constraint is not used, we also need to update the ZMP area:
-  
-  if( not zmpConstraintEnabled() )
+
+  if(not zmpConstraintEnabled())
   {
     mcZMPAreaPtr_->updateMcZMPArea(2.0);
   }
-  
+
   mcComAreaPtr_->updateMcComArea();
   mcDCMAreaPtr_->updateMcDCMArea();
   // int numVertex = static_cast<int>(iniVertexSet_.size());
@@ -313,26 +312,24 @@ void ImpactAwareFloatingBaseConstraint::calculateZMP_()
   sva_contactBodyWrenchSum.force() = contactBodyWrenchSum.segment(3, 3); // Force starts at 3.
   sva_contactBodyWrenchSum.couple() = contactBodyWrenchSum.segment(0, 3); // Torque starts at 0.
 
-
-
   // zmpCalculation is a static function
   floatingBaseStates_.bipedalZMP.oneStepPreview =
       McZMPArea<Eigen::Vector2d>::zmpCalculation(Eigen::Vector3d::UnitZ(), sva_contactBodyWrenchSum);
 
-
-  //TODO:  we need to calculate with the static function if realtime update is not enabled. 
+  // TODO:  we need to calculate with the static function if realtime update is not enabled.
   if(getParams().updateMcZMPArea)
   {
     floatingBaseStates_.bipedalZMP.current = getMcZMPArea()->getBipedalZMP();
-  }else{
-   sva::ForceVecd sva_ContactBodyWrench;
-  sva_ContactBodyWrench.force() = contactBodyWrench.segment(3, 3); // Force starts at 3.
-  sva_ContactBodyWrench.couple() = contactBodyWrench.segment(0, 3); // Torque starts at 0.
-
-    floatingBaseStates_.bipedalZMP.current =  
-	    McZMPArea<Eigen::Vector2d>::zmpCalculation(Eigen::Vector3d::UnitZ(), sva_ContactBodyWrench);
   }
+  else
+  {
+    sva::ForceVecd sva_ContactBodyWrench;
+    sva_ContactBodyWrench.force() = contactBodyWrench.segment(3, 3); // Force starts at 3.
+    sva_ContactBodyWrench.couple() = contactBodyWrench.segment(0, 3); // Torque starts at 0.
 
+    floatingBaseStates_.bipedalZMP.current =
+        McZMPArea<Eigen::Vector2d>::zmpCalculation(Eigen::Vector3d::UnitZ(), sva_ContactBodyWrench);
+  }
 
   floatingBaseStates_.bipedalZMP.stateJump =
       floatingBaseStates_.bipedalZMP.oneStepPreview - floatingBaseStates_.bipedalZMP.current;
@@ -347,17 +344,23 @@ void ImpactAwareFloatingBaseConstraint::calculateZMP_()
   sva_sum.couple() = sumWrench.segment(0, 3); // Torque starts at 0.
 
   // zmpCalculation is a static function
-  floatingBaseStates_.mcZMP.oneStepPreview = 
-	  McZMPArea<Eigen::Vector2d>::zmpCalculation(Eigen::Vector3d::UnitZ(), sva_sum);
-  
-  if(getParams().updateMcZMPArea){
-    floatingBaseStates_.mcZMP.current = getMcZMPArea()->getMcZMP();
-  }else{
+  floatingBaseStates_.mcZMP.oneStepPreview =
+      McZMPArea<Eigen::Vector2d>::zmpCalculation(Eigen::Vector3d::UnitZ(), sva_sum);
 
-sva::ForceVecd sva_allContactBodyWrench;
-  sva_allContactBodyWrench.force() = impactBodyWrench.segment(3, 3) + contactBodyWrench.segment(3, 3); // Force starts at 3.
-  sva_allContactBodyWrench.couple() = impactBodyWrench.segment(0, 3) + contactBodyWrench.segment(0, 3); // Torque starts at 0.
-    floatingBaseStates_.mcZMP.current = McZMPArea<Eigen::Vector2d>::zmpCalculation(Eigen::Vector3d::UnitZ(), sva_allContactBodyWrench);
+  if(getParams().updateMcZMPArea)
+  {
+    floatingBaseStates_.mcZMP.current = getMcZMPArea()->getMcZMP();
+  }
+  else
+  {
+
+    sva::ForceVecd sva_allContactBodyWrench;
+    sva_allContactBodyWrench.force() =
+        impactBodyWrench.segment(3, 3) + contactBodyWrench.segment(3, 3); // Force starts at 3.
+    sva_allContactBodyWrench.couple() =
+        impactBodyWrench.segment(0, 3) + contactBodyWrench.segment(0, 3); // Torque starts at 0.
+    floatingBaseStates_.mcZMP.current =
+        McZMPArea<Eigen::Vector2d>::zmpCalculation(Eigen::Vector3d::UnitZ(), sva_allContactBodyWrench);
   }
 
   floatingBaseStates_.mcZMP.stateJump = floatingBaseStates_.mcZMP.oneStepPreview - floatingBaseStates_.mcZMP.current;
@@ -397,7 +400,7 @@ void ImpactAwareFloatingBaseConstraint::updateDCMConstraint_()
 
   assert(getParams().constrainingDCM == true);
   // Calculates the new DCM constraint blocks internally.
-  updateMcDCMAreas_();
+  //updateMcDCMAreas_();
 
   // Should we use the real robot or the simulated one?
   // const auto & robot = predictor_.getSimRobot();
@@ -410,49 +413,46 @@ void ImpactAwareFloatingBaseConstraint::updateDCMConstraint_()
       (comJacobianPtr_->jacobian(realRobot().mb(), realRobot().mbc()) * predictor_.getJacobianDeltaAlpha())
           .block(0, 0, 2, dof_());
 
-   
   if(getParams().updateMcDCMArea)
   {
     A_.block(getDCMRowNr_(), 0, getMcDCMArea()->getNumVertex(), dof_()) =
         getParams().dt / getOmega() * ieqConstraintBlocksDCM_.G * jacDCM;
 
     b_.segment(getDCMRowNr_(), getMcDCMArea()->getNumVertex()) =
-        (ieqConstraintBlocksDCM_.h - ieqConstraintBlocksDCM_.G * floatingBaseStates_.DCM.current)
+        (ieqConstraintBlocksDCM_.h - ieqConstraintBlocksDCM_.G * floatingBaseStates_.DCM.current.segment(0, 2))
         - ieqConstraintBlocksDCM_.G * jacDCM * robotJointVelocity_ / getOmega();
   }
 }
 
 void ImpactAwareFloatingBaseConstraint::updateZMPConstraint_()
 {
-  
+
   assert(getParams().constrainingZMP == true);
 
   Eigen::MatrixXd sumJacZMP;
   Eigen::Vector6d sumWrenchZMP;
   getZMPBlocks(sumJacZMP, sumWrenchZMP);
 
-
   if(getParams().updateMcZMPArea)
   {
     // We assume that we always start from ZMP constraint unless it is not used.
-   A_.block(0, 0, getMcZMPArea()->getNumVertex(), dof_()) =
-       (getParams().dt / getParams().impactDuration) * A_zmp_ * sumJacZMP;
+    A_.block(0, 0, getMcZMPArea()->getNumVertex(), dof_()) =
+        (getParams().dt / getParams().impactDuration) * A_zmp_ * sumJacZMP;
 
-   // Read the robot joint velocities.
-   // rbd::paramToVector(robot.mbc().alpha, robotJointVelocity_);
-   b_.segment(0, getMcZMPArea()->getNumVertex()) =
-       -(A_zmp_ * sumWrenchZMP + A_zmp_ * sumJacZMP * robotJointVelocity_ / getParams().dt);
- 
+    // Read the robot joint velocities.
+    // rbd::paramToVector(robot.mbc().alpha, robotJointVelocity_);
+    b_.segment(0, getMcZMPArea()->getNumVertex()) =
+        -(A_zmp_ * sumWrenchZMP + A_zmp_ * sumJacZMP * robotJointVelocity_ / getParams().dt);
   }
 }
 
 void ImpactAwareFloatingBaseConstraint::compute()
 {
 
-  //std::cout<< cyan <<" This is a test sentence"<< reset<<std::endl;
+  // std::cout<< cyan <<" This is a test sentence"<< reset<<std::endl;
   // const auto & robot = predictor_.getSimRobot();
   // Read the SIMULATED robot joint velocity:
-  
+
   robotJointVelocity_ = (rbd::dofToVector(realRobot().mb(), realRobot().mbc().alpha));
 
   // Update the Multi-contact areas
@@ -461,26 +461,28 @@ void ImpactAwareFloatingBaseConstraint::compute()
   // Update the ZMP, ComVel and DCM states
   updateFloatingBaseState_();
 
-  std::cout<<red <<"ImpactAwareFloatingBaseConstraint computed FloatingBase-States."<<reset<<std::endl;
+  std::cout << red << "ImpactAwareFloatingBaseConstraint computed FloatingBase-States." << reset << std::endl;
 
-
-  //std::cout<<red <<"Updated McAreas"<< reset<<std::endl;
+  // std::cout<<red <<"Updated McAreas"<< reset<<std::endl;
 
   // Update the Constraint size based on the number of the Multi-contact areas vertices.
   updateAbMatrixsize_();
 
-  if (getParams().debug){
+  if(getParams().debug)
+  {
 
-    std::cout<<red <<"Updated McAreas"<< reset<<std::endl;
-    std::cout<<red <<"ImpactAwareFloatingBaseConstraint status: "<< getConstrainingStatus()<<reset<<std::endl;
+    std::cout << red << "Updated McAreas" << reset << std::endl;
+    std::cout << red << "ImpactAwareFloatingBaseConstraint status: " << getConstrainingStatus() << reset << std::endl;
 
-    std::cout<<red<< "A_ size: "<<A_.rows()<<", " <<A_.cols()<<reset<<std::endl;
-    std::cout<<red<< "b_ size: "<<b_.rows()<<std::endl;
+    std::cout << red << "A_ size: " << A_.rows() << ", " << A_.cols() << reset << std::endl;
+    std::cout << red << "b_ size: " << b_.rows() << std::endl;
 
-    if(zmpConstraintEnabled()){
+    if(zmpConstraintEnabled())
+    {
       printZMPConstraintMatrix();
     }
-    if(dcmConstraintEnabled()){
+    if(dcmConstraintEnabled())
+    {
       printDCMConstraintMatrix();
     }
   }
@@ -536,22 +538,23 @@ void ImpactAwareFloatingBaseConstraint::updateAbMatrixsize_()
 void ImpactAwareFloatingBaseConstraint::printZMPConstraintMatrix() const
 {
 
-   std::cerr<<red <<"DCM A matrix is: "<<std::endl<<cyan<<
-	   A_<<std::endl<<red<<std::endl<<
-	   "b vector is: "<<cyan<< b_.transpose()<<std::endl<<red<<
-	   "Intermediat G matrix is: "<< cyan<< getIeqBlocksDCM().G <<std::endl<<red<<
-	   "Intermediat h vector is: "<<cyan<< b_.transpose()<<reset<<std::endl;
+  std::cerr << red << "DCM A matrix is: " << std::endl
+            << cyan << A_ << std::endl
+            << red << std::endl
+            << "b vector is: " << cyan << b_.transpose() << std::endl
+            << red << "Intermediat G matrix is: " << cyan << getIeqBlocksDCM().G << std::endl
+            << red << "Intermediat h vector is: " << cyan << b_.transpose() << reset << std::endl;
 }
-
 
 void ImpactAwareFloatingBaseConstraint::printDCMConstraintMatrix() const
 {
 
-   std::cerr<<red <<"DCM A matrix is: "<<std::endl<<cyan<<
-	   A_<<std::endl<<red<<std::endl<<
-	   "b vector is: "<<cyan<< b_.transpose()<<std::endl<<red<<
-	   "Intermediat G matrix is: "<< cyan<< getIeqBlocksDCM().G <<std::endl<<red<<
-	   "Intermediat h vector is: "<<cyan<< b_.transpose()<<reset<<std::endl;
+  std::cerr << red << "DCM A matrix is: " << std::endl
+            << cyan << A_ << std::endl
+            << red << std::endl
+            << "b vector is: " << cyan << b_.transpose() << std::endl
+            << red << "Intermediat G matrix is: " << cyan << getIeqBlocksDCM().G << std::endl
+            << red << "Intermediat h vector is: " << cyan << b_.transpose() << reset << std::endl;
 }
 
 } // end of namespace mc_impact
