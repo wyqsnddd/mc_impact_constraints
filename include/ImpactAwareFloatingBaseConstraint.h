@@ -139,12 +139,12 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
 
   bool enabledMcDCMArea() const
   {
-   return (getParams().constrainingDCM and getParams().updateMcDCMArea);
+    return (getParams().constrainingDCM and getParams().updateMcDCMArea);
   }
 
   bool enabledMcZMPArea() const
   {
-   return  (getParams().updateMcZMPArea or getParams().updateMcDCMArea);
+    return (getParams().updateMcZMPArea or getParams().updateMcDCMArea);
   }
   inline const std::shared_ptr<const mc_impact::McZMPArea<Eigen::Vector2d>> getMcZMPArea() const
   {
@@ -246,10 +246,10 @@ private:
       case 3: // Only constraining DCM
         return 0;
       case 4: // Constraining both ZMP and DCM
-	if(getParams().updateMcZMPArea)
+        if(getParams().updateMcZMPArea)
           return getMcZMPArea()->getNumVertex();
-	else
-	  return static_cast<int>(getParams().zmpAreaVertexSet.size());
+        else
+          return static_cast<int>(getParams().zmpAreaVertexSet.size());
       default:
         throw std::runtime_error("The constrainingStatus is not set.");
     }
@@ -327,7 +327,7 @@ private:
   // Left hand side of the ZMP and DCM constraint
   Eigen::MatrixXd A_zmp_;
   Eigen::MatrixXd A_dcm_;
-  void reset_();
+  void fixedSupportPolygonSetup_();
 
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;

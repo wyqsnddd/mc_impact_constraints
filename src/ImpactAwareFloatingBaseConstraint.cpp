@@ -23,7 +23,7 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
 
   // When the constraints are enabled and  the realtime computation of McComArea and McDCMArea are needed.
   // As long as McZMPArea or McDCMArea need to be udpated
-  //if((getParams().updateMcZMPArea or getParams().updateMcDCMArea))
+  // if((getParams().updateMcZMPArea or getParams().updateMcDCMArea))
   if(enabledMcZMPArea())
   {
 
@@ -34,7 +34,7 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
   }
 
   // When the constraints are enabled and  the realtime computation of McComArea and McDCMArea are needed.
-  //if(getParams().constrainingDCM and getParams().updateMcDCMArea)
+  // if(getParams().constrainingDCM and getParams().updateMcDCMArea)
   if(enabledMcDCMArea())
   {
 
@@ -57,11 +57,11 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
   comJacobianPtr_ = std::make_shared<rbd::CoMJacobian>(realRobot_.mb());
 
   // Initialize the building blocks for the constraints.
-  reset_();
+  fixedSupportPolygonSetup_();
 
   std::cout << red << "Created ImpactAwareFloatingBaseConstraint." << reset << std::endl;
 }
-void ImpactAwareFloatingBaseConstraint::reset_()
+void ImpactAwareFloatingBaseConstraint::fixedSupportPolygonSetup_()
 {
   // int numVertexZMP = mcZMPAreaPtr_->getNumVertex();
   int numVertexZMP = static_cast<int>(getParams().zmpAreaVertexSet.size());
@@ -143,7 +143,7 @@ void ImpactAwareFloatingBaseConstraint::updateMcAreas_(double height)
       {
         updateMcDCMAreas_();
 
-	// TODO temp debug
+        // TODO temp debug
         getMcZMPArea()->print();
         getMcComArea()->print();
         getMcDCMArea()->print();
@@ -160,7 +160,7 @@ void ImpactAwareFloatingBaseConstraint::updateMcAreas_(double height)
       {
         updateMcDCMAreas_();
 
-	// TODO temp debug
+        // TODO temp debug
         getMcZMPArea()->print();
         getMcComArea()->print();
         getMcDCMArea()->print();
@@ -400,7 +400,7 @@ void ImpactAwareFloatingBaseConstraint::updateDCMConstraint_()
 
   assert(getParams().constrainingDCM == true);
   // Calculates the new DCM constraint blocks internally.
-  //updateMcDCMAreas_();
+  // updateMcDCMAreas_();
 
   // Should we use the real robot or the simulated one?
   // const auto & robot = predictor_.getSimRobot();
@@ -413,15 +413,15 @@ void ImpactAwareFloatingBaseConstraint::updateDCMConstraint_()
       (comJacobianPtr_->jacobian(realRobot().mb(), realRobot().mbc()) * predictor_.getJacobianDeltaAlpha())
           .block(0, 0, 2, dof_());
 
-  if(getParams().updateMcDCMArea)
-  {
-    A_.block(getDCMRowNr_(), 0, getMcDCMArea()->getNumVertex(), dof_()) =
-        getParams().dt / getOmega() * ieqConstraintBlocksDCM_.G * jacDCM;
+  // if(getParams().updateMcDCMArea)
+  //{
+  A_.block(getDCMRowNr_(), 0, getMcDCMArea()->getNumVertex(), dof_()) =
+      getParams().dt / getOmega() * ieqConstraintBlocksDCM_.G * jacDCM;
 
-    b_.segment(getDCMRowNr_(), getMcDCMArea()->getNumVertex()) =
-        (ieqConstraintBlocksDCM_.h - ieqConstraintBlocksDCM_.G * floatingBaseStates_.DCM.current.segment(0, 2))
-        - ieqConstraintBlocksDCM_.G * jacDCM * robotJointVelocity_ / getOmega();
-  }
+  b_.segment(getDCMRowNr_(), getMcDCMArea()->getNumVertex()) =
+      (ieqConstraintBlocksDCM_.h - ieqConstraintBlocksDCM_.G * floatingBaseStates_.DCM.current.segment(0, 2))
+      - ieqConstraintBlocksDCM_.G * jacDCM * robotJointVelocity_ / getOmega();
+  //}
 }
 
 void ImpactAwareFloatingBaseConstraint::updateZMPConstraint_()
@@ -433,17 +433,17 @@ void ImpactAwareFloatingBaseConstraint::updateZMPConstraint_()
   Eigen::Vector6d sumWrenchZMP;
   getZMPBlocks(sumJacZMP, sumWrenchZMP);
 
-  if(getParams().updateMcZMPArea)
-  {
-    // We assume that we always start from ZMP constraint unless it is not used.
-    A_.block(0, 0, getMcZMPArea()->getNumVertex(), dof_()) =
-        (getParams().dt / getParams().impactDuration) * A_zmp_ * sumJacZMP;
+  // if(getParams().updateMcZMPArea)
+  //{
+  // We assume that we always start from ZMP constraint unless it is not used.
+  A_.block(0, 0, getMcZMPArea()->getNumVertex(), dof_()) =
+      (getParams().dt / getParams().impactDuration) * A_zmp_ * sumJacZMP;
 
-    // Read the robot joint velocities.
-    // rbd::paramToVector(robot.mbc().alpha, robotJointVelocity_);
-    b_.segment(0, getMcZMPArea()->getNumVertex()) =
-        -(A_zmp_ * sumWrenchZMP + A_zmp_ * sumJacZMP * robotJointVelocity_ / getParams().dt);
-  }
+  // Read the robot joint velocities.
+  // rbd::paramToVector(robot.mbc().alpha, robotJointVelocity_);
+  b_.segment(0, getMcZMPArea()->getNumVertex()) =
+      -(A_zmp_ * sumWrenchZMP + A_zmp_ * sumJacZMP * robotJointVelocity_ / getParams().dt);
+  //}
 }
 
 void ImpactAwareFloatingBaseConstraint::compute()
