@@ -433,15 +433,20 @@ void ImpactAwareFloatingBaseConstraint::updateZMPConstraint_()
   Eigen::Vector6d sumWrenchZMP;
   getZMPBlocks(sumJacZMP, sumWrenchZMP);
 
-  // if(getParams().updateMcZMPArea)
+  int A_zmp_rows = static_cast<int>(getParams().zmpAreaVertexSet.size());
+  if(getParams().updateMcZMPArea){
+     A_zmp_rows =  getMcZMPArea()->getNumVertex();
+     assert(A_zmp_rows == A_zmp_.rows());
+  }
+
   //{
   // We assume that we always start from ZMP constraint unless it is not used.
-  A_.block(0, 0, getMcZMPArea()->getNumVertex(), dof_()) =
+  A_.block(0, 0, A_zmp_rows, dof_()) =
       (getParams().dt / getParams().impactDuration) * A_zmp_ * sumJacZMP;
 
   // Read the robot joint velocities.
   // rbd::paramToVector(robot.mbc().alpha, robotJointVelocity_);
-  b_.segment(0, getMcZMPArea()->getNumVertex()) =
+  b_.segment(0, A_zmp_rows) =
       -(A_zmp_ * sumWrenchZMP + A_zmp_ * sumJacZMP * robotJointVelocity_ / getParams().dt);
   //}
 }
