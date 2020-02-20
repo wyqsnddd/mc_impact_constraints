@@ -154,7 +154,7 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
     }
     else
     {
-      LOG_ERROR_AND_THROW(std::runtime_error, "Asking for McDCMArea, which  is not initialized and updated.");
+      LOG_ERROR_AND_THROW(std::runtime_error, "Asking for McZMPArea, which  is not initialized and updated.");
     }
   }
 

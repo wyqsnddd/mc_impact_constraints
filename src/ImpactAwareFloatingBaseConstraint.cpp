@@ -63,36 +63,41 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
 }
 void ImpactAwareFloatingBaseConstraint::fixedSupportPolygonSetup_()
 {
-  // int numVertexZMP = mcZMPAreaPtr_->getNumVertex();
-  int numVertexZMP = static_cast<int>(getParams().zmpAreaVertexSet.size());
+  if (zmpConstraintEnabled()){
+    // int numVertexZMP = mcZMPAreaPtr_->getNumVertex();
+    int numVertexZMP = static_cast<int>(getParams().zmpAreaVertexSet.size());
+  
+    A_zmp_ = Eigen::MatrixXd::Zero(numVertexZMP, 6);
+  
+    // Modify the ieqConstraintBlocks.
+    pointsToInequalityMatrix(getParams().zmpAreaVertexSet, ieqConstraintBlocksZMP_.G, ieqConstraintBlocksZMP_.h,
+                             getParams().lowerSlope, getParams().upperSlope);
+    /// Needs to be checked carefully, compare to the 4 dim case
+    // A(:,0) = G_y
+    A_zmp_.block(0, 0, numVertexZMP, 1) = getIeqBlocksZMP().G.block(0, 1, numVertexZMP, 1);
+    /// A(:,1) = -G_x
+    A_zmp_.block(0, 1, numVertexZMP, 1) = -getIeqBlocksZMP().G.block(0, 0, numVertexZMP, 1);
+    /// A(:,5) = h
+    A_zmp_.block(0, 5, numVertexZMP, 1) = -getIeqBlocksZMP().h;
 
-  A_zmp_ = Eigen::MatrixXd::Zero(numVertexZMP, 6);
-
-  // Modify the ieqConstraintBlocks.
-  pointsToInequalityMatrix(getParams().zmpAreaVertexSet, ieqConstraintBlocksZMP_.G, ieqConstraintBlocksZMP_.h,
-                           getParams().lowerSlope, getParams().upperSlope);
-  /// Needs to be checked carefully, compare to the 4 dim case
-  // A(:,0) = G_y
-  A_zmp_.block(0, 0, numVertexZMP, 1) = getIeqBlocksZMP().G.block(0, 1, numVertexZMP, 1);
-  /// A(:,1) = -G_x
-  A_zmp_.block(0, 1, numVertexZMP, 1) = -getIeqBlocksZMP().G.block(0, 0, numVertexZMP, 1);
-  /// A(:,5) = h
-  A_zmp_.block(0, 5, numVertexZMP, 1) = -getIeqBlocksZMP().h;
-
+  }
   // int numVertexDCM = mcDCMAreaPtr_->getNumVertex();
   // A_dcm_ = Eigen::MatrixXd::Zero(numVertexDCM, 6);
   // Modify the ieqConstraintBlocks.
-  pointsToInequalityMatrix(getParams().dcmAreaVertexSet, ieqConstraintBlocksDCM_.G, ieqConstraintBlocksDCM_.h,
-                           getParams().lowerSlope, getParams().upperSlope);
-  /// Needs to be checked carefully, compare to the 4 dim case
-  // A(:,0) = G_y
-  // A_dcm_.block(0, 0, numVertexDCM, 1) = getIeqBlocksDCM().G.block(0, 1, numVertexDCM, 1);
-  /// A(:,1) = -G_x
-  // A_dcm_.block(0, 1, numVertexDCM, 1) = -getIeqBlocksDCM().G.block(0, 0, numVertexDCM, 1);
-  /// A(:,5) = h
-  // A_dcm_.block(0, 5, numVertexDCM, 1) = -getIeqBlocksDCM().h;
+  if(dcmConstraintEnabled()){
+      pointsToInequalityMatrix(getParams().dcmAreaVertexSet, ieqConstraintBlocksDCM_.G, ieqConstraintBlocksDCM_.h,
+                              getParams().lowerSlope, getParams().upperSlope);
 
-  // Initialie the building blocks
+     /// Needs to be checked carefully, compare to the 4 dim case
+     // A(:,0) = G_y
+     // A_dcm_.block(0, 0, numVertexDCM, 1) = getIeqBlocksDCM().G.block(0, 1, numVertexDCM, 1);
+     /// A(:,1) = -G_x
+     // A_dcm_.block(0, 1, numVertexDCM, 1) = -getIeqBlocksDCM().G.block(0, 0, numVertexDCM, 1);
+     /// A(:,5) = h
+     // A_dcm_.block(0, 5, numVertexDCM, 1) = -getIeqBlocksDCM().h;
+  }
+
+   // Initialie the building blocks
   robotJointVelocity_.resize(dof_());
 
   /*
@@ -187,21 +192,10 @@ void ImpactAwareFloatingBaseConstraint::updateMcDCMAreas_()
 
   mcComAreaPtr_->updateMcComArea();
   mcDCMAreaPtr_->updateMcDCMArea();
-  // int numVertex = static_cast<int>(iniVertexSet_.size());
-  // int numVertexDCM = getMcDCMArea()->getNumVertex();
-
-  // A_dcm_ = Eigen::MatrixXd::Zero(numVertexDCM, 6);
 
   // Set the inequality matrix blocks
   setIeqBlocksDCM(getMcDCMArea()->getIeqConstraint());
 
-  /// Needs to be checked carefully, compare to the 4 dim case
-  // A(:,0) = G_y
-  // A_dcm_.block(0, 0, numVertexDCM, 1) = getIeqBlocksDCM().G.block(0, 1, numVertexDCM, 1);
-  /// A(:,1) = -G_x
-  // A_dcm_.block(0, 1, numVertexDCM, 1) = -getIeqBlocksDCM().G.block(0, 0, numVertexDCM, 1);
-  /// A(:,5) = h
-  // A_dcm_.block(0, 5, numVertexDCM, 1) = -getIeqBlocksDCM().h;
 }
 
 void ImpactAwareFloatingBaseConstraint::getZMPBlocks(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench)
@@ -400,28 +394,17 @@ void ImpactAwareFloatingBaseConstraint::updateDCMConstraint_()
 
   assert(getParams().constrainingDCM == true);
   // Calculates the new DCM constraint blocks internally.
-  // updateMcDCMAreas_();
-
-  // Should we use the real robot or the simulated one?
-  // const auto & robot = predictor_.getSimRobot();
-  // int dof = dof_();
-
-  // Eigen::MatrixXd jacCom= comJacobianPtr_->jacobian(realRobot().mb(), realRobot().mbc());
-  // std::cout<<"comJacobian size is: "<<comJacobian.rows() << ", "<<comJacobian.cols()<<std::endl;
-
+  
   Eigen::MatrixXd jacDCM =
       (comJacobianPtr_->jacobian(realRobot().mb(), realRobot().mbc()) * predictor_.getJacobianDeltaAlpha())
           .block(0, 0, 2, dof_());
 
-  // if(getParams().updateMcDCMArea)
-  //{
-  A_.block(getDCMRowNr_(), 0, getMcDCMArea()->getNumVertex(), dof_()) =
+  A_.block(getDCMRowNr_(), 0, getDCMConstraintSize_(), dof_()) =
       getParams().dt / getOmega() * ieqConstraintBlocksDCM_.G * jacDCM;
 
-  b_.segment(getDCMRowNr_(), getMcDCMArea()->getNumVertex()) =
+  b_.segment(getDCMRowNr_(), getDCMConstraintSize_()) =
       (ieqConstraintBlocksDCM_.h - ieqConstraintBlocksDCM_.G * floatingBaseStates_.DCM.current.segment(0, 2))
       - ieqConstraintBlocksDCM_.G * jacDCM * robotJointVelocity_ / getOmega();
-  //}
 }
 
 void ImpactAwareFloatingBaseConstraint::updateZMPConstraint_()
@@ -433,17 +416,14 @@ void ImpactAwareFloatingBaseConstraint::updateZMPConstraint_()
   Eigen::Vector6d sumWrenchZMP;
   getZMPBlocks(sumJacZMP, sumWrenchZMP);
 
-  // if(getParams().updateMcZMPArea)
-  //{
   // We assume that we always start from ZMP constraint unless it is not used.
-  A_.block(0, 0, getMcZMPArea()->getNumVertex(), dof_()) =
+  A_.block(0, 0, getZMPConstraintSize_(), dof_()) =
       (getParams().dt / getParams().impactDuration) * A_zmp_ * sumJacZMP;
 
   // Read the robot joint velocities.
   // rbd::paramToVector(robot.mbc().alpha, robotJointVelocity_);
-  b_.segment(0, getMcZMPArea()->getNumVertex()) =
+  b_.segment(0, getZMPConstraintSize_()) =
       -(A_zmp_ * sumWrenchZMP + A_zmp_ * sumJacZMP * robotJointVelocity_ / getParams().dt);
-  //}
 }
 
 void ImpactAwareFloatingBaseConstraint::compute()
