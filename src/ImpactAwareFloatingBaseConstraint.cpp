@@ -6,8 +6,8 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
     mi_qpEstimator & predictor,
     const mc_rbdyn::Robot & robot,
     const ImpactAwareConstraintParams<Eigen::Vector2d> & params)
-: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor),
-  robot_(robot), params_(params)
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), robot_(robot),
+  params_(params)
 {
 
   // Set the constraining status of the floating-base state.
@@ -63,12 +63,13 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
 }
 void ImpactAwareFloatingBaseConstraint::fixedSupportPolygonSetup_()
 {
-  if (zmpConstraintEnabled()){
+  if(zmpConstraintEnabled())
+  {
     // int numVertexZMP = mcZMPAreaPtr_->getNumVertex();
     int numVertexZMP = static_cast<int>(getParams().zmpAreaVertexSet.size());
-  
+
     A_zmp_ = Eigen::MatrixXd::Zero(numVertexZMP, 6);
-  
+
     // Modify the ieqConstraintBlocks.
     pointsToInequalityMatrix(getParams().zmpAreaVertexSet, ieqConstraintBlocksZMP_.G, ieqConstraintBlocksZMP_.h,
                              getParams().lowerSlope, getParams().upperSlope);
@@ -79,25 +80,25 @@ void ImpactAwareFloatingBaseConstraint::fixedSupportPolygonSetup_()
     A_zmp_.block(0, 1, numVertexZMP, 1) = -getIeqBlocksZMP().G.block(0, 0, numVertexZMP, 1);
     /// A(:,5) = h
     A_zmp_.block(0, 5, numVertexZMP, 1) = -getIeqBlocksZMP().h;
-
   }
   // int numVertexDCM = mcDCMAreaPtr_->getNumVertex();
   // A_dcm_ = Eigen::MatrixXd::Zero(numVertexDCM, 6);
   // Modify the ieqConstraintBlocks.
-  if(dcmConstraintEnabled()){
-      pointsToInequalityMatrix(getParams().dcmAreaVertexSet, ieqConstraintBlocksDCM_.G, ieqConstraintBlocksDCM_.h,
-                              getParams().lowerSlope, getParams().upperSlope);
+  if(dcmConstraintEnabled())
+  {
+    pointsToInequalityMatrix(getParams().dcmAreaVertexSet, ieqConstraintBlocksDCM_.G, ieqConstraintBlocksDCM_.h,
+                             getParams().lowerSlope, getParams().upperSlope);
 
-     /// Needs to be checked carefully, compare to the 4 dim case
-     // A(:,0) = G_y
-     // A_dcm_.block(0, 0, numVertexDCM, 1) = getIeqBlocksDCM().G.block(0, 1, numVertexDCM, 1);
-     /// A(:,1) = -G_x
-     // A_dcm_.block(0, 1, numVertexDCM, 1) = -getIeqBlocksDCM().G.block(0, 0, numVertexDCM, 1);
-     /// A(:,5) = h
-     // A_dcm_.block(0, 5, numVertexDCM, 1) = -getIeqBlocksDCM().h;
+    /// Needs to be checked carefully, compare to the 4 dim case
+    // A(:,0) = G_y
+    // A_dcm_.block(0, 0, numVertexDCM, 1) = getIeqBlocksDCM().G.block(0, 1, numVertexDCM, 1);
+    /// A(:,1) = -G_x
+    // A_dcm_.block(0, 1, numVertexDCM, 1) = -getIeqBlocksDCM().G.block(0, 0, numVertexDCM, 1);
+    /// A(:,5) = h
+    // A_dcm_.block(0, 5, numVertexDCM, 1) = -getIeqBlocksDCM().h;
   }
 
-   // Initialie the building blocks
+  // Initialie the building blocks
   robotJointVelocity_.resize(dof_());
 
   /*
@@ -140,20 +141,22 @@ void ImpactAwareFloatingBaseConstraint::updateMcAreas_(double height)
       if(getParams().updateMcZMPArea)
       {
         updateMcZMPAreas_(height);
-	if(getParams().debug){
+        if(getParams().debug)
+        {
           getMcZMPArea()->print();
-	}
+        }
       }
       break;
     case 3:
       if(getParams().updateMcDCMArea)
       {
         updateMcDCMAreas_();
-	if(getParams().debug){
+        if(getParams().debug)
+        {
           getMcZMPArea()->print();
           getMcComArea()->print();
           getMcDCMArea()->print();
-	}
+        }
       }
       break;
     case 4:
@@ -162,19 +165,21 @@ void ImpactAwareFloatingBaseConstraint::updateMcAreas_(double height)
       {
         updateMcZMPAreas_(height);
 
-	if(getParams().debug){
+        if(getParams().debug)
+        {
           getMcZMPArea()->print();
-	}
+        }
       }
       if(getParams().updateMcDCMArea)
       {
         updateMcDCMAreas_();
 
-	if(getParams().debug){
+        if(getParams().debug)
+        {
           getMcZMPArea()->print();
           getMcComArea()->print();
           getMcDCMArea()->print();
-	}
+        }
       }
       break;
     default:
@@ -201,7 +206,6 @@ void ImpactAwareFloatingBaseConstraint::updateMcDCMAreas_()
 
   // Set the inequality matrix blocks
   setIeqBlocksDCM(getMcDCMArea()->getIeqConstraint());
-
 }
 
 void ImpactAwareFloatingBaseConstraint::getZMPBlocks(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench)
@@ -400,10 +404,9 @@ void ImpactAwareFloatingBaseConstraint::updateDCMConstraint_()
 
   assert(getParams().constrainingDCM == true);
   // Calculates the new DCM constraint blocks internally.
-  
-  Eigen::MatrixXd jacDCM =
-      (comJacobianPtr_->jacobian(robot().mb(), robot().mbc()) * predictor_.getJacobianDeltaAlpha())
-          .block(0, 0, 2, dof_());
+
+  Eigen::MatrixXd jacDCM = (comJacobianPtr_->jacobian(robot().mb(), robot().mbc()) * predictor_.getJacobianDeltaAlpha())
+                               .block(0, 0, 2, dof_());
 
   A_.block(getDCMRowNr_(), 0, getDCMConstraintSize_(), dof_()) =
       getParams().dt / getOmega() * ieqConstraintBlocksDCM_.G * jacDCM;
@@ -423,8 +426,7 @@ void ImpactAwareFloatingBaseConstraint::updateZMPConstraint_()
   getZMPBlocks(sumJacZMP, sumWrenchZMP);
 
   // We assume that we always start from ZMP constraint unless it is not used.
-  A_.block(0, 0, getZMPConstraintSize_(), dof_()) =
-      (getParams().dt / getParams().impactDuration) * A_zmp_ * sumJacZMP;
+  A_.block(0, 0, getZMPConstraintSize_(), dof_()) = (getParams().dt / getParams().impactDuration) * A_zmp_ * sumJacZMP;
 
   // Read the robot joint velocities.
   // rbd::paramToVector(robot.mbc().alpha, robotJointVelocity_);
@@ -447,7 +449,8 @@ void ImpactAwareFloatingBaseConstraint::compute()
   // Update the ZMP, ComVel and DCM states
   updateFloatingBaseState_();
 
-  if(getParams().debug){
+  if(getParams().debug)
+  {
     std::cout << red << "ImpactAwareFloatingBaseConstraint computed FloatingBase-States." << reset << std::endl;
   }
   // std::cout<<red <<"Updated McAreas"<< reset<<std::endl;
@@ -548,65 +551,50 @@ void ImpactAwareFloatingBaseConstraint::logFloatingBaseStates(mc_control::fsm::C
 {
 
   // DCM states
-  //auto & ctl = static_cast<mc_impact::Controller &>(ctlInput);
-  
-  
-  ctl.logger().addLogEntry("FloatingBaseState_DCM_Prediction", [this]() {
-    return this->getFloatingBaseStates().DCM.oneStepPreview;
-  });
-  
+  // auto & ctl = static_cast<mc_impact::Controller &>(ctlInput);
+
+  ctl.logger().addLogEntry("FloatingBaseState_DCM_Prediction",
+                           [this]() { return this->getFloatingBaseStates().DCM.oneStepPreview; });
+
   ctl.logger().addLogEntry("FloatingBaseState_DCM_StateJump",
-                       [this]() { return this->getFloatingBaseStates().DCM.stateJump; });
-  
-  ctl.logger().addLogEntry("FloatingBaseState_DCM",
-                       [this]() { return this->getFloatingBaseStates().DCM.current; });
+                           [this]() { return this->getFloatingBaseStates().DCM.stateJump; });
+
+  ctl.logger().addLogEntry("FloatingBaseState_DCM", [this]() { return this->getFloatingBaseStates().DCM.current; });
 
   // Multi-contact ZMP states
 
-  ctl.logger().addLogEntry("FloatingBaseState_ZMP_Mc_Prediction", [this]() {
-    return getFloatingBaseStates().mcZMP.oneStepPreview;
-  });
-  ctl.logger().addLogEntry("FloatingBaseState_ZMP_Mc_StateJump", [this]() {
-    return getFloatingBaseStates().mcZMP.stateJump;
-  });
-  ctl.logger().addLogEntry("FloatingBaseState_ZMP_Mc",
-                       [this]() { return getFloatingBaseStates().mcZMP.current; });
+  ctl.logger().addLogEntry("FloatingBaseState_ZMP_Mc_Prediction",
+                           [this]() { return getFloatingBaseStates().mcZMP.oneStepPreview; });
+  ctl.logger().addLogEntry("FloatingBaseState_ZMP_Mc_StateJump",
+                           [this]() { return getFloatingBaseStates().mcZMP.stateJump; });
+  ctl.logger().addLogEntry("FloatingBaseState_ZMP_Mc", [this]() { return getFloatingBaseStates().mcZMP.current; });
 
   // Bipedal ZMP states
-  ctl.logger().addLogEntry("FloatingBaseState_ZMP_Bipedal_Prediction", [this]() {
-    return getFloatingBaseStates().bipedalZMP.oneStepPreview;
-  });
-  ctl.logger().addLogEntry("FloatingBaseState_ZMP_Bipedal_StateJump", [this]() {
-    return getFloatingBaseStates().bipedalZMP.stateJump;
-  });
-  ctl.logger().addLogEntry("FloatingBaseState_ZMP_Bipedal", [this]() {
-    return getFloatingBaseStates().bipedalZMP.current;
-  });
+  ctl.logger().addLogEntry("FloatingBaseState_ZMP_Bipedal_Prediction",
+                           [this]() { return getFloatingBaseStates().bipedalZMP.oneStepPreview; });
+  ctl.logger().addLogEntry("FloatingBaseState_ZMP_Bipedal_StateJump",
+                           [this]() { return getFloatingBaseStates().bipedalZMP.stateJump; });
+  ctl.logger().addLogEntry("FloatingBaseState_ZMP_Bipedal",
+                           [this]() { return getFloatingBaseStates().bipedalZMP.current; });
 
   // Com states
-  ctl.logger().addLogEntry("FloatingBaseState_Com",
-                       [this]() { return getFloatingBaseStates().Com; });
-  ctl.logger().addLogEntry("FloatingBaseState_Com_Acc",
-                       [this]() { return getFloatingBaseStates().ComAcc; });
+  ctl.logger().addLogEntry("FloatingBaseState_Com", [this]() { return getFloatingBaseStates().Com; });
+  ctl.logger().addLogEntry("FloatingBaseState_Com_Acc", [this]() { return getFloatingBaseStates().ComAcc; });
 
   // Com-vel states
-  ctl.logger().addLogEntry("FloatingBaseState_Com_Vel_Prediction", [this]() {
-    return getFloatingBaseStates().ComVel.oneStepPreview;
-  });
-  ctl.logger().addLogEntry("FloatingBaseState_Com_Vel_StateJump", [this]() {
-    return getFloatingBaseStates().ComVel.stateJump;
-  });
-  ctl.logger().addLogEntry("FloatingBaseState_Com_Vel",
-                       [this]() { return getFloatingBaseStates().ComVel.current; });
-
+  ctl.logger().addLogEntry("FloatingBaseState_Com_Vel_Prediction",
+                           [this]() { return getFloatingBaseStates().ComVel.oneStepPreview; });
+  ctl.logger().addLogEntry("FloatingBaseState_Com_Vel_StateJump",
+                           [this]() { return getFloatingBaseStates().ComVel.stateJump; });
+  ctl.logger().addLogEntry("FloatingBaseState_Com_Vel", [this]() { return getFloatingBaseStates().ComVel.current; });
 }
 
-void ImpactAwareFloatingBaseConstraint::addMcContactGuiItems(mc_control::fsm::Controller &ctl) const
+void ImpactAwareFloatingBaseConstraint::addMcContactGuiItems(mc_control::fsm::Controller & ctl) const
 {
   getParams().contactSetPtr->addGuiItems(ctl);
 }
 
-void ImpactAwareFloatingBaseConstraint::addMcAreasGuiItems(mc_control::fsm::Controller &ctl) const
+void ImpactAwareFloatingBaseConstraint::addMcAreasGuiItems(mc_control::fsm::Controller & ctl) const
 {
   switch(getConstrainingStatus())
   {
@@ -620,31 +608,28 @@ void ImpactAwareFloatingBaseConstraint::addMcAreasGuiItems(mc_control::fsm::Cont
       if(getParams().updateMcDCMArea)
       {
         getMcZMPArea()->addGuiItems(ctl);
-  	getMcComArea()->addGuiItems(ctl);
-	getMcDCMArea()->addGuiItems(ctl);
+        getMcComArea()->addGuiItems(ctl);
+        getMcDCMArea()->addGuiItems(ctl);
       }
       break;
     case 4:
 
       if(getParams().updateMcZMPArea)
       {
-	getMcZMPArea()->addGuiItems(ctl);
+        getMcZMPArea()->addGuiItems(ctl);
       }
       if(getParams().updateMcDCMArea)
       {
-  	getMcComArea()->addGuiItems(ctl);
-	getMcDCMArea()->addGuiItems(ctl);
-
+        getMcComArea()->addGuiItems(ctl);
+        getMcDCMArea()->addGuiItems(ctl);
       }
       break;
     default:
       throw std::runtime_error("The constraining status is not set correctly");
   }
-
-
 }
 
-void ImpactAwareFloatingBaseConstraint::addFloatingBaseGuiItems(mc_control::fsm::Controller &ctl) const
+void ImpactAwareFloatingBaseConstraint::addFloatingBaseGuiItems(mc_control::fsm::Controller & ctl) const
 {
   mc_rtc::gui::ArrowConfig arrow_config_zmp({0., 1., 0.});
   arrow_config_zmp.start_point_scale = 0.0;
@@ -656,32 +641,25 @@ void ImpactAwareFloatingBaseConstraint::addFloatingBaseGuiItems(mc_control::fsm:
   arrow_config_dcm.shaft_diam *= 2.0;
   arrow_config_dcm.head_diam *= 1.5;
 
-  ctl.gui()->addElement({"DCM"},
-		  mc_rtc::gui::Arrow("DCM", arrow_config_dcm,
-                                       [this]() {
-                                         const auto & c = robot().com();
-                                         const auto & cdot = robot().comVelocity();
-                                         double w = std::sqrt(9.81 / 0.78);
-                                         Eigen::Vector3d dcm3 = (c + cdot / w); // dcmImpulse_->dcm;
-                                         return Eigen::Vector3d{dcm3.x(), dcm3.y(), 0.};
-                                       },
-                                       [this]() {
-                                         // End of the arrow
-                                         return robot().com();
-                                       }));
+  ctl.gui()->addElement({"DCM"}, mc_rtc::gui::Arrow("DCM", arrow_config_dcm,
+                                                    [this]() {
+                                                      const auto & c = robot().com();
+                                                      const auto & cdot = robot().comVelocity();
+                                                      double w = std::sqrt(9.81 / 0.78);
+                                                      Eigen::Vector3d dcm3 = (c + cdot / w); // dcmImpulse_->dcm;
+                                                      return Eigen::Vector3d{dcm3.x(), dcm3.y(), 0.};
+                                                    },
+                                                    [this]() {
+                                                      // End of the arrow
+                                                      return robot().com();
+                                                    }));
 
-
-  ctl.gui()->addElement(
-      {"ZMP"},
-      mc_rtc::gui::Arrow(
-          "Arrow", arrow_config_zmp,
-          [this]() { return getFloatingBaseStates().mcZMP.current; },
-          [this]() {
-            // End of the arrow
-            return robot().com();
-          }));
-
-
+  ctl.gui()->addElement({"ZMP"}, mc_rtc::gui::Arrow("Arrow", arrow_config_zmp,
+                                                    [this]() { return getFloatingBaseStates().mcZMP.current; },
+                                                    [this]() {
+                                                      // End of the arrow
+                                                      return robot().com();
+                                                    }));
 }
 
 } // end of namespace mc_impact

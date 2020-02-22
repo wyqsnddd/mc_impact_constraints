@@ -1,8 +1,6 @@
 #pragma once
 
-
 #include <mc_control/fsm/Controller.h>
-
 #include <mc_prediction/mi_qpEstimator.h>
 #include <mc_solver/InequalityConstraint.h>
 #include <mc_solver/QPSolver.h>
@@ -221,24 +219,21 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
   void printDCMConstraintMatrix() const;
   void printZMPConstraintMatrix() const;
 
-
-  /*! \brief Visualize Multi-contact areas in rviz. 
+  /*! \brief Visualize Multi-contact areas in rviz.
    */
-  void addMcAreasGuiItems(mc_control::fsm::Controller &ctl) const;
+  void addMcAreasGuiItems(mc_control::fsm::Controller & ctl) const;
 
-  /*! \brief Visualize floating-base states: Com, DCM and ZMP 
+  /*! \brief Visualize floating-base states: Com, DCM and ZMP
    */
-  void addFloatingBaseGuiItems(mc_control::fsm::Controller &ctl) const;
+  void addFloatingBaseGuiItems(mc_control::fsm::Controller & ctl) const;
 
-  
-  /*! \brief Visualize Multi-contact surfaces, vertices in rviz. 
+  /*! \brief Visualize Multi-contact surfaces, vertices in rviz.
    */
-  void addMcContactGuiItems(mc_control::fsm::Controller &ctl) const;
+  void addMcContactGuiItems(mc_control::fsm::Controller & ctl) const;
 
   /*! \brif Add the logs.
    */
-  void logFloatingBaseStates(mc_control::fsm::Controller &ctl) const;
-
+  void logFloatingBaseStates(mc_control::fsm::Controller & ctl) const;
 
 private:
   // Predictor
