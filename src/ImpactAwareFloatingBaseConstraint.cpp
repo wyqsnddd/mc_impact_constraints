@@ -4,10 +4,10 @@ namespace mc_impact
 {
 ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
     mi_qpEstimator & predictor,
-    const mc_rbdyn::Robot & realRobot,
+    const mc_rbdyn::Robot & robot,
     const ImpactAwareConstraintParams<Eigen::Vector2d> & params)
 : mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor),
-  realRobot_(realRobot), params_(params)
+  robot_(robot), params_(params)
 {
 
   // Set the constraining status of the floating-base state.
@@ -27,7 +27,7 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
   if(enabledMcZMPArea())
   {
 
-    mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(realRobot_, getParams().contactSetPtr,
+    mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(robot_, getParams().contactSetPtr,
                                                                             getParams().mcProjectionParams);
     // mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(predictor_.getSimRobot(),
     // getParams().contactSetPtr, getParams().mcProjectionParams);
@@ -49,12 +49,12 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
     */
 
     mcComAreaPtr_ =
-        std::make_shared<mc_impact::McComArea>(realRobot_, getParams().contactSetPtr, getParams().mcProjectionParams);
+        std::make_shared<mc_impact::McComArea>(robot_, getParams().contactSetPtr, getParams().mcProjectionParams);
 
     mcDCMAreaPtr_ = std::make_shared<mc_impact::McDCMArea>(mcZMPAreaPtr_, mcComAreaPtr_);
   }
   // Initialize the com Jacobian
-  comJacobianPtr_ = std::make_shared<rbd::CoMJacobian>(realRobot_.mb());
+  comJacobianPtr_ = std::make_shared<rbd::CoMJacobian>(robot_.mb());
 
   // Initialize the building blocks for the constraints.
   fixedSupportPolygonSetup_();
@@ -105,7 +105,7 @@ void ImpactAwareFloatingBaseConstraint::fixedSupportPolygonSetup_()
   b_.resize(nrInEq());
   */
 
-  std::cout << red << "Reset ImpactAwareFloatingBaseConstraint." << reset << std::endl;
+  std::cout << red << "Fixed-SupportPolygon set for the ImpactAwareFloatingBaseConstraint." << reset << std::endl;
 }
 void ImpactAwareFloatingBaseConstraint::updateMcZMPAreas_(double height)
 {
@@ -140,18 +140,20 @@ void ImpactAwareFloatingBaseConstraint::updateMcAreas_(double height)
       if(getParams().updateMcZMPArea)
       {
         updateMcZMPAreas_(height);
-        getMcZMPArea()->print();
+	if(getParams().debug){
+          getMcZMPArea()->print();
+	}
       }
       break;
     case 3:
       if(getParams().updateMcDCMArea)
       {
         updateMcDCMAreas_();
-
-        // TODO temp debug
-        getMcZMPArea()->print();
-        getMcComArea()->print();
-        getMcDCMArea()->print();
+	if(getParams().debug){
+          getMcZMPArea()->print();
+          getMcComArea()->print();
+          getMcDCMArea()->print();
+	}
       }
       break;
     case 4:
@@ -159,16 +161,20 @@ void ImpactAwareFloatingBaseConstraint::updateMcAreas_(double height)
       if(getParams().updateMcZMPArea)
       {
         updateMcZMPAreas_(height);
-        getMcZMPArea()->print();
+
+	if(getParams().debug){
+          getMcZMPArea()->print();
+	}
       }
       if(getParams().updateMcDCMArea)
       {
         updateMcDCMAreas_();
 
-        // TODO temp debug
-        getMcZMPArea()->print();
-        getMcComArea()->print();
-        getMcDCMArea()->print();
+	if(getParams().debug){
+          getMcZMPArea()->print();
+          getMcComArea()->print();
+          getMcDCMArea()->print();
+	}
       }
       break;
     default:
@@ -202,7 +208,7 @@ void ImpactAwareFloatingBaseConstraint::getZMPBlocks(Eigen::MatrixXd & sumJac, E
 {
   exWrench.setZero();
   // int dof = predictor_.getSimRobot().mb().nrDof();
-  // int dof = realRobot().mb().nrDof();
+  // int dof = robot().mb().nrDof();
   sumJac.resize(6, dof_());
   sumJac.setZero();
   // sva::PTransformd X_0_CoM = sva::PTransformd(predictor_.getRobot().com());
@@ -214,11 +220,11 @@ void ImpactAwareFloatingBaseConstraint::getZMPBlocks(Eigen::MatrixXd & sumJac, E
   {
     std::string bodyName = contactPair.second.getContactParams().bodyName;
     // sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(contactPair.second.getContactParams().bodyName).inv();
-    sva::PTransformd X_ee_0 = realRobot().bodyPosW(contactPair.second.getContactParams().bodyName).inv();
+    sva::PTransformd X_ee_0 = robot().bodyPosW(contactPair.second.getContactParams().bodyName).inv();
     // sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(idx->bodyName).inv();
     // exWrench += X_ee_0.dualMatrix() * predictor_.getSimRobot().forceSensor(idx->sensorName).wrench().vector();
     // exWrench += X_ee_0.dualMatrix() * predictor_.getSimRobot().bodyWrench(bodyName).vector();
-    exWrench += X_ee_0.dualMatrix() * realRobot().bodyWrench(bodyName).vector();
+    exWrench += X_ee_0.dualMatrix() * robot().bodyWrench(bodyName).vector();
 
     // sumJac += X_ee_0.dualMatrix().block(0, 3, 6, 3) * predictor_.getJacobianDeltaF(idx->bodyName);
 
@@ -234,7 +240,7 @@ void ImpactAwareFloatingBaseConstraint::getZMPBlocks(Eigen::MatrixXd & sumJac, E
         ++impactIdx)
     {
       // sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(impactIdx->second->getImpactBody()).inv();
-      sva::PTransformd X_ee_0 = realRobot().bodyPosW(impactIdx->second->getImpactBody()).inv();
+      sva::PTransformd X_ee_0 = robot().bodyPosW(impactIdx->second->getImpactBody()).inv();
 
       sumJac.block(0, 0, 3, dof_()) +=
           X_ee_0.dualMatrix().block(0, 3, 3, 3) * predictor_.getJacobianDeltaF(impactIdx->second->getImpactBody());
@@ -285,13 +291,13 @@ void ImpactAwareFloatingBaseConstraint::calculateZMP_()
     if(contactPair.second.inContact())
     {
       // contact established
-      contactBodyWrench += X_ee_0.dualMatrix() * realRobot().bodyWrench(bodyName).vector();
+      contactBodyWrench += X_ee_0.dualMatrix() * robot().bodyWrench(bodyName).vector();
       contactBodyWrenchJac += X_ee_0.dualMatrix().block(0, 3, 6, 3) * predictor_.getJacobianDeltaF(bodyName);
     }
     else
     {
       // contact not established, impact is expected.
-      impactBodyWrench += X_ee_0.dualMatrix() * realRobot().bodyWrench(bodyName).vector();
+      impactBodyWrench += X_ee_0.dualMatrix() * robot().bodyWrench(bodyName).vector();
       impactBodyWrenchJac += X_ee_0.dualMatrix().block(0, 3, 6, 3) * predictor_.getJacobianDeltaF(bodyName);
     }
   } // end of for
@@ -363,17 +369,17 @@ void ImpactAwareFloatingBaseConstraint::calculateZMP_()
 void ImpactAwareFloatingBaseConstraint::updateFloatingBaseState_()
 {
   // Update omega for DCM calculation
-  calcOmega(realRobot().com().z());
+  calcOmega(robot().com().z());
 
-  Eigen::MatrixXd comJacobian = comJacobianPtr_->jacobian(realRobot().mb(), realRobot().mbc());
+  Eigen::MatrixXd comJacobian = comJacobianPtr_->jacobian(robot().mb(), robot().mbc());
   Eigen::MatrixXd dcmJacobian = (comJacobian * predictor_.getJacobianDeltaAlpha()).block(0, 0, 2, dof_());
 
-  floatingBaseStates_.Com = realRobot().com();
-  floatingBaseStates_.ComAcc = realRobot().comAcceleration();
+  floatingBaseStates_.Com = robot().com();
+  floatingBaseStates_.ComAcc = robot().comAcceleration();
 
   // (1) COM velocity
 
-  floatingBaseStates_.ComVel.current = realRobot().comVelocity();
+  floatingBaseStates_.ComVel.current = robot().comVelocity();
   floatingBaseStates_.ComVel.stateJump = comJacobian * predictor_.getJointVelJump();
   floatingBaseStates_.ComVel.oneStepPreview = floatingBaseStates_.ComVel.current + floatingBaseStates_.ComVel.stateJump;
 
@@ -396,7 +402,7 @@ void ImpactAwareFloatingBaseConstraint::updateDCMConstraint_()
   // Calculates the new DCM constraint blocks internally.
   
   Eigen::MatrixXd jacDCM =
-      (comJacobianPtr_->jacobian(realRobot().mb(), realRobot().mbc()) * predictor_.getJacobianDeltaAlpha())
+      (comJacobianPtr_->jacobian(robot().mb(), robot().mbc()) * predictor_.getJacobianDeltaAlpha())
           .block(0, 0, 2, dof_());
 
   A_.block(getDCMRowNr_(), 0, getDCMConstraintSize_(), dof_()) =
@@ -433,7 +439,7 @@ void ImpactAwareFloatingBaseConstraint::compute()
   // const auto & robot = predictor_.getSimRobot();
   // Read the SIMULATED robot joint velocity:
 
-  robotJointVelocity_ = (rbd::dofToVector(realRobot().mb(), realRobot().mbc().alpha));
+  robotJointVelocity_ = (rbd::dofToVector(robot().mb(), robot().mbc().alpha));
 
   // Update the Multi-contact areas
   updateMcAreas_(2.0);
@@ -441,8 +447,9 @@ void ImpactAwareFloatingBaseConstraint::compute()
   // Update the ZMP, ComVel and DCM states
   updateFloatingBaseState_();
 
-  std::cout << red << "ImpactAwareFloatingBaseConstraint computed FloatingBase-States." << reset << std::endl;
-
+  if(getParams().debug){
+    std::cout << red << "ImpactAwareFloatingBaseConstraint computed FloatingBase-States." << reset << std::endl;
+  }
   // std::cout<<red <<"Updated McAreas"<< reset<<std::endl;
 
   // Update the Constraint size based on the number of the Multi-contact areas vertices.
@@ -518,11 +525,11 @@ void ImpactAwareFloatingBaseConstraint::updateAbMatrixsize_()
 void ImpactAwareFloatingBaseConstraint::printZMPConstraintMatrix() const
 {
 
-  std::cerr << red << "DCM A matrix is: " << std::endl
+  std::cerr << red << "ZMP A matrix is: " << std::endl
             << cyan << A_ << std::endl
             << red << std::endl
             << "b vector is: " << cyan << b_.transpose() << std::endl
-            << red << "Intermediat G matrix is: " << cyan << getIeqBlocksDCM().G << std::endl
+            << red << "Intermediat G matrix is: " << cyan << getIeqBlocksZMP().G << std::endl
             << red << "Intermediat h vector is: " << cyan << b_.transpose() << reset << std::endl;
 }
 

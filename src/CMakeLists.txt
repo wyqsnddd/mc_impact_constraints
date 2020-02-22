@@ -6,6 +6,7 @@ set(constraints
   ZMPWithImpulse
   DCMWithImpulse
   ImpactAwareFloatingBaseConstraint
+  ImpactAwareZMPConstraint
   #supportPolygon
   ConstraintUtils
 )

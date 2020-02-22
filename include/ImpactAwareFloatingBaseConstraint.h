@@ -15,7 +15,7 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
 {
   ///< ZMP defined with a set of points
   ImpactAwareFloatingBaseConstraint(mi_qpEstimator & predictor,
-                                    const mc_rbdyn::Robot & realRobot,
+                                    const mc_rbdyn::Robot & robot,
                                     const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
 
   /*! \brief We use this status to check what floating-base state do we constrain:
@@ -195,9 +195,9 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
 
   /*! \return reference to the robot (either pyhsices-engine simulated or real)
    */
-  inline const mc_rbdyn::Robot & realRobot() const
+  inline const mc_rbdyn::Robot & robot() const
   {
-    return realRobot_;
+    return robot_;
   }
 
   /*! \return The constant: \omega = sqrt(9.8/com-z)
@@ -222,11 +222,11 @@ private:
   // Predictor
   mi_qpEstimator & predictor_;
 
-  const mc_rbdyn::Robot & realRobot_;
+  const mc_rbdyn::Robot & robot_;
 
   inline int dof_() const
   {
-    return realRobot_.mb().nrDof();
+    return robot().mb().nrDof();
   }
 
   inline void calcOmega(const double & c_z)
