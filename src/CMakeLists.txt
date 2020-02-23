@@ -1,13 +1,9 @@
 set(constraints
   BoundJointVelocityJump
   BoundJointTorqueJump
-  FrictionWithImpulse
-  COPWithImpulse
-  ZMPWithImpulse
-  DCMWithImpulse
   ImpactAwareFloatingBaseConstraint
   ImpactAwareZMPConstraint
-  #supportPolygon
+  ImpactAwareSustainedContactConstraint
   ConstraintUtils
 )
 set(constraints_SRC)
