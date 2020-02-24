@@ -16,8 +16,9 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
 {
   ///< ZMP defined with a set of points
   ImpactAwareFloatingBaseConstraint(mi_qpEstimator & predictor,
-                                    const mc_rbdyn::Robot & robot,
-                                    const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
+		  std::shared_ptr<McContactSet> contactSetPtr,
+		  const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
+  
 
   /*! \brief We use this status to check what floating-base state do we constrain:
    * 1: only ZMP
@@ -238,6 +239,8 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
 private:
   // Predictor
   mi_qpEstimator & predictor_;
+  ImpactAwareConstraintParams<Eigen::Vector2d> params_;
+  std::shared_ptr<McContactSet> contactSetPtr_;
 
   const mc_rbdyn::Robot & robot_;
 
@@ -361,7 +364,6 @@ private:
 
   std::shared_ptr<rbd::CoMJacobian> comJacobianPtr_;
 
-  ImpactAwareConstraintParams<Eigen::Vector2d> params_;
 
 }; // End of struct name: ImpactAwareFloatingBaseConstraint
 

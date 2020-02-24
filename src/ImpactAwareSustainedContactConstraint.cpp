@@ -3,11 +3,12 @@
 namespace mc_impact
 {
 
-ImpactAwareSustainedContact::ImpactAwareSustainedContact(const std::string & mcContactName,
+ImpactAwareSustainedContact::ImpactAwareSustainedContact(
                                mi_qpEstimator & predictor,
-                               const ImpactAwareConstraintParams<Eigen::Vector2d> & impactAwareConstraintParams)
-: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), mcContactName_(mcContactName),
-  predictor_(predictor), constraintParams_(impactAwareConstraintParams)
+		 const McContactParams & mcContactParams,
+		 const ImpactAwareConstraintParams<Eigen::Vector2d> & constraintParams)
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), 
+  predictor_(predictor), constraintParams_(constraintParams), mcContactParams_(mcContactParams)
 {
 
   initializeImpactAwareCopConstraint_();

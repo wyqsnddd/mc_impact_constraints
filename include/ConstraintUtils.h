@@ -14,7 +14,7 @@ struct ImpactAwareConstraintParams
 public:
   ImpactAwareConstraintParams()
   {
-    contactSetPtr.reset(new McContactSet());
+    //contactSetPtr.reset(new McContactSet());
   }
 
   ~ImpactAwareConstraintParams() {}
@@ -43,7 +43,7 @@ public:
   bool constrainingDCM = false;
   bool constrainingCOMAcc = false;
 
-  std::shared_ptr<McContactSet> contactSetPtr;
+  //std::shared_ptr<McContactSet> contactSetPtr;
   // const std::vector<McContactParams> contacts;
   ///< Vertices of the multi-contact DCM area.
   std::vector<Point> dcmAreaVertexSet;

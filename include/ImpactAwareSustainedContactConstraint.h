@@ -14,9 +14,10 @@ struct ImpactAwareSustainedContact: public mc_solver::InequalityConstraintRobot
  *
  */
 {
-  ImpactAwareSustainedContact(const std::string & mcContactName,
+  ImpactAwareSustainedContact(
                  mi_qpEstimator & predictor,
-                 const ImpactAwareConstraintParams<Eigen::Vector2d> & impactAwareConstraintParams);
+		 const McContactParams & mcContactParams,
+		 const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
 
   inline int maxInEq() const override
   {
@@ -67,17 +68,20 @@ struct ImpactAwareSustainedContact: public mc_solver::InequalityConstraintRobot
 
   inline const std::string & getMcContactName() const
   {
-    return mcContactName_;
+    return getParams().surfaceName;
   }
 
+  
   inline const ImpactAwareConstraintParams<Eigen::Vector2d> & getConstraintParams() const
   {
     return constraintParams_;
   }
 
+ 
   inline const McContactParams & getParams() const
   {
-    return constraintParams_.contactSetPtr->getContact(getMcContactName()).getContactParams();
+    //return constraintParams_.contactSetPtr->getContact(getMcContactName()).getContactParams();
+    return mcContactParams_; 
   }
 
   const mc_rbdyn::Robot & robot() const
@@ -128,6 +132,7 @@ private:
   Eigen::VectorXd robotJointVelocity_;
 
   const ImpactAwareConstraintParams<Eigen::Vector2d> & constraintParams_;
+  McContactParams mcContactParams_;
 
   // dt * J_deltatau / impact_duration
   Eigen::MatrixXd A_;

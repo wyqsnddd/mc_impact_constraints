@@ -4,10 +4,10 @@ namespace mc_impact
 {
 ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
     mi_qpEstimator & predictor,
-    const mc_rbdyn::Robot & robot,
-    const ImpactAwareConstraintParams<Eigen::Vector2d> & params)
-: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), robot_(robot),
-  params_(params)
+    std::shared_ptr<McContactSet> contactSetPtr,
+    const ImpactAwareConstraintParams<Eigen::Vector2d> & params
+    )
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), params_(params), contactSetPtr_(contactSetPtr), robot_(predictor_.getSimRobot())
 {
 
   // Set the constraining status of the floating-base state.
@@ -27,7 +27,7 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
   if(enabledMcZMPArea())
   {
 
-    mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(robot_, getParams().contactSetPtr,
+    mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(robot_, contactSetPtr_,
                                                                             getParams().mcProjectionParams);
     // mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(predictor_.getSimRobot(),
     // getParams().contactSetPtr, getParams().mcProjectionParams);
@@ -49,7 +49,7 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
     */
 
     mcComAreaPtr_ =
-        std::make_shared<mc_impact::McComArea>(robot_, getParams().contactSetPtr, getParams().mcProjectionParams);
+        std::make_shared<mc_impact::McComArea>(robot_, contactSetPtr_, getParams().mcProjectionParams);
 
     mcDCMAreaPtr_ = std::make_shared<mc_impact::McDCMArea>(mcZMPAreaPtr_, mcComAreaPtr_);
   }
@@ -220,7 +220,7 @@ void ImpactAwareFloatingBaseConstraint::getZMPBlocks(Eigen::MatrixXd & sumJac, E
 
   // for(auto idx = getParams().contactSetPtr->getContactMap().begin(); idx != getParams().contacts.end(); ++idx)
 
-  for(auto & contactPair : getParams().contactSetPtr->getContactMap())
+  for(auto & contactPair : contactSetPtr_->getContactMap())
   {
     std::string bodyName = contactPair.second.getContactParams().bodyName;
     // sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(contactPair.second.getContactParams().bodyName).inv();
@@ -285,7 +285,7 @@ void ImpactAwareFloatingBaseConstraint::calculateZMP_()
 
   // (1) Go through all the contact
   // Collect all the local Jacobians from all the contacts
-  for(auto & contactPair : getParams().contactSetPtr->getContactMap())
+  for(auto & contactPair : contactSetPtr_->getContactMap())
   {
 
     std::string bodyName = contactPair.second.getContactParams().bodyName;
@@ -591,7 +591,7 @@ void ImpactAwareFloatingBaseConstraint::logFloatingBaseStates(mc_control::fsm::C
 
 void ImpactAwareFloatingBaseConstraint::addMcContactGuiItems(mc_control::fsm::Controller & ctl) const
 {
-  getParams().contactSetPtr->addGuiItems(ctl);
+  contactSetPtr_->addGuiItems(ctl);
 }
 
 void ImpactAwareFloatingBaseConstraint::addMcAreasGuiItems(mc_control::fsm::Controller & ctl) const

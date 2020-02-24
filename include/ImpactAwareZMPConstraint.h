@@ -15,7 +15,7 @@ struct ImpactAwareZMPConstraint : public mc_solver::InequalityConstraintRobot
 {
   ///< ZMP defined with a set of points
   ImpactAwareZMPConstraint(mi_qpEstimator & predictor,
-                           const mc_rbdyn::Robot & realRobot,
+			   std::shared_ptr<McContactSet> contactSetPtr,
                            const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
 
   /*!
@@ -120,6 +120,10 @@ struct ImpactAwareZMPConstraint : public mc_solver::InequalityConstraintRobot
 private:
   // Predictor
   mi_qpEstimator & predictor_;
+  ImpactAwareConstraintParams<Eigen::Vector2d> params_;
+  std::shared_ptr<McContactSet> contactSetPtr_;
+
+  const mc_rbdyn::Robot & robot_;
 
   inline void calcOmega_(const double & c_z)
   {
@@ -129,7 +133,6 @@ private:
 
   double omega_;
 
-  const mc_rbdyn::Robot & robot_;
 
   inline int dof_() const
   {
@@ -161,9 +164,7 @@ private:
 
   IeqConstraintBlocks ieqConstraintBlocksZMP_;
 
-  ImpactAwareConstraintParams<Eigen::Vector2d> params_;
-
-  FloatingBaseStates floatingBaseStates_;
+    FloatingBaseStates floatingBaseStates_;
   void updateFloatingBaseState_();
 
   Eigen::VectorXd robotJointVelocity_;

@@ -4,15 +4,13 @@ namespace mc_impact
 {
 
 ImpactAwareZMPConstraint::ImpactAwareZMPConstraint(mi_qpEstimator & predictor,
-                                                   const mc_rbdyn::Robot & robot,
-                                                   const ImpactAwareConstraintParams<Eigen::Vector2d> & params)
-: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), robot_(robot),
-  params_(params)
+			   std::shared_ptr<McContactSet> contactSetPtr,
+			   const ImpactAwareConstraintParams<Eigen::Vector2d> & params)
+: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), params_(params), contactSetPtr_(contactSetPtr), robot_(predictor.getSimRobot())
 {
-
   if(enabledMcZMPArea())
   {
-    mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(robot_, getParams().contactSetPtr,
+    mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(robot_, contactSetPtr,
                                                                             getParams().mcProjectionParams);
   }
 
@@ -100,7 +98,7 @@ void ImpactAwareZMPConstraint::getZMPBlocks(Eigen::MatrixXd & sumJac, Eigen::Vec
 
   // for(auto idx = getParams().contactSetPtr->getContactMap().begin(); idx != getParams().contacts.end(); ++idx)
 
-  for(auto & contactPair : getParams().contactSetPtr->getContactMap())
+  for(auto & contactPair : contactSetPtr_->getContactMap())
   {
     std::string bodyName = contactPair.second.getContactParams().bodyName;
     // sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(contactPair.second.getContactParams().bodyName).inv();
@@ -165,7 +163,7 @@ void ImpactAwareZMPConstraint::calculateZMP_()
 
   // (1) Go through all the contact
   // Collect all the local Jacobians from all the contacts
-  for(auto & contactPair : getParams().contactSetPtr->getContactMap())
+  for(auto & contactPair : contactSetPtr_->getContactMap())
   {
     std::string bodyName = contactPair.second.getContactParams().bodyName;
     sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(bodyName).inv();
