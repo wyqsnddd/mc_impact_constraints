@@ -15,9 +15,9 @@ struct ImpactAwareSustainedContact: public mc_solver::InequalityConstraintRobot
  */
 {
   ImpactAwareSustainedContact(
-                 mi_qpEstimator & predictor,
-		 const McContactParams & mcContactParams,
-		 const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
+		  std::shared_ptr<mi_qpEstimator > predictorPtr,
+		  const McContactParams & mcContactParams,
+		  const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
 
   inline int maxInEq() const override
   {
@@ -86,7 +86,7 @@ struct ImpactAwareSustainedContact: public mc_solver::InequalityConstraintRobot
 
   const mc_rbdyn::Robot & robot() const
   {
-    return predictor_.getSimRobot();
+    return predictorPtr_->getSimRobot();
   }
 
   int dof() const
@@ -104,7 +104,15 @@ struct ImpactAwareSustainedContact: public mc_solver::InequalityConstraintRobot
   static Eigen::Matrix3d crossProduct(const Eigen::Vector3d & input);
 
 
+  inline std::shared_ptr<mi_qpEstimator> getPredictor()
+  {
+    return predictorPtr_; 
+  }
+
+
 private:
+
+  std::shared_ptr<mi_qpEstimator> predictorPtr_;
 
   int copConstraintSize_() const
   {
@@ -122,9 +130,6 @@ private:
   void computeImpactAwareFrictionConstraint_();
 
   std::string mcContactName_;
-
-  // Predictor
-  mi_qpEstimator & predictor_;
 
   sva::ForceVecd measuredWrench_;
 

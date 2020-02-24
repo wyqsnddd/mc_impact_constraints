@@ -3,11 +3,11 @@
 namespace mc_impact
 {
 ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
-    mi_qpEstimator & predictor,
+		std::shared_ptr<mi_qpEstimator> predictorPtr,
     std::shared_ptr<McContactSet> contactSetPtr,
     const ImpactAwareConstraintParams<Eigen::Vector2d> & params
     )
-: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), params_(params), contactSetPtr_(contactSetPtr), robot_(predictor_.getSimRobot())
+: mc_solver::InequalityConstraintRobot(getPredictor()->getSimRobot().robotIndex()), predictorPtr_(predictorPtr), params_(params), contactSetPtr_(contactSetPtr), robot_(getPredictor()->getSimRobot())
 {
 
   // Set the constraining status of the floating-base state.
@@ -29,7 +29,7 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
 
     mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(robot_, contactSetPtr_,
                                                                             getParams().mcProjectionParams);
-    // mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(predictor_.getSimRobot(),
+    // mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(getPredictor()->.getSimRobot(),
     // getParams().contactSetPtr, getParams().mcProjectionParams);
   }
 
@@ -42,7 +42,7 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
 
     /*
     mcComAreaPtr_ =
-      std::make_shared<mc_impact::McComArea>(predictor_.getSimRobot(), getParams().contactSetPtr,
+      std::make_shared<mc_impact::McComArea>(getPredictor()->.getSimRobot(), getParams().contactSetPtr,
     getParams().mcProjectionParams); mcDCMAreaPtr_ = std::make_shared<mc_impact::McDCMArea>(mcZMPAreaPtr_,
     mcComAreaPtr_);
 
@@ -211,11 +211,11 @@ void ImpactAwareFloatingBaseConstraint::updateMcDCMAreas_()
 void ImpactAwareFloatingBaseConstraint::getZMPBlocks(Eigen::MatrixXd & sumJac, Eigen::Vector6d & exWrench)
 {
   exWrench.setZero();
-  // int dof = predictor_.getSimRobot().mb().nrDof();
+  // int dof = getPredictor()->.getSimRobot().mb().nrDof();
   // int dof = robot().mb().nrDof();
   sumJac.resize(6, dof_());
   sumJac.setZero();
-  // sva::PTransformd X_0_CoM = sva::PTransformd(predictor_.getRobot().com());
+  // sva::PTransformd X_0_CoM = sva::PTransformd(getPredictor()->.getRobot().com());
   // (1) Go through the bodies with contact
 
   // for(auto idx = getParams().contactSetPtr->getContactMap().begin(); idx != getParams().contacts.end(); ++idx)
@@ -223,38 +223,38 @@ void ImpactAwareFloatingBaseConstraint::getZMPBlocks(Eigen::MatrixXd & sumJac, E
   for(auto & contactPair : contactSetPtr_->getContactMap())
   {
     std::string bodyName = contactPair.second.getContactParams().bodyName;
-    // sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(contactPair.second.getContactParams().bodyName).inv();
+    // sva::PTransformd X_ee_0 = getPredictor()->.getSimRobot().bodyPosW(contactPair.second.getContactParams().bodyName).inv();
     sva::PTransformd X_ee_0 = robot().bodyPosW(contactPair.second.getContactParams().bodyName).inv();
-    // sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(idx->bodyName).inv();
-    // exWrench += X_ee_0.dualMatrix() * predictor_.getSimRobot().forceSensor(idx->sensorName).wrench().vector();
-    // exWrench += X_ee_0.dualMatrix() * predictor_.getSimRobot().bodyWrench(bodyName).vector();
+    // sva::PTransformd X_ee_0 = getPredictor()->.getSimRobot().bodyPosW(idx->bodyName).inv();
+    // exWrench += X_ee_0.dualMatrix() * getPredictor()->.getSimRobot().forceSensor(idx->sensorName).wrench().vector();
+    // exWrench += X_ee_0.dualMatrix() * getPredictor()->.getSimRobot().bodyWrench(bodyName).vector();
     exWrench += X_ee_0.dualMatrix() * robot().bodyWrench(bodyName).vector();
 
-    // sumJac += X_ee_0.dualMatrix().block(0, 3, 6, 3) * predictor_.getJacobianDeltaF(idx->bodyName);
+    // sumJac += X_ee_0.dualMatrix().block(0, 3, 6, 3) * getPredictor()->.getJacobianDeltaF(idx->bodyName);
 
-    sumJac.block(0, 0, 3, dof_()) += X_ee_0.dualMatrix().block(0, 3, 3, 3) * predictor_.getJacobianDeltaF(bodyName);
-    sumJac.block(3, 0, 3, dof_()) += X_ee_0.dualMatrix().block(3, 3, 3, 3) * predictor_.getJacobianDeltaF(bodyName);
+    sumJac.block(0, 0, 3, dof_()) += X_ee_0.dualMatrix().block(0, 3, 3, 3) * getPredictor()->getJacobianDeltaF(bodyName);
+    sumJac.block(3, 0, 3, dof_()) += X_ee_0.dualMatrix().block(3, 3, 3, 3) * getPredictor()->getJacobianDeltaF(bodyName);
     //
   } // end of for
 
   // (2) Go through the impacts
   if(getParams().multiContactCase)
   {
-    for(auto impactIdx = predictor_.getImpactModels().begin(); impactIdx != predictor_.getImpactModels().end();
+    for(auto impactIdx = getPredictor()->getImpactModels().begin(); impactIdx != getPredictor()->getImpactModels().end();
         ++impactIdx)
     {
-      // sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(impactIdx->second->getImpactBody()).inv();
+      // sva::PTransformd X_ee_0 = getPredictor()->.getSimRobot().bodyPosW(impactIdx->second->getImpactBody()).inv();
       sva::PTransformd X_ee_0 = robot().bodyPosW(impactIdx->second->getImpactBody()).inv();
 
       sumJac.block(0, 0, 3, dof_()) +=
-          X_ee_0.dualMatrix().block(0, 3, 3, 3) * predictor_.getJacobianDeltaF(impactIdx->second->getImpactBody());
+          X_ee_0.dualMatrix().block(0, 3, 3, 3) * getPredictor()->getJacobianDeltaF(impactIdx->second->getImpactBody());
 
       sumJac.block(3, 0, 3, dof_()) +=
-          X_ee_0.dualMatrix().block(3, 3, 3, 3) * predictor_.getJacobianDeltaF(impactIdx->second->getImpactBody());
+          X_ee_0.dualMatrix().block(3, 3, 3, 3) * getPredictor()->getJacobianDeltaF(impactIdx->second->getImpactBody());
 
       // Add the hand force sensor measurement
       // exWrench += X_ee_0.dualMatrix() *
-      // predictor_.getSimRobot().bodyWrench(impactIdx->second->getImpactBody()).vector();
+      // getPredictor()->.getSimRobot().bodyWrench(impactIdx->second->getImpactBody()).vector();
     }
   }
 }
@@ -263,8 +263,8 @@ void ImpactAwareFloatingBaseConstraint::calculateZMP_()
 {
 
   // We use the joint velocity used by the impact model
-  Eigen::VectorXd jointVel = predictor_.getImpactModels().begin()->second->getJointVel();
-  double inv_t = (1 / predictor_.getImpactModels().begin()->second->getImpactDuration());
+  Eigen::VectorXd jointVel = getPredictor()->getImpactModels().begin()->second->getJointVel();
+  double inv_t = (1 / getPredictor()->getImpactModels().begin()->second->getImpactDuration());
 
   // Eigen::Vector6d local_exWrench;
   // local_exWrench.setZero();
@@ -289,20 +289,20 @@ void ImpactAwareFloatingBaseConstraint::calculateZMP_()
   {
 
     std::string bodyName = contactPair.second.getContactParams().bodyName;
-    sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(bodyName).inv();
+    sva::PTransformd X_ee_0 = getPredictor()->getSimRobot().bodyPosW(bodyName).inv();
 
     // Use condition "inContact" to exclude, e.g. hand contact.
     if(contactPair.second.inContact())
     {
       // contact established
       contactBodyWrench += X_ee_0.dualMatrix() * robot().bodyWrench(bodyName).vector();
-      contactBodyWrenchJac += X_ee_0.dualMatrix().block(0, 3, 6, 3) * predictor_.getJacobianDeltaF(bodyName);
+      contactBodyWrenchJac += X_ee_0.dualMatrix().block(0, 3, 6, 3) * getPredictor()->getJacobianDeltaF(bodyName);
     }
     else
     {
       // contact not established, impact is expected.
       impactBodyWrench += X_ee_0.dualMatrix() * robot().bodyWrench(bodyName).vector();
-      impactBodyWrenchJac += X_ee_0.dualMatrix().block(0, 3, 6, 3) * predictor_.getJacobianDeltaF(bodyName);
+      impactBodyWrenchJac += X_ee_0.dualMatrix().block(0, 3, 6, 3) * getPredictor()->getJacobianDeltaF(bodyName);
     }
   } // end of for
 
@@ -376,7 +376,7 @@ void ImpactAwareFloatingBaseConstraint::updateFloatingBaseState_()
   calcOmega(robot().com().z());
 
   Eigen::MatrixXd comJacobian = comJacobianPtr_->jacobian(robot().mb(), robot().mbc());
-  Eigen::MatrixXd dcmJacobian = (comJacobian * predictor_.getJacobianDeltaAlpha()).block(0, 0, 2, dof_());
+  Eigen::MatrixXd dcmJacobian = (comJacobian * getPredictor()->getJacobianDeltaAlpha()).block(0, 0, 2, dof_());
 
   floatingBaseStates_.Com = robot().com();
   floatingBaseStates_.ComAcc = robot().comAcceleration();
@@ -384,7 +384,7 @@ void ImpactAwareFloatingBaseConstraint::updateFloatingBaseState_()
   // (1) COM velocity
 
   floatingBaseStates_.ComVel.current = robot().comVelocity();
-  floatingBaseStates_.ComVel.stateJump = comJacobian * predictor_.getJointVelJump();
+  floatingBaseStates_.ComVel.stateJump = comJacobian * getPredictor()->getJointVelJump();
   floatingBaseStates_.ComVel.oneStepPreview = floatingBaseStates_.ComVel.current + floatingBaseStates_.ComVel.stateJump;
 
   // (2) ZMP
@@ -394,7 +394,7 @@ void ImpactAwareFloatingBaseConstraint::updateFloatingBaseState_()
   floatingBaseStates_.DCM.current.segment(0, 2) =
       floatingBaseStates_.Com.segment(0, 2) + floatingBaseStates_.ComVel.current.segment(0, 2) / getOmega();
   floatingBaseStates_.DCM.stateJump.segment(0, 2) =
-      comJacobian.block(0, 0, 2, dof_()) * predictor_.getJointVelJump() / getOmega();
+      comJacobian.block(0, 0, 2, dof_()) * getPredictor()->getJointVelJump() / getOmega();
   floatingBaseStates_.DCM.oneStepPreview.segment(0, 2) =
       floatingBaseStates_.DCM.current.segment(0, 2) + floatingBaseStates_.DCM.stateJump.segment(0, 2);
 }
@@ -405,7 +405,7 @@ void ImpactAwareFloatingBaseConstraint::updateDCMConstraint_()
   assert(getParams().constrainingDCM == true);
   // Calculates the new DCM constraint blocks internally.
 
-  Eigen::MatrixXd jacDCM = (comJacobianPtr_->jacobian(robot().mb(), robot().mbc()) * predictor_.getJacobianDeltaAlpha())
+  Eigen::MatrixXd jacDCM = (comJacobianPtr_->jacobian(robot().mb(), robot().mbc()) * getPredictor()->getJacobianDeltaAlpha())
                                .block(0, 0, 2, dof_());
 
   A_.block(getDCMRowNr_(), 0, getDCMConstraintSize_(), dof_()) =
@@ -438,7 +438,7 @@ void ImpactAwareFloatingBaseConstraint::compute()
 {
 
   // std::cout<< cyan <<" This is a test sentence"<< reset<<std::endl;
-  // const auto & robot = predictor_.getSimRobot();
+  // const auto & robot = getPredictor()->.getSimRobot();
   // Read the SIMULATED robot joint velocity:
 
   robotJointVelocity_ = (rbd::dofToVector(robot().mb(), robot().mbc().alpha));

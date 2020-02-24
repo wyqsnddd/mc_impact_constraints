@@ -3,10 +3,11 @@
 namespace mc_impact
 {
 
-ImpactAwareZMPConstraint::ImpactAwareZMPConstraint(mi_qpEstimator & predictor,
-			   std::shared_ptr<McContactSet> contactSetPtr,
-			   const ImpactAwareConstraintParams<Eigen::Vector2d> & params)
-: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), predictor_(predictor), params_(params), contactSetPtr_(contactSetPtr), robot_(predictor.getSimRobot())
+ImpactAwareZMPConstraint::ImpactAwareZMPConstraint(
+		std::shared_ptr<mi_qpEstimator> predictorPtr,
+		std::shared_ptr<McContactSet> contactSetPtr,
+		const ImpactAwareConstraintParams<Eigen::Vector2d> & params)
+: mc_solver::InequalityConstraintRobot(predictorPtr->getSimRobot().robotIndex()), predictorPtr_(predictorPtr), params_(params), contactSetPtr_(contactSetPtr), robot_(predictorPtr->getSimRobot())
 {
   if(enabledMcZMPArea())
   {
@@ -110,25 +111,25 @@ void ImpactAwareZMPConstraint::getZMPBlocks(Eigen::MatrixXd & sumJac, Eigen::Vec
 
     // sumJac += X_ee_0.dualMatrix().block(0, 3, 6, 3) * predictor_.getJacobianDeltaF(idx->bodyName);
 
-    sumJac.block(0, 0, 3, dof_()) += X_ee_0.dualMatrix().block(0, 3, 3, 3) * predictor_.getJacobianDeltaF(bodyName);
-    sumJac.block(3, 0, 3, dof_()) += X_ee_0.dualMatrix().block(3, 3, 3, 3) * predictor_.getJacobianDeltaF(bodyName);
+    sumJac.block(0, 0, 3, dof_()) += X_ee_0.dualMatrix().block(0, 3, 3, 3) * getPredictor()->getJacobianDeltaF(bodyName);
+    sumJac.block(3, 0, 3, dof_()) += X_ee_0.dualMatrix().block(3, 3, 3, 3) * getPredictor()->getJacobianDeltaF(bodyName);
     //
   } // end of for
 
   // (2) Go through the impacts
   if(getParams().multiContactCase)
   {
-    for(auto impactIdx = predictor_.getImpactModels().begin(); impactIdx != predictor_.getImpactModels().end();
+    for(auto impactIdx = getPredictor()->getImpactModels().begin(); impactIdx != getPredictor()->getImpactModels().end();
         ++impactIdx)
     {
       // sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(impactIdx->second->getImpactBody()).inv();
       sva::PTransformd X_ee_0 = robot().bodyPosW(impactIdx->second->getImpactBody()).inv();
 
       sumJac.block(0, 0, 3, dof_()) +=
-          X_ee_0.dualMatrix().block(0, 3, 3, 3) * predictor_.getJacobianDeltaF(impactIdx->second->getImpactBody());
+          X_ee_0.dualMatrix().block(0, 3, 3, 3) * getPredictor()->getJacobianDeltaF(impactIdx->second->getImpactBody());
 
       sumJac.block(3, 0, 3, dof_()) +=
-          X_ee_0.dualMatrix().block(3, 3, 3, 3) * predictor_.getJacobianDeltaF(impactIdx->second->getImpactBody());
+          X_ee_0.dualMatrix().block(3, 3, 3, 3) * getPredictor()->getJacobianDeltaF(impactIdx->second->getImpactBody());
 
       // Add the hand force sensor measurement
       // exWrench += X_ee_0.dualMatrix() *
@@ -141,8 +142,8 @@ void ImpactAwareZMPConstraint::calculateZMP_()
 {
 
   // We use the joint velocity used by the impact model
-  Eigen::VectorXd jointVel = predictor_.getImpactModels().begin()->second->getJointVel();
-  double inv_t = (1 / predictor_.getImpactModels().begin()->second->getImpactDuration());
+  Eigen::VectorXd jointVel = getPredictor()->getImpactModels().begin()->second->getJointVel();
+  double inv_t = (1 / getPredictor()->getImpactModels().begin()->second->getImpactDuration());
 
   // Eigen::Vector6d local_exWrench;
   // local_exWrench.setZero();
@@ -166,20 +167,20 @@ void ImpactAwareZMPConstraint::calculateZMP_()
   for(auto & contactPair : contactSetPtr_->getContactMap())
   {
     std::string bodyName = contactPair.second.getContactParams().bodyName;
-    sva::PTransformd X_ee_0 = predictor_.getSimRobot().bodyPosW(bodyName).inv();
+    sva::PTransformd X_ee_0 = getPredictor()->getSimRobot().bodyPosW(bodyName).inv();
 
     // Use condition "inContact" to exclude, e.g. hand contact.
     if(contactPair.second.inContact())
     {
       // contact established
       contactBodyWrench += X_ee_0.dualMatrix() * robot().bodyWrench(bodyName).vector();
-      contactBodyWrenchJac += X_ee_0.dualMatrix().block(0, 3, 6, 3) * predictor_.getJacobianDeltaF(bodyName);
+      contactBodyWrenchJac += X_ee_0.dualMatrix().block(0, 3, 6, 3) * getPredictor()->getJacobianDeltaF(bodyName);
     }
     else
     {
       // contact not established, impact is expected.
       impactBodyWrench += X_ee_0.dualMatrix() * robot().bodyWrench(bodyName).vector();
-      impactBodyWrenchJac += X_ee_0.dualMatrix().block(0, 3, 6, 3) * predictor_.getJacobianDeltaF(bodyName);
+      impactBodyWrenchJac += X_ee_0.dualMatrix().block(0, 3, 6, 3) * getPredictor()->getJacobianDeltaF(bodyName);
     }
   } // end of for
 
@@ -251,7 +252,7 @@ void ImpactAwareZMPConstraint::updateFloatingBaseState_()
   calcOmega_(robot().com().z());
 
   Eigen::MatrixXd comJacobian = comJacobianPtr_->jacobian(robot().mb(), robot().mbc());
-  Eigen::MatrixXd dcmJacobian = (comJacobian * predictor_.getJacobianDeltaAlpha()).block(0, 0, 2, dof_());
+  Eigen::MatrixXd dcmJacobian = (comJacobian * getPredictor()->getJacobianDeltaAlpha()).block(0, 0, 2, dof_());
 
   floatingBaseStates_.Com = robot().com();
   floatingBaseStates_.ComAcc = robot().comAcceleration();
@@ -259,7 +260,7 @@ void ImpactAwareZMPConstraint::updateFloatingBaseState_()
   // (1) COM velocity
 
   floatingBaseStates_.ComVel.current = robot().comVelocity();
-  floatingBaseStates_.ComVel.stateJump = comJacobian * predictor_.getJointVelJump();
+  floatingBaseStates_.ComVel.stateJump = comJacobian * getPredictor()->getJointVelJump();
   floatingBaseStates_.ComVel.oneStepPreview = floatingBaseStates_.ComVel.current + floatingBaseStates_.ComVel.stateJump;
 
   // (2) ZMP
@@ -269,7 +270,7 @@ void ImpactAwareZMPConstraint::updateFloatingBaseState_()
   floatingBaseStates_.DCM.current.segment(0, 2) =
       floatingBaseStates_.Com.segment(0, 2) + floatingBaseStates_.ComVel.current.segment(0, 2) / getOmega();
   floatingBaseStates_.DCM.stateJump.segment(0, 2) =
-      comJacobian.block(0, 0, 2, dof_()) * predictor_.getJointVelJump() / getOmega();
+      comJacobian.block(0, 0, 2, dof_()) * getPredictor()->getJointVelJump() / getOmega();
   floatingBaseStates_.DCM.oneStepPreview.segment(0, 2) =
       floatingBaseStates_.DCM.current.segment(0, 2) + floatingBaseStates_.DCM.stateJump.segment(0, 2);
 }

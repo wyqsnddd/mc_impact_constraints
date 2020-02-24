@@ -14,9 +14,10 @@ namespace mc_impact
 struct ImpactAwareZMPConstraint : public mc_solver::InequalityConstraintRobot
 {
   ///< ZMP defined with a set of points
-  ImpactAwareZMPConstraint(mi_qpEstimator & predictor,
-			   std::shared_ptr<McContactSet> contactSetPtr,
-                           const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
+  ImpactAwareZMPConstraint(
+		  std::shared_ptr<mi_qpEstimator > predictorPtr,
+		  std::shared_ptr<McContactSet> contactSetPtr,
+		  const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
 
   /*!
    * \brief returns  the number of rows in realtime such that the QP can adjust the constraint size.
@@ -117,9 +118,15 @@ struct ImpactAwareZMPConstraint : public mc_solver::InequalityConstraintRobot
     return omega_;
   }
 
+  inline std::shared_ptr<mi_qpEstimator> getPredictor()
+  {
+    return predictorPtr_; 
+  }
+
 private:
-  // Predictor
-  mi_qpEstimator & predictor_;
+
+  std::shared_ptr<mi_qpEstimator> predictorPtr_;
+
   ImpactAwareConstraintParams<Eigen::Vector2d> params_;
   std::shared_ptr<McContactSet> contactSetPtr_;
 

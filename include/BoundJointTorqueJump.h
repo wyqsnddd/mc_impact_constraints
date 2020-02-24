@@ -15,9 +15,9 @@ namespace mc_impact
 struct BoundJointTorqueJump : public mc_solver::GenInequalityConstraintRobot
 {
   /** Multiply the regular torque bounds limits by the provided multiplier */
-  BoundJointTorqueJump(mi_qpEstimator & predictor, double dt, double impact_dt, double mult, bool debug = false);
+  BoundJointTorqueJump(std::shared_ptr<mi_qpEstimator> predictorPtr, double dt, double impact_dt, double mult, bool debug = false);
 
-  BoundJointTorqueJump(mi_qpEstimator & predictor,
+  BoundJointTorqueJump(std::shared_ptr<mi_qpEstimator> predictorPtr,
                        double dt,
                        double impact_dt,
                        const Eigen::VectorXd & LBound,
@@ -59,9 +59,16 @@ struct BoundJointTorqueJump : public mc_solver::GenInequalityConstraintRobot
 
   void compute() override;
 
+  inline std::shared_ptr<mi_qpEstimator> getPredictor()
+  {
+    return predictorPtr_; 
+  }
+
 private:
   // Predictor
-  mi_qpEstimator & predictor_;
+  //mi_qpEstimator & predictor_;
+  std::shared_ptr<mi_qpEstimator> predictorPtr_;
+
   // Timestep
   double dt_;
   // Impact duration

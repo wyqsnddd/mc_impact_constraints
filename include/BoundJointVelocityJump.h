@@ -13,9 +13,9 @@ namespace mc_impact
 struct BoundJointVelocityJump : public mc_solver::GenInequalityConstraintRobot
 {
   /** Use the robot module provided velocity bounds */
-  BoundJointVelocityJump(mi_qpEstimator & predictor, double dt, double multiplier = 1.0, bool debu = false);
+  BoundJointVelocityJump(std::shared_ptr<mi_qpEstimator> predictorPtr, double dt, double multiplier = 1.0, bool debu = false);
 
-  BoundJointVelocityJump(mi_qpEstimator & predictor,
+  BoundJointVelocityJump(std::shared_ptr<mi_qpEstimator> predictorPtr,
                          double dt,
                          const Eigen::VectorXd & LBound,
                          const Eigen::VectorXd & UBound,
@@ -56,9 +56,13 @@ struct BoundJointVelocityJump : public mc_solver::GenInequalityConstraintRobot
 
   void compute() override;
 
+  inline std::shared_ptr<mi_qpEstimator> getPredictor()
+  {
+    return predictorPtr_; 
+  }
 private:
   // Predictor
-  mi_qpEstimator & predictor_;
+  std::shared_ptr<mi_qpEstimator> predictorPtr_;
   // Timestep
   double dt_;
   // Lower joint velocity bound

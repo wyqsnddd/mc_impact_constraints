@@ -15,7 +15,8 @@ namespace mc_impact
 struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstraintRobot
 {
   ///< ZMP defined with a set of points
-  ImpactAwareFloatingBaseConstraint(mi_qpEstimator & predictor,
+  ImpactAwareFloatingBaseConstraint(
+		  std::shared_ptr<mi_qpEstimator > predictorPtr,
 		  std::shared_ptr<McContactSet> contactSetPtr,
 		  const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
   
@@ -236,9 +237,15 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
    */
   void logFloatingBaseStates(mc_control::fsm::Controller & ctl) const;
 
+  inline std::shared_ptr<mi_qpEstimator> getPredictor()
+  {
+    return predictorPtr_; 
+  }
+
 private:
   // Predictor
-  mi_qpEstimator & predictor_;
+  //mi_qpEstimator & predictor_;
+  std::shared_ptr<mi_qpEstimator> predictorPtr_;
   ImpactAwareConstraintParams<Eigen::Vector2d> params_;
   std::shared_ptr<McContactSet> contactSetPtr_;
 

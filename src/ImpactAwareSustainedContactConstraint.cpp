@@ -4,11 +4,11 @@ namespace mc_impact
 {
 
 ImpactAwareSustainedContact::ImpactAwareSustainedContact(
-                               mi_qpEstimator & predictor,
+		std::shared_ptr<mi_qpEstimator> predictorPtr,
 		 const McContactParams & mcContactParams,
 		 const ImpactAwareConstraintParams<Eigen::Vector2d> & constraintParams)
-: mc_solver::InequalityConstraintRobot(predictor.getSimRobot().robotIndex()), 
-  predictor_(predictor), constraintParams_(constraintParams), mcContactParams_(mcContactParams)
+: mc_solver::InequalityConstraintRobot(predictorPtr->getSimRobot().robotIndex()), 
+  predictorPtr_(predictorPtr), constraintParams_(constraintParams), mcContactParams_(mcContactParams)
 {
 
   initializeImpactAwareCopConstraint_();
@@ -84,7 +84,7 @@ void ImpactAwareSustainedContact::updateCopLogs_()
    
   
   auto perturbedWrench = measuredWrench();
-  perturbedWrench.force() += predictor_.getEndeffector(getParams().bodyName).estimatedAverageImpulsiveForce;
+  perturbedWrench.force() += getPredictor()->getEndeffector(getParams().bodyName).estimatedAverageImpulsiveForce;
 
   cop_stateJump_ = copCalculation(Eigen::Vector3d::UnitZ(), perturbedWrench);
 
@@ -106,7 +106,7 @@ void ImpactAwareSustainedContact::updateCopLogs_()
 }
 void ImpactAwareSustainedContact::computeImpactAwareCopConstraint_()
 {
-  const auto & J_deltaF = predictor_.getJacobianDeltaF(getParams().bodyName);
+  const auto & J_deltaF = getPredictor()->getJacobianDeltaF(getParams().bodyName);
 
   A_cop_ = (getConstraintParams().dt / getConstraintParams().impactDuration) * G_cop_.block(0, 3, 4, 3) * J_deltaF;
 
@@ -118,12 +118,12 @@ void ImpactAwareSustainedContact::computeImpactAwareCopConstraint_()
 
 void ImpactAwareSustainedContact::computeImpactAwareFrictionConstraint_()
 {
-  const auto & J_deltaF = predictor_.getJacobianDeltaF(getParams().bodyName);
+  const auto & J_deltaF = getPredictor()->getJacobianDeltaF(getParams().bodyName);
 
   A_friction_ = (getConstraintParams().dt / getConstraintParams().impactDuration) * multiplier_ * J_deltaF;
 
   b_friction_ = -multiplier_
-       * (predictor_.getSimRobot().bodyWrench(getParams().bodyName).force()
+       * (getPredictor()->getSimRobot().bodyWrench(getParams().bodyName).force()
           + J_deltaF * robotJointVelocity_/ getConstraintParams().impactDuration);
 
 }
