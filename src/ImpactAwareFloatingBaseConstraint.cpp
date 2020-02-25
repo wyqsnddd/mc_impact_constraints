@@ -653,6 +653,46 @@ void ImpactAwareFloatingBaseConstraint::addMcContactGuiItems(mc_control::fsm::Co
   contactSetPtr_->addGuiItems(ctl);
 }
 
+
+void ImpactAwareFloatingBaseConstraint::removeMcContactGuiItems(mc_control::fsm::Controller & ctl) const
+{
+  contactSetPtr_->removeGuiItems(ctl);
+}
+void ImpactAwareFloatingBaseConstraint::removeMcAreasGuiItems(mc_control::fsm::Controller & ctl) const
+{
+  switch(getConstrainingStatus())
+  {
+    case 1:
+      if(getParams().updateMcZMPArea)
+      {
+        getMcZMPArea()->removeGuiItems(ctl);
+      }
+      break;
+    case 3:
+      if(getParams().updateMcDCMArea)
+      {
+        getMcZMPArea()->removeGuiItems(ctl);
+        getMcComArea()->removeGuiItems(ctl);
+        getMcDCMArea()->removeGuiItems(ctl);
+      }
+      break;
+    case 4:
+
+      if(getParams().updateMcZMPArea)
+      {
+        getMcZMPArea()->removeGuiItems(ctl);
+      }
+      if(getParams().updateMcDCMArea)
+      {
+        getMcComArea()->removeGuiItems(ctl);
+        getMcDCMArea()->removeGuiItems(ctl);
+      }
+      break;
+    default:
+      throw std::runtime_error("The constraining status is not set correctly");
+  }
+
+}
 void ImpactAwareFloatingBaseConstraint::addMcAreasGuiItems(mc_control::fsm::Controller & ctl) const
 {
   switch(getConstrainingStatus())
@@ -687,7 +727,11 @@ void ImpactAwareFloatingBaseConstraint::addMcAreasGuiItems(mc_control::fsm::Cont
       throw std::runtime_error("The constraining status is not set correctly");
   }
 }
-
+void ImpactAwareFloatingBaseConstraint::removeFloatingBaseGuiItems(mc_control::fsm::Controller & ctl) const
+{
+  ctl.gui()->removeElement({"DCM"}, "DCMArrow");
+  ctl.gui()->removeElement({"ZMP"}, "ZMPArrow");
+}
 void ImpactAwareFloatingBaseConstraint::addFloatingBaseGuiItems(mc_control::fsm::Controller & ctl) const
 {
   mc_rtc::gui::ArrowConfig arrow_config_zmp({0., 1., 0.});
@@ -700,7 +744,7 @@ void ImpactAwareFloatingBaseConstraint::addFloatingBaseGuiItems(mc_control::fsm:
   arrow_config_dcm.shaft_diam *= 2.0;
   arrow_config_dcm.head_diam *= 1.5;
 
-  ctl.gui()->addElement({"DCM"}, mc_rtc::gui::Arrow("DCM", arrow_config_dcm,
+  ctl.gui()->addElement({"DCM"}, mc_rtc::gui::Arrow("DCMArrow", arrow_config_dcm,
                                                     [this]() {
                                                       const auto & c = robot().com();
                                                       const auto & cdot = robot().comVelocity();
@@ -713,7 +757,7 @@ void ImpactAwareFloatingBaseConstraint::addFloatingBaseGuiItems(mc_control::fsm:
                                                       return robot().com();
                                                     }));
 
-  ctl.gui()->addElement({"ZMP"}, mc_rtc::gui::Arrow("Arrow", arrow_config_zmp,
+  ctl.gui()->addElement({"ZMP"}, mc_rtc::gui::Arrow("ZMPArrow", arrow_config_zmp,
                                                     [this]() { return getFloatingBaseStates().mcZMP.current; },
                                                     [this]() {
                                                       // End of the arrow

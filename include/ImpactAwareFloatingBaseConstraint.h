@@ -225,14 +225,17 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
   /*! \brief Visualize Multi-contact areas in rviz.
    */
   void addMcAreasGuiItems(mc_control::fsm::Controller & ctl) const;
+  void removeMcAreasGuiItems(mc_control::fsm::Controller & ctl) const;
 
   /*! \brief Visualize floating-base states: Com, DCM and ZMP
    */
   void addFloatingBaseGuiItems(mc_control::fsm::Controller & ctl) const;
+  void removeFloatingBaseGuiItems(mc_control::fsm::Controller & ctl) const;
 
   /*! \brief Visualize Multi-contact surfaces, vertices in rviz.
    */
   void addMcContactGuiItems(mc_control::fsm::Controller & ctl) const;
+  void removeMcContactGuiItems(mc_control::fsm::Controller & ctl) const;
 
   /*! \brif Add the logs.
    */
