@@ -61,6 +61,18 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
 
   std::cout << red << "Created ImpactAwareFloatingBaseConstraint." << reset << std::endl;
 }
+
+ImpactAwareFloatingBaseConstraint::~ImpactAwareFloatingBaseConstraint()
+{
+
+ if(checkLoggersAdded_())
+ {
+   removeLogFloatingBaseStates(); 
+ }
+
+}
+
+
 void ImpactAwareFloatingBaseConstraint::fixedSupportPolygonSetup_()
 {
   if(zmpConstraintEnabled())
@@ -547,9 +559,11 @@ void ImpactAwareFloatingBaseConstraint::printDCMConstraintMatrix() const
             << red << "Intermediat h vector is: " << cyan << b_.transpose() << reset << std::endl;
 }
 
-void ImpactAwareFloatingBaseConstraint::logFloatingBaseStates(mc_control::fsm::Controller & ctl) const
+void ImpactAwareFloatingBaseConstraint::logFloatingBaseStates(mc_control::fsm::Controller & ctl) 
 {
 
+  setControllerWithLogger_(ctl);
+  
   // DCM states
   // auto & ctl = static_cast<mc_impact::Controller &>(ctlInput);
 
@@ -587,6 +601,45 @@ void ImpactAwareFloatingBaseConstraint::logFloatingBaseStates(mc_control::fsm::C
   ctl.logger().addLogEntry("FloatingBaseState_Com_Vel_StateJump",
                            [this]() { return getFloatingBaseStates().ComVel.stateJump; });
   ctl.logger().addLogEntry("FloatingBaseState_Com_Vel", [this]() { return getFloatingBaseStates().ComVel.current; });
+}
+
+void ImpactAwareFloatingBaseConstraint::removeLogFloatingBaseStates() 
+{
+
+  if(checkLoggersAdded_())
+  {
+    // DCM states
+    // auto & ctl = static_cast<mc_impact::Controller &>(ctlInput);
+
+    getControllerWithLogger_()->logger().removeLogEntry("FloatingBaseState_DCM_Prediction");
+
+    getControllerWithLogger_()->logger().removeLogEntry("FloatingBaseState_DCM_StateJump");
+
+    getControllerWithLogger_()->logger().removeLogEntry("FloatingBaseState_DCM");
+
+    // Multi-contact ZMP states
+
+    getControllerWithLogger_()->logger().removeLogEntry("FloatingBaseState_ZMP_Mc_Prediction");
+    getControllerWithLogger_()->logger().removeLogEntry("FloatingBaseState_ZMP_Mc");
+
+    // Bipedal ZMP states
+    getControllerWithLogger_()->logger().removeLogEntry("FloatingBaseState_ZMP_Bipedal_Prediction");
+    getControllerWithLogger_()->logger().removeLogEntry("FloatingBaseState_ZMP_Bipedal_StateJump");
+    getControllerWithLogger_()->logger().removeLogEntry("FloatingBaseState_ZMP_Bipedal");
+
+    // Com states
+    getControllerWithLogger_()->logger().removeLogEntry("FloatingBaseState_Com");
+    getControllerWithLogger_()->logger().removeLogEntry("FloatingBaseState_Com_Acc");
+
+    // Com-vel states
+    getControllerWithLogger_()->logger().removeLogEntry("FloatingBaseState_Com_Vel_Prediction");
+    getControllerWithLogger_()->logger().removeLogEntry("FloatingBaseState_Com_Vel_StateJump");
+    getControllerWithLogger_()->logger().removeLogEntry("FloatingBaseState_Com_Vel");
+  }
+  else
+  {
+     std::runtime_error("Trying to remove loggers without adding them!");
+  }
 }
 
 void ImpactAwareFloatingBaseConstraint::addMcContactGuiItems(mc_control::fsm::Controller & ctl) const

@@ -19,7 +19,8 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
 		  std::shared_ptr<mi_qpEstimator > predictorPtr,
 		  std::shared_ptr<McContactSet> contactSetPtr,
 		  const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
-  
+  ~ImpactAwareFloatingBaseConstraint();
+
 
   /*! \brief We use this status to check what floating-base state do we constrain:
    * 1: only ZMP
@@ -235,7 +236,9 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
 
   /*! \brif Add the logs.
    */
-  void logFloatingBaseStates(mc_control::fsm::Controller & ctl) const;
+  void logFloatingBaseStates(mc_control::fsm::Controller & ctl);
+
+  void removeLogFloatingBaseStates();
 
   inline std::shared_ptr<mi_qpEstimator> getPredictor()
   {
@@ -248,6 +251,36 @@ private:
   std::shared_ptr<mi_qpEstimator> predictorPtr_;
   ImpactAwareConstraintParams<Eigen::Vector2d> params_;
   std::shared_ptr<McContactSet> contactSetPtr_;
+
+  inline void setLogger_()
+  {
+    loggersAdded_ = true;
+  }
+  inline bool checkLoggersAdded_() const
+  {
+    return loggersAdded_;
+  }
+  bool loggersAdded_ = false;
+
+  inline mc_control::fsm::Controller * getControllerWithLogger_() 
+  {
+    if(controllerWithLoggerPtr_ != nullptr)
+    {
+      return controllerWithLoggerPtr_;
+    }
+    else
+    {
+      throw std::runtime_error("Getting controllerWithLoggerPtr_ without setting."); 
+    }
+  }
+
+  inline void setControllerWithLogger_(mc_control::fsm::Controller & ctl) 
+  {
+    controllerWithLoggerPtr_ = &ctl; 
+  }
+
+  mc_control::fsm::Controller *  controllerWithLoggerPtr_;
+
 
   const mc_rbdyn::Robot & robot_;
 
