@@ -18,8 +18,8 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
   ImpactAwareFloatingBaseConstraint(
 		  std::shared_ptr<mi_qpEstimator > predictorPtr,
 		  std::shared_ptr<McContactSet> contactSetPtr,
-		  const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
-  ~ImpactAwareFloatingBaseConstraint();
+		  ImpactAwareConstraintParams<Eigen::Vector2d> & params);
+  // ~ImpactAwareFloatingBaseConstraint();
 
 
   /*! \brief We use this status to check what floating-base state do we constrain:
@@ -252,6 +252,8 @@ private:
   ImpactAwareConstraintParams<Eigen::Vector2d> params_;
   std::shared_ptr<McContactSet> contactSetPtr_;
 
+  const mc_rbdyn::Robot & robot_;
+
   inline void setLogger_()
   {
     loggersAdded_ = true;
@@ -282,7 +284,6 @@ private:
   mc_control::fsm::Controller *  controllerWithLoggerPtr_;
 
 
-  const mc_rbdyn::Robot & robot_;
 
   inline int dof_() const
   {

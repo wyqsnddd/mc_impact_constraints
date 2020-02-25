@@ -5,11 +5,12 @@ namespace mc_impact
 ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
 		std::shared_ptr<mi_qpEstimator> predictorPtr,
     std::shared_ptr<McContactSet> contactSetPtr,
-    const ImpactAwareConstraintParams<Eigen::Vector2d> & params
+    ImpactAwareConstraintParams<Eigen::Vector2d> & params
     )
 : mc_solver::InequalityConstraintRobot(getPredictor()->getSimRobot().robotIndex()), predictorPtr_(predictorPtr), params_(params), contactSetPtr_(contactSetPtr), robot_(getPredictor()->getSimRobot())
 {
 
+  LOG_INFO("Initialzing ImpactAwareFloatingBaseConstraint:");
   // Set the constraining status of the floating-base state.
   constrainingStatus_ = 0;
   if(getParams().constrainingZMP)
@@ -31,7 +32,9 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
                                                                             getParams().mcProjectionParams);
     // mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(getPredictor()->.getSimRobot(),
     // getParams().contactSetPtr, getParams().mcProjectionParams);
+    LOG_INFO("McZMPArea is created");
   }
+
 
   // When the constraints are enabled and  the realtime computation of McComArea and McDCMArea are needed.
   // if(getParams().constrainingDCM and getParams().updateMcDCMArea)
@@ -52,6 +55,8 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
         std::make_shared<mc_impact::McComArea>(robot_, contactSetPtr_, getParams().mcProjectionParams);
 
     mcDCMAreaPtr_ = std::make_shared<mc_impact::McDCMArea>(mcZMPAreaPtr_, mcComAreaPtr_);
+
+    LOG_INFO("McDCMArea is created");
   }
   // Initialize the com Jacobian
   comJacobianPtr_ = std::make_shared<rbd::CoMJacobian>(robot_.mb());
@@ -62,6 +67,7 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
   std::cout << red << "Created ImpactAwareFloatingBaseConstraint." << reset << std::endl;
 }
 
+/*
 ImpactAwareFloatingBaseConstraint::~ImpactAwareFloatingBaseConstraint()
 {
 
@@ -71,7 +77,7 @@ ImpactAwareFloatingBaseConstraint::~ImpactAwareFloatingBaseConstraint()
  }
 
 }
-
+*/
 
 void ImpactAwareFloatingBaseConstraint::fixedSupportPolygonSetup_()
 {
