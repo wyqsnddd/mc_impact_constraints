@@ -201,7 +201,8 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
    */
   inline const mc_rbdyn::Robot & robot() const
   {
-    return robot_;
+    //return robot_;
+    return predictorPtr_->getSimRobot();
   }
 
   /*! \return The constant: \omega = sqrt(9.8/com-z)
@@ -255,7 +256,7 @@ private:
   ImpactAwareConstraintParams<Eigen::Vector2d> params_;
   std::shared_ptr<McContactSet> contactSetPtr_;
 
-  const mc_rbdyn::Robot & robot_;
+  //const mc_rbdyn::Robot & robot_;
 
   inline void setLogger_()
   {

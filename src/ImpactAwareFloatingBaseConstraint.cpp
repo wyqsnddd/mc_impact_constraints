@@ -7,7 +7,8 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
     std::shared_ptr<McContactSet> contactSetPtr,
     ImpactAwareConstraintParams<Eigen::Vector2d> & params
     )
-: mc_solver::InequalityConstraintRobot(getPredictor()->getSimRobot().robotIndex()), predictorPtr_(predictorPtr), params_(params), contactSetPtr_(contactSetPtr), robot_(getPredictor()->getSimRobot())
+: mc_solver::InequalityConstraintRobot(getPredictor()->getSimRobot().robotIndex()), predictorPtr_(predictorPtr), params_(params), contactSetPtr_(contactSetPtr)
+	//, robot_(predictorPtr->getSimRobot())
 {
 
   LOG_INFO("Initialzing ImpactAwareFloatingBaseConstraint:");
@@ -28,7 +29,7 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
   if(enabledMcZMPArea())
   {
 
-    mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(robot_, contactSetPtr_,
+    mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(robot(), contactSetPtr_,
                                                                             getParams().mcProjectionParams);
     // mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(getPredictor()->.getSimRobot(),
     // getParams().contactSetPtr, getParams().mcProjectionParams);
@@ -52,14 +53,14 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
     */
 
     mcComAreaPtr_ =
-        std::make_shared<mc_impact::McComArea>(robot_, contactSetPtr_, getParams().mcProjectionParams);
+        std::make_shared<mc_impact::McComArea>(robot(), contactSetPtr_, getParams().mcProjectionParams);
 
     mcDCMAreaPtr_ = std::make_shared<mc_impact::McDCMArea>(mcZMPAreaPtr_, mcComAreaPtr_);
 
     LOG_INFO("McDCMArea is created");
   }
   // Initialize the com Jacobian
-  comJacobianPtr_ = std::make_shared<rbd::CoMJacobian>(robot_.mb());
+  comJacobianPtr_ = std::make_shared<rbd::CoMJacobian>(robot().mb());
 
   // Initialize the building blocks for the constraints.
   fixedSupportPolygonSetup_();
