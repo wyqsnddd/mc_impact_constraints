@@ -11,13 +11,6 @@ namespace mc_impact
 template<typename Point>
 struct ImpactAwareConstraintParams
 {
-public:
-  ImpactAwareConstraintParams()
-  {
-    //contactSetPtr.reset(new McContactSet());
-  }
-
-  ~ImpactAwareConstraintParams() {}
   ///< Sampling Period
   double dt = 0.05;
   ///< Impact duration
@@ -98,7 +91,6 @@ void pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
                               Eigen::VectorXd & slopeVec,
                               double miniSlope = 0.01,
                               double maxSlope = 100);
-
 template<typename Point>
 void pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
                               Eigen::MatrixXd & G,
@@ -108,3 +100,108 @@ void pointsToInequalityMatrix(const std::vector<Point> & inputPoints,
 
             */
 } // namespace mc_impact
+
+/*
+// Reader of McContactParams
+namespace mc_rtc
+{
+template<typename Point>
+struct ConfigurationLoader<mc_impact::ImpactAwareConstraintParams<Point> >
+{
+  static mc_impact::ImpactAwareConstraintParams<Point> load(const mc_rtc::Configuration & config)
+  {
+    mc_impact::ImpactAwareConstraintParams<Point> impactAwareConstraintParams;
+    impactAwareConstraintParams.dt = config("impact")("timeStep");
+  
+    impactAwareConstraintParams.impactDuration = config("impact")("impactDuration");
+  
+    impactAwareConstraintParams.updateMcZMPArea =
+        static_cast<bool>(config("impact")("constraints")("floatingBaseConstraint")("zmpArea")("updateMcZMPArea"));
+    impactAwareConstraintParams.updateMcDCMArea =
+        static_cast<bool>(config("impact")("constraints")("floatingBaseConstraint")("dcmArea")("updateMcDCMArea"));
+  
+     impactAwareConstraintParams.debug =  static_cast<bool>(config("impact")("constraints")("debug"));
+    impactAwareConstraintParams.dcmAreaVertexSet = config("impact")("constraints")("initialDCMArea");
+    impactAwareConstraintParams.zmpAreaVertexSet = config("impact")("constraints")("initialZMPArea");
+  
+    impactAwareConstraintParams.enableImpactAwareFloatingBaseConstraint =
+        static_cast<bool>(config("impact")("constraints")("floatingBaseConstraint")("enabled"));
+  
+    impactAwareConstraintParams.enableImpactAwareJointVelocityConstraint =
+        static_cast<bool>(config("impact")("constraints")("jointVelocity")("on"));
+    impactAwareConstraintParams.enableImpactAwareJointTorqueConstraint =
+        static_cast<bool>(config("impact")("constraints")("jointTorque")("on"));
+
+
+
+    impactAwareConstraintParams.mcProjectionParams.iterationLimit =
+          config("impact")("constraints")("floatingBaseConstraint")("mcProjectionParams")("projectionIterationLimit");
+      impactAwareConstraintParams.mcProjectionParams.convergeThreshold = config("impact")("constraints")(
+          "floatingBaseConstraint")("mcProjectionParams")("projectionConvergenceThreshold");
+      impactAwareConstraintParams.mcProjectionParams.projectionRadius =
+          config("impact")("constraints")("floatingBaseConstraint")("mcProjectionParams")("projectionRadius");
+      impactAwareConstraintParams.mcProjectionParams.useLIPMAssumptions = static_cast<bool>(
+          config("impact")("constraints")("floatingBaseConstraint")("mcProjectionParams")("useLIPMAssumptions"));
+      impactAwareConstraintParams.mcProjectionParams.useSpatialVectorAlgebra = static_cast<bool>(
+          config("impact")("constraints")("floatingBaseConstraint")("mcProjectionParams")("useSpatialVectorAlgebra"));
+      impactAwareConstraintParams.mcProjectionParams.debug = static_cast<bool>(
+          config("impact")("constraints")("floatingBaseConstraint")("debug"));
+
+      impactAwareConstraintParams.constrainingDCM =
+          static_cast<bool>(config("impact")("constraints")("floatingBaseConstraint")("dcmArea")("dcmConstraint"));
+      impactAwareConstraintParams.constrainingZMP =
+          static_cast<bool>(config("impact")("constraints")("floatingBaseConstraint")("zmpArea")("zmpConstraint"));
+      impactAwareConstraintParams.constrainingCOMAcc =
+          static_cast<bool>(config("impact")("constraints")("floatingBaseConstraint")("comArea")("comAccConstraint"));
+
+
+    return impactAwareConstraintParams;
+
+  }
+
+  //template<typename Point>
+  static mc_rtc::Configuration save(const mc_impact::ImpactAwareConstraintParams<Point> & data)
+  {
+    mc_rtc::Configuration config;
+
+    config.add("timeStep", data.dt);
+    config.add("impactDuration", data.impactDuration);
+    config.add("updateMcZMPArea", data.updateMcZMPArea);
+    config.add("updateMcDCMArea", data.updateMcDCMArea);
+    config.add("debug", data.debug);
+    config.add("dcmAreaVertexSet", data.dcmAreaVertexSet);
+    config.add("zmpAreaVertexSet", data.zmpAreaVertexSet);
+
+    // Constraints configuration
+    config.add("enableImpactAwareFloatingBaseConstraint", data.enableImpactAwareFloatingBaseConstraint);
+    config.add("enableImpactAwareJointVelocityConstraint", data.enableImpactAwareJointVelocityConstraint);
+    config.add("enableImpactAwareJointTorqueConstraint", data.enableImpactAwareJointTorqueConstraint);
+
+
+    // Configuration of the FloatingBaseConstraint
+    config.add("constrainingDCM", data.constrainingDCM);
+    config.add("constrainingZMP", data.constrainingZMP);
+    config.add("constrainingCOMAcc", data.constrainingCOMAcc);
+
+
+    // Projection parameters 
+    config.add("iterationLimit", data.mcProjectionParams.iterationLimit);
+    config.add("convergeThreshold", data.mcProjectionParams.convergeThreshold);
+    config.add("projectionRadius", data.mcProjectionParams.projectionRadius);
+    config.add("useLIPMAssumptions", data.mcProjectionParams.useLIPMAssumptions);
+    config.add("useSpatialVectorAlgebra", data.mcProjectionParams.useSpatialVectorAlgebra);
+    config.add("debug", data.mcProjectionParams.debug);
+    
+    return config;
+  }
+};
+{
+struct ConfigurationLoader<mc_impact::ImpactAwareConstraintParams<Eigen::Vector2d> >;
+struct ConfigurationLoader<mc_impact::ImpactAwareConstraintParams<Eigen::Vector3d> >;
+
+} // namespace mc_rtc 
+
+*/
+
+
+
