@@ -171,7 +171,7 @@ private:
 
   IeqConstraintBlocks ieqConstraintBlocksZMP_;
 
-    FloatingBaseStates floatingBaseStates_;
+  FloatingBaseStates floatingBaseStates_;
   void updateFloatingBaseState_();
 
   Eigen::VectorXd robotJointVelocity_;

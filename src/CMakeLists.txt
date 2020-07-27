@@ -3,6 +3,7 @@ set(constraints
   BoundJointTorqueJump
   ImpactAwareFloatingBaseConstraint
   ImpactAwareZMPConstraint
+  ImpactAwareCOMVelConstraint
   ImpactAwareSustainedContactConstraint
   ConstraintUtils
 )

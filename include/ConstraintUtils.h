@@ -11,7 +11,7 @@ namespace mc_impact
 template<typename Point>
 struct ImpactAwareConstraintParams
 {
-  ///< Sampling Period
+  ///< Sampling Period 
   double dt = 0.05;
   ///< Impact duration
   double impactDuration = 0.05;
@@ -47,6 +47,7 @@ struct ImpactAwareConstraintParams
   McProjectionParams mcProjectionParams;
 
   bool enableImpactAwareFloatingBaseConstraint = false;
+  bool enableImpactAwareCOMVelConstraint = false;
   bool enableImpactAwareJointVelocityConstraint = false;
   bool enableImpactAwareJointTorqueConstraint = false;
   bool enableImpactAwareCOPConstraint = false;
@@ -66,6 +67,20 @@ struct ComparisonState
   Eigen::Vector3d simRobot;
 };
 */
+struct COMStates
+{
+  ImpactAwareState ComVel;
+
+  Eigen::Vector3d Com;
+  Eigen::Vector3d ComAcc;
+
+  double ComVelXUpperBound = 0.0;
+  double ComVelXLowerBound = 0.0;
+  double ComVelYUpperBound = 0.0;
+  double ComVelYLowerBound = 0.0;
+};
+
+
 struct FloatingBaseStates
 {
   // These values are all taken from the realrobot or the estimator
