@@ -17,7 +17,7 @@ ImpactAwareCOMVelConstraint::ImpactAwareCOMVelConstraint(std::shared_ptr<mi_qpEs
 
   // Initialize the support polygon
   
-  poleOne_ = -1;
+  poleOne_ = -1.0;
   poleTwo_ = -0.2;
   updateGains_();
 
@@ -32,10 +32,7 @@ void ImpactAwareCOMVelConstraint::compute()
 
   // update the sup 
   
-  // Update the COM vel bounds:
-  updateCOMVelBounds_();
-
-  // Update the COM vel constraint:
+    // Update the COM vel constraint:
   updateCOMVelConstraint_();
 }
 
@@ -46,14 +43,23 @@ void ImpactAwareCOMVelConstraint::updateCOMVelBounds_()
   // Here we assume that com_ref and com_dot_ref are all zeros.
   COMStates_.ComVelXUpperBound = (zUpperBound_ - COMStates_.Com.x()*pGain_)/dGain_; 
   COMStates_.ComVelXLowerBound = (zLowerBound_ - COMStates_.Com.x()*pGain_)/dGain_; 
+
+  //if(getParams().debug)
+  {
+
+    std::cout<<"The COM is: "<<red<<  COMStates_.Com.transpose() << reset<<", and the omege is: "<<red<<getOmega() <<reset<<std::endl;
+    std::cout<<"The pGina is: "<<red<<  pGain_ << reset<<", and the dGain is: "<<red<<dGain_<<reset<<std::endl;
+    std::cout<<"The zmp upper bound is: "<<red<<  zUpperBound_ << reset<<", and the zmp lower bound is: "<<red<<zLowerBound_<<reset<<std::endl;
+    std::cout<<"The upper bound is: "<<red<<  COMStates_.ComVelXUpperBound << reset<<", and the lower is: "<<red<<COMStates_.ComVelXLowerBound <<reset<<std::endl;
+  }
 }
 
 void ImpactAwareCOMVelConstraint::updateCOMVelConstraint_()
 {
-  // Update omega for DCM calculation
-  calcOmega_(robot().com().z());
+// Update omega for DCM calculation
+calcOmega_(robot().com().z());
 
-  Eigen::MatrixXd comJacobian = comJacobianPtr_->jacobian(robot().mb(), robot().mbc());
+Eigen::MatrixXd comJacobian = comJacobianPtr_->jacobian(robot().mb(), robot().mbc());
 
   COMStates_.Com = robot().com();
   COMStates_.ComAcc = robot().comAcceleration();
@@ -74,18 +80,24 @@ void ImpactAwareCOMVelConstraint::updateCOMVelConstraint_()
 
   // Special Jac one
   
-  Eigen::VectorXd specialJacOne = mass_inv * cmmMatrix.block(0, 0, 1, dof_()) * getPredictor()->getJacobianDeltaAlpha();
+  // Note that the CMM matrix starts with the angular part and then translation, we need to shift the row number for 3.
+  Eigen::VectorXd specialJacOne = mass_inv * cmmMatrix.block(3, 0, 1, dof_()) * getPredictor()->getJacobianDeltaAlpha();
 
-  Eigen::VectorXd specialJacTwo = mass_inv * cmmMatrix.block(0, 0, 1, dof_()) * getPredictor()->getJacobianTwoDeltaAlpha();
+  Eigen::VectorXd specialJacTwo = mass_inv * cmmMatrix.block(3, 0, 1, dof_()) * getPredictor()->getJacobianTwoDeltaAlpha();
 
   // Special Jac Two
   // Saggital(X)-direction: 
   A_.block(0, 0, 1, dof_()) = getParams().dt * specialJacOne; 
   A_.block(1, 0, 1, dof_()) = - A_.block(0, 0, 1, dof_());
 
+  // Update the COM vel bounds:
+  updateCOMVelBounds_();
+
+
   b_(0) = getCOMStates().ComVelXUpperBound
 	  - COMStates_.ComVel.oneStepPreview.x()
-	  - specialJacTwo.transpose() * robotJointVelocity_; 
+	  //- specialJacTwo.transpose() * robotJointVelocity_; 
+	  - specialJacOne.transpose() * robotJointVelocity_; 
   b_(1) = getCOMStates().ComVelXLowerBound - (b_(0) - getCOMStates().ComVelXUpperBound);
 
   // Lateral(Y)-direction:
