@@ -18,7 +18,7 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
   ImpactAwareFloatingBaseConstraint(
 		  std::shared_ptr<mi_qpEstimator > predictorPtr,
 		  std::shared_ptr<McContactSet> contactSetPtr,
-		  ImpactAwareConstraintParams<Eigen::Vector2d> & params);
+		  const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
   // ~ImpactAwareFloatingBaseConstraint();
 
 
