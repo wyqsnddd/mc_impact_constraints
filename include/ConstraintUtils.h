@@ -71,8 +71,8 @@ struct COMStates
 {
   ImpactAwareState ComVel;
 
-  Eigen::Vector3d Com;
-  Eigen::Vector3d ComAcc;
+  Eigen::Vector3d Com = Eigen::Vector3d::Zero();
+  Eigen::Vector3d ComAcc = Eigen::Vector3d::Zero();
 
   double ComVelXUpperBound = 0.0;
   double ComVelXLowerBound = 0.0;
@@ -89,8 +89,8 @@ struct FloatingBaseStates
   ImpactAwareState ComVel;
   ImpactAwareState DCM;
 
-  Eigen::Vector3d Com;
-  Eigen::Vector3d ComAcc;
+  Eigen::Vector3d Com = Eigen::Vector3d::Zero();
+  Eigen::Vector3d ComAcc = Eigen::Vector3d::Zero();
   // Eigen::Vector3d ComVelSimRobot;
 };
 
