@@ -5,7 +5,7 @@ namespace mc_impact
 ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
 		std::shared_ptr<mi_qpEstimator> predictorPtr,
     std::shared_ptr<McContactSet> contactSetPtr,
-    ImpactAwareConstraintParams<Eigen::Vector2d> & params
+    const ImpactAwareConstraintParams<Eigen::Vector2d> & params
     )
 : mc_solver::InequalityConstraintRobot(getPredictor()->getSimRobot().robotIndex()), predictorPtr_(predictorPtr), params_(params), contactSetPtr_(contactSetPtr)
 	//, robot_(predictorPtr->getSimRobot())
