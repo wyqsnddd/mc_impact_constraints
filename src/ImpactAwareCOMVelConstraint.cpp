@@ -29,6 +29,7 @@ ImpactAwareCOMVelConstraint::ImpactAwareCOMVelConstraint(std::shared_ptr<mi_qpEs
 void ImpactAwareCOMVelConstraint::compute()
 {
 
+  //robotJointVelocity_ = (rbd::dofToVector(realRobot().mb(), realRobot().mbc().alpha));
   robotJointVelocity_ = (rbd::dofToVector(robot().mb(), robot().mbc().alpha));
 
   // update the sup 
@@ -49,7 +50,7 @@ void ImpactAwareCOMVelConstraint::updateCOMVelBounds_()
   {
 
     std::cout<<"The COM is: "<<red<<  COMStates_.Com.transpose() << reset<<", and the omege is: "<<red<<getOmega() <<reset<<std::endl;
-    std::cout<<"The pGina is: "<<red<<  pGain_ << reset<<", and the dGain is: "<<red<<dGain_<<reset<<std::endl;
+    std::cout<<"The pGain is: "<<red<<  pGain_ << reset<<", and the dGain is: "<<red<<dGain_<<reset<<std::endl;
     std::cout<<"The zmp upper bound is: "<<red<<  zUpperBound_ << reset<<", and the zmp lower bound is: "<<red<<zLowerBound_<<reset<<std::endl;
     std::cout<<"The upper bound is: "<<red<<  COMStates_.ComVelXUpperBound << reset<<", and the lower is: "<<red<<COMStates_.ComVelXLowerBound <<reset<<std::endl;
   }
@@ -62,12 +63,15 @@ calcOmega_(robot().com().z());
 
 Eigen::MatrixXd comJacobian = comJacobianPtr_->jacobian(robot().mb(), robot().mbc());
 
-  COMStates_.Com = robot().com();
+  COMStates_.Com = realRobot().com();
+  //COMStates_.ComAcc = realRobot().comAcceleration();
+  // The realRobot acceleration is not usable.
   COMStates_.ComAcc = robot().comAcceleration();
 
   // COM velocity
 
-  COMStates_.ComVel.current = realRobot().comVelocity();
+  //COMStates_.ComVel.current = realRobot().comVelocity();
+  COMStates_.ComVel.current = robot().comVelocity();
   COMStates_.ComVel.stateJump = comJacobian * getPredictor()->getJointVelJump();
   COMStates_.ComVel.oneStepPreview = COMStates_.ComVel.current + COMStates_.ComVel.stateJump;
 
@@ -91,17 +95,32 @@ Eigen::MatrixXd comJacobian = comJacobianPtr_->jacobian(robot().mb(), robot().mb
   // Special Jac Two
   // Saggital(X)-direction: 
   A_.block(0, 0, 1, dof_()) = getParams().dt * specialJacOne; 
-  A_.block(1, 0, 1, dof_()) = - A_.block(0, 0, 1, dof_());
+  //A_.block(1, 0, 1, dof_()) = - A_.block(0, 0, 1, dof_());
 
   // Update the COM vel bounds:
   updateCOMVelBounds_();
 
+  if(getParams().debug)
+  {
+
+    std::cout << red << "COM Vel upper bound is: " << getCOMStates().ComVelXUpperBound<< reset << std::endl;
+    std::cout << red << "currnt COM vel is: " << COMStates_.ComVel.current.x()<< reset << std::endl;
+    std::cout << red << "currnt COM acc is: " << COMStates_.ComAcc.x()<< reset << std::endl;
+    std::cout << red << "currnt dt is: " << getParams().dt << reset << std::endl;
+
+    Eigen::VectorXd alphaD = rbd::dofToVector(robot().mb(), robot().mbc().alphaD);
+
+    std::cout << red << "lhs is: " << A_.block(0, 0, 1, dof_())*alphaD << reset << std::endl;
+    std::cout << red << "rhs is: " << - specialJacTwo.transpose() * robotJointVelocity_ << reset << std::endl;
+    
+  }
 
   b_(0) = getCOMStates().ComVelXUpperBound  
-	  - COMStates_.ComVel.current.x() - COMStates_.ComAcc.x()*getParams().dt
+	  - COMStates_.ComVel.current.x()
+	  - COMStates_.ComAcc.x()*getParams().dt
 	  - specialJacTwo.transpose() * robotJointVelocity_; 
 	  //- specialJacOne.transpose() * robotJointVelocity_; 
-  b_(1) = - getCOMStates().ComVelXLowerBound - (b_(0) - getCOMStates().ComVelXUpperBound);
+  //b_(1) = - getCOMStates().ComVelXLowerBound - (b_(0) - getCOMStates().ComVelXUpperBound);
 
   // Lateral(Y)-direction:
   
