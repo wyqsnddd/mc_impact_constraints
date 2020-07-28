@@ -3,8 +3,9 @@
 
 namespace mc_impact{
 ImpactAwareCOMVelConstraint::ImpactAwareCOMVelConstraint(std::shared_ptr<mi_qpEstimator> predictorPtr,
+		const mc_rbdyn::Robot & realRobot,
 		const ImpactAwareConstraintParams<Eigen::Vector2d> & params)
-	:mc_solver::InequalityConstraintRobot(predictorPtr->getSimRobot().robotIndex()), predictorPtr_(predictorPtr), params_(params), robot_(predictorPtr->getSimRobot())
+	:mc_solver::InequalityConstraintRobot(predictorPtr->getSimRobot().robotIndex()), predictorPtr_(predictorPtr), params_(params), robot_(predictorPtr->getSimRobot()), realRobot_(realRobot)
 {
   // Update the constraint size
   A_.resize(nrInEq(), dof_());
@@ -66,7 +67,7 @@ Eigen::MatrixXd comJacobian = comJacobianPtr_->jacobian(robot().mb(), robot().mb
 
   // COM velocity
 
-  COMStates_.ComVel.current = robot().comVelocity();
+  COMStates_.ComVel.current = realRobot().comVelocity();
   COMStates_.ComVel.stateJump = comJacobian * getPredictor()->getJointVelJump();
   COMStates_.ComVel.oneStepPreview = COMStates_.ComVel.current + COMStates_.ComVel.stateJump;
 

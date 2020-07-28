@@ -13,6 +13,7 @@ struct ImpactAwareCOMVelConstraint : public mc_solver::InequalityConstraintRobot
 {
 
   ImpactAwareCOMVelConstraint(std::shared_ptr<mi_qpEstimator> predictorPtr,
+		  const mc_rbdyn::Robot & realRobot,
 		  const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
 
   /*!
@@ -58,6 +59,10 @@ struct ImpactAwareCOMVelConstraint : public mc_solver::InequalityConstraintRobot
     return robot_;
   }
 
+  inline const mc_rbdyn::Robot & realRobot() const
+  {
+    return realRobot_;
+  }
   /*! \return The constant: \omega = sqrt(9.8/com-z)
    */
   inline double getOmega() const
@@ -78,6 +83,8 @@ protected:
   std::shared_ptr<McContactSet> contactSetPtr_;
 
   const mc_rbdyn::Robot & robot_;
+
+  const mc_rbdyn::Robot & realRobot_;
 
   inline void updateGains_()
   {
