@@ -44,7 +44,7 @@ void ImpactAwareCOMVelConstraint::updateCOMVelBounds_()
   COMStates_.ComVelXUpperBound = (zUpperBound_ - COMStates_.Com.x()*pGain_)/dGain_; 
   COMStates_.ComVelXLowerBound = (zLowerBound_ - COMStates_.Com.x()*pGain_)/dGain_; 
 
-  //if(getParams().debug)
+  if(getParams().debug)
   {
 
     std::cout<<"The COM is: "<<red<<  COMStates_.Com.transpose() << reset<<", and the omege is: "<<red<<getOmega() <<reset<<std::endl;
@@ -74,16 +74,18 @@ Eigen::MatrixXd comJacobian = comJacobianPtr_->jacobian(robot().mb(), robot().mb
   {
     std::cout << red << "ImpactAwareCOMVelConstraint computed FloatingBase-States." << reset << std::endl;
   }
-  const Eigen::MatrixXd &  cmmMatrix = getPredictor()->getCmm()->matrix();
+  //const Eigen::MatrixXd &  cmmMatrix = getPredictor()->getCmm()->matrix();
 
-  double mass_inv = 1.0/robot().mass();
+  //double mass_inv = 1.0/robot().mass();
 
   // Special Jac one
   
   // Note that the CMM matrix starts with the angular part and then translation, we need to shift the row number for 3.
-  Eigen::VectorXd specialJacOne = mass_inv * cmmMatrix.block(3, 0, 1, dof_()) * getPredictor()->getJacobianDeltaAlpha();
+  //Eigen::VectorXd specialJacOne = mass_inv * cmmMatrix.block(3, 0, 1, dof_()) * getPredictor()->getJacobianDeltaAlpha();
+  Eigen::VectorXd specialJacOne =  comJacobian.block(0, 0, 1, dof_()) * getPredictor()->getJacobianDeltaAlpha();
 
-  Eigen::VectorXd specialJacTwo = mass_inv * cmmMatrix.block(3, 0, 1, dof_()) * getPredictor()->getJacobianTwoDeltaAlpha();
+  //Eigen::VectorXd specialJacTwo = mass_inv * cmmMatrix.block(3, 0, 1, dof_()) * getPredictor()->getJacobianTwoDeltaAlpha();
+  Eigen::VectorXd specialJacTwo = comJacobian.block(3, 0, 1, dof_()) * getPredictor()->getJacobianTwoDeltaAlpha();
 
   // Special Jac Two
   // Saggital(X)-direction: 
@@ -94,11 +96,11 @@ Eigen::MatrixXd comJacobian = comJacobianPtr_->jacobian(robot().mb(), robot().mb
   updateCOMVelBounds_();
 
 
-  b_(0) = getCOMStates().ComVelXUpperBound
-	  - COMStates_.ComVel.oneStepPreview.x()
-	  //- specialJacTwo.transpose() * robotJointVelocity_; 
-	  - specialJacOne.transpose() * robotJointVelocity_; 
-  b_(1) = getCOMStates().ComVelXLowerBound - (b_(0) - getCOMStates().ComVelXUpperBound);
+  b_(0) = getCOMStates().ComVelXUpperBound  
+	  - COMStates_.ComVel.current.x() - COMStates_.ComAcc.x()*getParams().dt
+	  - specialJacTwo.transpose() * robotJointVelocity_; 
+	  //- specialJacOne.transpose() * robotJointVelocity_; 
+  b_(1) = - getCOMStates().ComVelXLowerBound - (b_(0) - getCOMStates().ComVelXUpperBound);
 
   // Lateral(Y)-direction:
   
