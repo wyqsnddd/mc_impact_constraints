@@ -608,6 +608,8 @@ void ImpactAwareFloatingBaseConstraint::logFloatingBaseStates(mc_control::fsm::C
   ctl.logger().addLogEntry("FloatingBaseState_Com_Vel_StateJump",
                            [this]() { return getFloatingBaseStates().ComVel.stateJump; });
   ctl.logger().addLogEntry("FloatingBaseState_Com_Vel", [this]() { return getFloatingBaseStates().ComVel.current; });
+
+  setLogger_();
 }
 
 void ImpactAwareFloatingBaseConstraint::removeLogFloatingBaseStates() 

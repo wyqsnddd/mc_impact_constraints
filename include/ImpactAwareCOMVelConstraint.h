@@ -74,7 +74,21 @@ struct ImpactAwareCOMVelConstraint : public mc_solver::InequalityConstraintRobot
   {
     return predictorPtr_; 
   }
+
+  /*! \brif Add the logs.
+   */
+  void logConstraint(mc_control::fsm::Controller & ctl);
+
+  void removeLog();
+
   
+  Eigen::Vector3d temp_comVel_jump_comJacobian;
+
+  Eigen::Vector3d temp_comVel_jump_comJacobian_acc;
+
+  Eigen::Vector3d temp_comVel_jump_cmm;
+  Eigen::Vector3d temp_comVel_jump_cmm_two;
+ 
 protected:
 
   std::shared_ptr<mi_qpEstimator> predictorPtr_;
@@ -135,6 +149,37 @@ protected:
 
   double zUpperBound_ = 0.10;
   double zLowerBound_ = -0.07;
+
+  inline void setLogger_()
+  {
+    loggersAdded_ = true;
+  }
+  inline bool checkLoggersAdded_() const
+  {
+    return loggersAdded_;
+  }
+  bool loggersAdded_ = false;
+
+  inline mc_control::fsm::Controller * getControllerWithLogger_() 
+  {
+    if(controllerWithLoggerPtr_ != nullptr)
+    {
+      return controllerWithLoggerPtr_;
+    }
+    else
+    {
+      throw std::runtime_error("Getting controllerWithLoggerPtr_ without setting."); 
+    }
+  }
+
+  inline void setControllerWithLogger_(mc_control::fsm::Controller & ctl) 
+  {
+    controllerWithLoggerPtr_ = &ctl; 
+  }
+
+  mc_control::fsm::Controller *  controllerWithLoggerPtr_;
+
+
 }; // End of struct name: ImpactAwareCOMVelConstraint
 
 } // end of namespace mc_impact
