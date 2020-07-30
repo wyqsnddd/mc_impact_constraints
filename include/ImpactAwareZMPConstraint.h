@@ -55,7 +55,7 @@ struct ImpactAwareZMPConstraint : public mc_solver::InequalityConstraintRobot
     }
     else
     {
-      LOG_ERROR_AND_THROW(std::runtime_error, "Asking for McZMPArea, which  is not initialized and updated.");
+      mc_rtc::log::error("Asking for McZMPArea, which  is not initialized and updated.");
     }
   }
   inline std::string nameInEq() const override

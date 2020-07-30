@@ -5,13 +5,14 @@ namespace mc_impact
 ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
 		std::shared_ptr<mi_qpEstimator> predictorPtr,
     std::shared_ptr<McContactSet> contactSetPtr,
+    const mc_rbdyn::Robot & realRobot,
     const ImpactAwareConstraintParams<Eigen::Vector2d> & params
     )
-: mc_solver::InequalityConstraintRobot(predictorPtr->getSimRobot().robotIndex()), predictorPtr_(predictorPtr), params_(params), contactSetPtr_(contactSetPtr)
+: mc_solver::InequalityConstraintRobot(predictorPtr->getSimRobot().robotIndex()), predictorPtr_(predictorPtr), realRobot_(realRobot), params_(params), contactSetPtr_(contactSetPtr)
 	//, robot_(predictorPtr->getSimRobot())
 {
 
-  LOG_INFO("Initialzing ImpactAwareFloatingBaseConstraint:");
+  mc_rtc::log::info("Initialzing ImpactAwareFloatingBaseConstraint:");
   // Set the constraining status of the floating-base state.
   constrainingStatus_ = 0;
   if(getParams().constrainingZMP)
@@ -33,7 +34,7 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
                                                                             getParams().mcProjectionParams);
     // mcZMPAreaPtr_ = std::make_shared<mc_impact::McZMPArea<Eigen::Vector2d>>(getPredictor()->.getSimRobot(),
     // getParams().contactSetPtr, getParams().mcProjectionParams);
-    LOG_INFO("McZMPArea is created");
+    mc_rtc::log::info("McZMPArea is created");
   }
 
 
@@ -57,7 +58,7 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
 
     mcDCMAreaPtr_ = std::make_shared<mc_impact::McDCMArea>(mcZMPAreaPtr_, mcComAreaPtr_);
 
-    LOG_INFO("McDCMArea is created");
+    mc_rtc::log::info("McDCMArea is created");
   }
   // Initialize the com Jacobian
   comJacobianPtr_ = std::make_shared<rbd::CoMJacobian>(robot().mb());
@@ -397,12 +398,12 @@ void ImpactAwareFloatingBaseConstraint::updateFloatingBaseState_()
   Eigen::MatrixXd comJacobian = comJacobianPtr_->jacobian(robot().mb(), robot().mbc());
   Eigen::MatrixXd dcmJacobian = (comJacobian * getPredictor()->getJacobianDeltaAlpha()).block(0, 0, 2, dof_());
 
-  floatingBaseStates_.Com = robot().com();
-  floatingBaseStates_.ComAcc = robot().comAcceleration();
+  floatingBaseStates_.Com = realRobot().com();
+  floatingBaseStates_.ComAcc = realRobot().comAcceleration();
 
   // (1) COM velocity
 
-  floatingBaseStates_.ComVel.current = robot().comVelocity();
+  floatingBaseStates_.ComVel.current = realRobot().comVelocity();
   floatingBaseStates_.ComVel.stateJump = comJacobian * getPredictor()->getJointVelJump();
   floatingBaseStates_.ComVel.oneStepPreview = floatingBaseStates_.ComVel.current + floatingBaseStates_.ComVel.stateJump;
 

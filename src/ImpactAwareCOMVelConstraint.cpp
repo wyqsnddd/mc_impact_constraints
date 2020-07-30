@@ -122,7 +122,9 @@ void ImpactAwareCOMVelConstraint::updateCOMVelConstraint_()
     temp_comVel_jump_comJacobian_acc = getParams().dt*specialJacOne_full*alphaD + specialJacTwo_full*robotJointVelocity_;
 
     temp_comVel_jump_comJacobian = comJacobian*getPredictor()->getJointVelJump();
+
     temp_comVel_jump_cmm = mass_inv * cmmMatrix.block(0, 0, 3, dof_())*getPredictor()->getJointVelJump();
+
     temp_comVel_jump_cmm_two = mass_inv * cmmMatrix.block(3, 0, 3, dof_())*getPredictor()->getJointVelJump();
 
     COMStates_.ComVel.stateJump =  
@@ -203,6 +205,7 @@ void ImpactAwareCOMVelConstraint::logConstraint(mc_control::fsm::Controller & ct
     return getCOMStates().ComVelYLowerBound;
   });
 
+
  if(getParams().debug)
   { 
 
@@ -221,6 +224,10 @@ void ImpactAwareCOMVelConstraint::logConstraint(mc_control::fsm::Controller & ct
 
   ctl.logger().addLogEntry("ComVel_predicted_jump", [this]() {
     return getCOMStates().ComVel.stateJump;
+  });
+
+  ctl.logger().addLogEntry("ComVel_next_preImpact", [this]() {
+    return  (Eigen::Vector3d)(COMStates_.ComVel.current + COMStates_.ComAcc*getParams().dt);
   });
 
 

@@ -18,7 +18,9 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
   ImpactAwareFloatingBaseConstraint(
 		  std::shared_ptr<mi_qpEstimator > predictorPtr,
 		  std::shared_ptr<McContactSet> contactSetPtr,
+		  const mc_rbdyn::Robot & realRobot,
 		  const ImpactAwareConstraintParams<Eigen::Vector2d> & params);
+
   // ~ImpactAwareFloatingBaseConstraint();
 
 
@@ -158,7 +160,7 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
     }
     else
     {
-      LOG_ERROR_AND_THROW(std::runtime_error, "Asking for McZMPArea, which  is not initialized and updated.");
+      throw std::runtime_error("Asking for McZMPArea, which  is not initialized and updated.");
     }
   }
 
@@ -171,7 +173,9 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
     }
     else
     {
-      LOG_ERROR_AND_THROW(std::runtime_error, "Asking for McDCMArea, which  is not initialized and updated.");
+      throw std::runtime_error("Asking for McDCMArea, which  is not initialized and updated.");
+
+
     }
   }
 
@@ -183,7 +187,7 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
     }
     else
     {
-      LOG_ERROR_AND_THROW(std::runtime_error, "Asking for McDCMArea, which  is not initialized and updated.");
+      throw std::runtime_error( "Asking for McDCMArea, which  is not initialized and updated.");
     }
   }
 
@@ -212,6 +216,10 @@ struct ImpactAwareFloatingBaseConstraint : public mc_solver::InequalityConstrain
     return omega_;
   }
 
+  inline const mc_rbdyn::Robot & realRobot() const
+  {
+    return realRobot_;
+  }
   /*! \return if the 'samplePoint' is inside the multi-contact ZMP area.
    */
   bool pointInsideMcZMPArea(const Eigen::Vector3d & samplePoint) const;
@@ -253,10 +261,14 @@ private:
   // Predictor
   //mi_qpEstimator & predictor_;
   std::shared_ptr<mi_qpEstimator> predictorPtr_;
+
+  const mc_rbdyn::Robot & realRobot_;
+
   ImpactAwareConstraintParams<Eigen::Vector2d> params_;
   std::shared_ptr<McContactSet> contactSetPtr_;
 
   //const mc_rbdyn::Robot & robot_;
+
 
   inline void setLogger_()
   {
