@@ -7,7 +7,7 @@ ImpactAwareFloatingBaseConstraint::ImpactAwareFloatingBaseConstraint(
     std::shared_ptr<McContactSet> contactSetPtr,
     const ImpactAwareConstraintParams<Eigen::Vector2d> & params
     )
-: mc_solver::InequalityConstraintRobot(getPredictor()->getSimRobot().robotIndex()), predictorPtr_(predictorPtr), params_(params), contactSetPtr_(contactSetPtr)
+: mc_solver::InequalityConstraintRobot(predictorPtr->getSimRobot().robotIndex()), predictorPtr_(predictorPtr), params_(params), contactSetPtr_(contactSetPtr)
 	//, robot_(predictorPtr->getSimRobot())
 {
 
