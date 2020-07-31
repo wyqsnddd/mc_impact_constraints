@@ -189,6 +189,11 @@ void ImpactAwareCOMVelConstraint::logConstraint(mc_control::fsm::Controller & ct
 {
 
   setControllerWithLogger_(ctl);
+  ctl.logger().addLogEntry("ComVel_realrobot", [this]() {
+    return realRobot().comVelocity(); 
+  });
+
+  setControllerWithLogger_(ctl);
   ctl.logger().addLogEntry("ComVel_x_upper_bound", [this]() {
     return getCOMStates().ComVelXUpperBound;
   });
